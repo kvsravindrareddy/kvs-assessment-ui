@@ -1,0 +1,133 @@
+/* styles.css */
+.home {
+  background-color: aquamarine;
+}
+
+body {
+  margin: 0;
+  background-color: aquamarine;
+  font-family: Arial, sans-serif;
+  }
+  
+  .assessment {
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 80%;
+    border-collapse: collapse;
+  }
+
+  .assessment th, .assessment td {
+    border: 1px solid #ddd;
+    background-color: white;
+  }
+  
+  .summary {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+  }
+  
+  .question {
+    margin-top: 20px;
+    background-color: #f9f9f9;
+  }
+  
+  input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+  }
+  
+  button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+  
+  button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+
+  .selected {
+    background-color: blue;
+  }
+
+  .subscribe-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.subscribe-form-container {
+    width: 80%; /* Adjust the width as needed */
+    max-width: 400px; /* Set a maximum width */
+}
+
+.subscribe-form {
+    /* Add your form styles here */
+}
+
+/* Adjust the input width */
+.subscribe-form input[type="text"],
+.subscribe-form input[type="email"],
+.subscribe-form select {
+    width: 100%; /* Set width to 100% */
+    max-width: 100%; /* Ensure the input doesn't exceed the container width */
+    padding: 8px; /* Add padding as needed */
+    margin-bottom: 10px; /* Add margin as needed */
+}
+
+/* Adjust the button width */
+.subscribe-form button[type="submit"] {
+    width: 100%; /* Set width to 100% */
+    max-width: 100%; /* Ensure the button doesn't exceed the container width */
+    padding: 10px 20px; /* Add padding as needed */
+    margin-top: 10px; /* Add margin as needed */
+}
+
+.home {
+  background-color: aquamarine;
+}
+
+#mainpage {
+  padding: 0 20%; /* Adjust the padding to leave white space on the left and right */
+}
+
+.topnav {
+  display: flex;
+  justify-content: center;
+  background-color: #04AA6D;
+}
+
+.topnav a {
+  color: black;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.topnav a.active {
+  background-color: #04AA6D;
+  color: white;
+}
+
+.content {
+  background-color: white;;
+  padding: 20px;
+}
