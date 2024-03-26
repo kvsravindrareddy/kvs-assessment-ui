@@ -9,6 +9,45 @@ body {
   font-family: Arial, sans-serif;
   }
   
+  .contact-form {
+    margin: 20px;
+    padding: 20px;
+    width: 90%; /* Adjust the width to make the table slightly bigger */
+    border-collapse: collapse;
+}
+
+.contact-form th, .contact-form td {
+    border: 1px solid green;
+    background-color: white;
+    padding: 8px; /* Adjust the padding for better spacing */
+}
+
+.contact-form input[type="text"],
+.contact-form input[type="email"],
+.contact-form textarea {
+    width: calc(100% - 16px); /* Subtracting the padding from the width */
+    padding: 4px;
+    box-sizing: border-box; /* Include padding in the width calculation */
+    resize: none; /* Prevent textarea from being resized */
+}
+.contact-form button[type="submit"] {
+  margin: auto; /* Center the button horizontally within its parent container */
+  display: block; /* Ensure button takes up entire width of its parent container */
+}
+
+.contact-form input:invalid,
+.contact-form textarea:invalid {
+    border-color: red;
+}
+
+.contact-form input:invalid + span::after,
+.contact-form textarea:invalid + span::after {
+    content: " *Required";
+    color: red;
+    font-size: 12px;
+    display: block;
+    margin-top: 4px;
+}
   .assessment {
     margin: 20px auto;
     padding: 20px;
