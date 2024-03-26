@@ -9,6 +9,7 @@ const AssessmentQuestions = () => {
     const [assessmentSummary, setAssessmentSummary] = useState(null);
     const [selectedAnswer, setSelectedAnswer] = useState('');
     const [selectedType, setSelectedType] = useState('addition');
+    const [selectedEmail, setSelectedEmail] = useState(null);
     const [numberOfQuestions, setNumberOfQuestions] = useState(10);
 
     useEffect(() => {
@@ -19,7 +20,7 @@ const AssessmentQuestions = () => {
 
     const fetchAssessmentQuestions = async () => {
         try {
-        const response = await axios.get(`http://localhost:9004/allrandoms?userId=${userId}&type=${selectedType}&numberOfQuestions=${numberOfQuestions}`);
+        const response = await axios.get(`http://69.127.132.13:9004/allrandoms?userId=${userId}&type=${selectedType}&email=${selectedEmail}&numberOfQuestions=${numberOfQuestions}`);
         const {questions, assessmentId} = response.data;
         if(questions.length > 0) {
         setQuestions(response.data.questions);
@@ -46,8 +47,9 @@ const AssessmentQuestions = () => {
 
     const handleSubmitAnswer = async () => {
         try {
-            const response = await axios.post('http://localhost:9004/submitrandomquestion', {
+            const response = await axios.post('http://69.127.132.13:9004/submitrandomquestion', {
                 userId: userId,
+                email: selectedEmail,
                 assessmentId: assessmentSummary.assessmentId,
                 assessmentStatus: 'STARTED',
                 currentQuestion: {
@@ -85,19 +87,32 @@ const AssessmentQuestions = () => {
               {/* Conditionally render these rows only if assessmentSummary is not present */}
               {!assessmentSummary && (
                 <>
-                  <tr>
-                    <td>Enter Name</td>
-                    <td>
-                      <input required={true}
-                        type="text"
-                        placeholder="Enter Name"
-                        value={userId}
-                        onChange={(event) => setUserid(event.target.value)}
-                        style={{ width: "85%" }}
-                        minLength={2}
-                      />
-                    </td>
-                  </tr>
+                    <tr>
+                        <td>Enter Name</td>
+                        <td>
+                        <input required={true}
+                            type="text"
+                            placeholder="Enter Name"
+                            value={userId}
+                            onChange={(event) => setUserid(event.target.value)}
+                            style={{ width: "85%" }}
+                            minLength={2}
+                        />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Enter Email</td>
+                        <td>
+                        <input required={true}
+                            type="text"
+                            placeholder="Enter Email"
+                            value={selectedEmail}
+                            onChange={(event) => setSelectedEmail(event.target.value)}
+                            style={{ width: "85%" }}
+                            minLength={2}
+                        />
+                        </td>
+                    </tr>
                     <tr>
                         <td>Assessment Type</td>
                         <td style={{ textAlign: 'center', width: "80%"}}>

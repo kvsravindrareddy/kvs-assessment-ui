@@ -31,7 +31,7 @@ const Subscribe = () => {
     useEffect(() => {
         const fetchCountries = async () => {
             try {
-                const countryResponse = await axios.get('http://localhost:9003/country');
+                const countryResponse = await axios.get('http://69.127.132.13:9003/country');
                 setCountryOptions(countryResponse.data.map(country => ({ 
                     label: `${country.name} (${country.dialCode})`,
                     value: country.dialCode 
@@ -68,7 +68,7 @@ const Subscribe = () => {
                 customerIp: clientIp
             });
     
-            const subRes = await axios.post('http://localhost:9003/subscribe', formData);
+            const subRes = await axios.post('http://69.127.132.13:9003/subscribe', formData);
             setSubResponse({
                 firstName: subRes.data.firstName,
                 lastName: subRes.data.lastName,
