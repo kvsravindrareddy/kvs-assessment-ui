@@ -10,6 +10,7 @@ const AssessmentQuestions = () => {
     const [selectedAnswer, setSelectedAnswer] = useState('');
     const [selectedType, setSelectedType] = useState('addition');
     const [selectedEmail, setSelectedEmail] = useState(null);
+    const [selectedComplexity, setSelectedComplexity] = useState('easy');
     const [numberOfQuestions, setNumberOfQuestions] = useState(10);
 
     useEffect(() => {
@@ -20,7 +21,7 @@ const AssessmentQuestions = () => {
 
     const fetchAssessmentQuestions = async () => {
         try {
-        const response = await axios.get(`http://69.127.132.13:9004/allrandoms?userId=${userId}&type=${selectedType}&email=${selectedEmail}&numberOfQuestions=${numberOfQuestions}`);
+        const response = await axios.get(`http://69.127.132.13:9004/allrandoms?userId=${userId}&type=${selectedType}&email=${selectedEmail}&numberOfQuestions=${numberOfQuestions}&complexity=${selectedComplexity}`);
         const {questions, assessmentId} = response.data;
         if(questions.length > 0) {
         setQuestions(response.data.questions);
@@ -29,7 +30,7 @@ const AssessmentQuestions = () => {
             totalQuestions: questions.length,
             correctQuestions: 0,
             incorrectQuestions: 0,
-            unasweredQuestions: questions.length,
+            unansweredQuestions: questions.length,
             status: 'IN_PROGRESS',
             assessmentId: assessmentId
         });
@@ -122,6 +123,21 @@ const AssessmentQuestions = () => {
                             >
                             <option value="addition">Addition</option>
                             <option value="subtraction">Subtraction</option>
+                            <option value="multiplication">Multiplication</option>
+                            <option value="division">Division</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Complexity</td>
+                        <td style={{ textAlign: 'center', width: "80%"}}>
+                            <select style={{ width: "45%"}}
+                            value={selectedComplexity}
+                            onChange={(e) => setSelectedComplexity(e.target.value)}
+                            >
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
                             </select>
                         </td>
                     </tr>
