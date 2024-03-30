@@ -12,6 +12,7 @@ const AssessmentQuestions = () => {
     const [selectedEmail, setSelectedEmail] = useState(null);
     const [selectedComplexity, setSelectedComplexity] = useState('easy');
     const [numberOfQuestions, setNumberOfQuestions] = useState(10);
+    const [pdfFileName, setPdfFileName] = useState('');
 
     useEffect(() => {
         if (questions.length > 0) {
@@ -75,6 +76,39 @@ const AssessmentQuestions = () => {
     const handleChangeAnswer = (event) => {
         setSelectedAnswer(event.target.value);
     };
+
+    const downloadQuestionsPDF = async () => {
+      try {
+          const response = await axios.get(`http://69.127.132.13:9004/pdf/allrandom?userId=${userId}&assessmentId=${assessmentSummary.assessmentId}&type=${selectedType}`, {
+              responseType: 'blob',
+          });
+          const blob = new Blob([response.data], { type: 'application/pdf' });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          
+          // Extract filename from content disposition header
+          const contentDisposition = response.headers['Content-Disposition'];
+          console.log('contentDisposition', contentDisposition);
+          const filenameRegex = /filename="([^"]+)"/;
+          const matches = filenameRegex.exec(contentDisposition);
+          let filename = 'assessment.pdf'; // default filename
+          if (matches != null && matches[1]) {
+              filename = matches[1];
+          }
+          
+          link.setAttribute('download', filename);
+          document.body.appendChild(link);
+          link.click();
+          
+          // Set the filename state
+          setPdfFileName(filename);
+      } catch (error) {
+          console.error(error);
+      }
+  };
+  
+  
 
     return (
         <div className="assessment">
@@ -193,10 +227,15 @@ const AssessmentQuestions = () => {
                     <td>Unanswered Questions</td>
                     <td>{assessmentSummary.unansweredQuestions}</td>
                   </tr>
-                  <tr>
-                    <td>Status</td>
-                    <td>{assessmentSummary.status}</td>
-                  </tr>
+                  {assessmentSummary.status === 'COMPLETED' && (
+                                <tr>
+                                    <td colSpan="2" style={{ textAlign: 'center' }}>
+                                        <button onClick={downloadQuestionsPDF}>Download Questions</button>
+                                        <span style={{ marginRight: '10px' }}></span>
+                                        <button onClick={handleStartAssessment}>Start Assessment</button>
+                                    </td>
+                                </tr>
+                            )}
                 </>
               )}
               {currentQuestion && (
@@ -233,3 +272,4 @@ const AssessmentQuestions = () => {
     };
 
 export default AssessmentQuestions;
+

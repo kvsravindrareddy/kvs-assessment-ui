@@ -44,7 +44,7 @@ const Contactus = () => {
 
         // Form is valid, proceed with submission
         try {
-            const response = await axios.post('http://localhost:9003/contactus', formData);
+            const response = await axios.post('http://69.127.132.13:9003/contactus', formData);
             setSubmitMessage(response.data);
 
             // Clear form data
