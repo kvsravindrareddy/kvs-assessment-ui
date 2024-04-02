@@ -75,10 +75,10 @@ const GenerateNumbers = () => {
   //Logic for displaying numbers for the current page
   return (
     <div className='generateNumbersMainDiv'>
+         <h2>
+            <b>Generate Numbers</b>
+        </h2>
       <table className='generateNumberQuesTb'>
-        <thead>
-            <tr><b>Generate Numbers</b></tr>
-        </thead>
         <tbody>
           <tr>
             <td>User ID</td>
