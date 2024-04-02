@@ -11,7 +11,7 @@ const AssessmentQuestions = () => {
     const [selectedType, setSelectedType] = useState('addition');
     const [selectedEmail, setSelectedEmail] = useState(null);
     const [selectedComplexity, setSelectedComplexity] = useState('easy');
-    const [numberOfQuestions, setNumberOfQuestions] = useState(10);
+    const [numberOfQuestions, setNumberOfQuestions] = useState(1);
     const [pdfFileName, setPdfFileName] = useState('');
 
     useEffect(() => {
@@ -22,7 +22,7 @@ const AssessmentQuestions = () => {
 
     const fetchAssessmentQuestions = async () => {
         try {
-        const response = await axios.get(`http://69.127.132.13:9004/allrandoms?userId=${userId}&type=${selectedType}&email=${selectedEmail}&numberOfQuestions=${numberOfQuestions}&complexity=${selectedComplexity}`);
+        const response = await axios.get(`http://localhost:9004/allrandoms?userId=${userId}&type=${selectedType}&email=${selectedEmail}&numberOfQuestions=${numberOfQuestions}&complexity=${selectedComplexity}`);
         const {questions, assessmentId} = response.data;
         if(questions.length > 0) {
         setQuestions(response.data.questions);
@@ -49,7 +49,7 @@ const AssessmentQuestions = () => {
 
     const handleSubmitAnswer = async () => {
         try {
-            const response = await axios.post('http://69.127.132.13:9004/submitrandomquestion', {
+            const response = await axios.post('http://localhost:9004/submitrandomquestion', {
                 userId: userId,
                 email: selectedEmail,
                 assessmentId: assessmentSummary.assessmentId,
@@ -79,7 +79,7 @@ const AssessmentQuestions = () => {
 
     const downloadQuestionsPDF = async () => {
       try {
-          const response = await axios.get(`http://69.127.132.13:9004/pdf/allrandom?userId=${userId}&assessmentId=${assessmentSummary.assessmentId}&type=${selectedType}`, {
+          const response = await axios.get(`http://localhost:9004/pdf/allrandom?userId=${userId}&assessmentId=${assessmentSummary.assessmentId}&type=${selectedType}`, {
               responseType: 'blob',
           });
           const blob = new Blob([response.data], { type: 'application/pdf' });
@@ -182,7 +182,7 @@ const AssessmentQuestions = () => {
                             value={numberOfQuestions}
                             onChange={(e) => setNumberOfQuestions(e.target.value)}
                             >
-                            <option value="10">10</option>
+                            <option value="1">1</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
                             </select>

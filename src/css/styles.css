@@ -1,11 +1,68 @@
 /* styles.css */
 .home {
-  background-color: aquamarine;
+  background-color: white;
+}
+
+.header {
+  background-color: white;
+  padding: 10px 20px;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+}
+
+.brand-section img {
+  width: 180px;
+  height: 80px;
+}
+
+.brand-section-buttons {
+  margin-left: auto; /* Push buttons to the right */
+  display: flex; /* Ensure buttons stay in the same line */
+  align-items: center; /* Center buttons vertically */
+}
+
+.brand-section-buttons button {
+  margin-left: 10px; /* Add space between buttons */
+  background-color: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.brand-section-buttons button.login:hover,
+.brand-section-buttons button.signup:hover {
+  background-color: #45A049; /* Highlight color on hover */
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+}
+
+.search input[type="text"] {
+  padding: 6px;
+  width: 120px; /* Adjust the width as needed */
+}
+
+.search button.search-icon {
+  padding: 6px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.search button.search-icon img {
+  width: 20px;
+  height: 20px;
 }
 
 body {
   margin: 0;
-  background-color: aquamarine;
+  background-color: white;
   font-family: Arial, sans-serif;
   }
   
@@ -134,8 +191,8 @@ body {
     margin-top: 10px; /* Add margin as needed */
 }
 
-.home {
-  background-color: aquamarine;
+* {
+  box-sizing: border-box;
 }
 
 #mainpage {
@@ -149,11 +206,13 @@ body {
 }
 
 .topnav a {
+  display: block; /* Ensure consistent box model */
   color: black;
   text-align: center;
   padding: 14px 16px;
   text-decoration: none;
   font-size: 17px;
+  background-color: transparent; /* Set background color to transparent */
 }
 
 .topnav a:hover {
@@ -166,7 +225,15 @@ body {
   color: white;
 }
 
-.content {
-  background-color: white;;
-  padding: 20px;
+.dropdown-content {
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 100px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
 }
