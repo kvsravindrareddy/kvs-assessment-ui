@@ -1,31 +1,27 @@
 import React, { useState } from 'react';
 import AlphabetGenerator from './AlphabetGenerator'; // Import your AlphabetGenerator component
-import LearningLetters from './LearningLetters'; // Import other components similarly
-import TracingLetters from './TracingLetters';
-import PrintingLetters from './PrintingLetters';
-// Import other components similarly
 
 const PreKWorksheets = () => {
   const [selectedMenuItem, setSelectedMenuItem] = useState(null);
+  const [selectedSubMenuItem, setSelectedSubMenuItem] = useState(null);
 
-  const handleClick = (menuItem) => {
+  const handleMenuItemClick = (menuItem) => {
     setSelectedMenuItem(menuItem);
+    setSelectedSubMenuItem(null); // Reset selected sub-menu item when parent menu item is clicked
+  };
+
+  const handleSubMenuItemClick = (subMenuItem) => {
+    setSelectedSubMenuItem(subMenuItem);
   };
 
   const renderSubMenu = () => {
-    switch (selectedMenuItem) {
-      case 'Alphabets':
-        return (
-          <div>
-            <AlphabetGenerator />
-            {/* Render other sub-components under Alphabets */}
-          </div>
-        );
-      case 'Sounds / Phonics':
-        return <LearningLetters />;
-      case 'Words / Vocabulary':
-        return <TracingLetters />;
-      // Add other cases for each submenu item
+    switch (selectedSubMenuItem) {
+      case 'Capital':
+        return <AlphabetGenerator type="Capital" />;
+      case 'Small':
+        return <AlphabetGenerator type="Small" />;
+      case 'Cursive':
+        return <AlphabetGenerator type="Cursive" />;
       default:
         return null;
     }
@@ -38,18 +34,28 @@ const PreKWorksheets = () => {
           <h2 id="block-prekmenu-2-menu">Pre-K Worksheets</h2>
           <ul className="menu odd menu-level-1">
             <li className="menu-item menu-item--expanded menu-item--active-trail">
-              <a href="#" onClick={() => handleClick('Alphabets')}>Alphabets</a>
-              {/* Add other menu items with onClick event handlers */}
+              <a href="#" onClick={() => handleMenuItemClick('Alphabets')}>Alphabets</a>
+              <ul className="submenu">
+                <li className="menu-item menu-item--collapsed">
+                  <a href="#" onClick={() => handleSubMenuItemClick('Capital')}>Capital</a>
+                </li>
+                <li className="menu-item menu-item--collapsed">
+                  <a href="#" onClick={() => handleSubMenuItemClick('Small')}>Small</a>
+                </li>
+                <li className="menu-item menu-item--collapsed">
+                  <a href="#" onClick={() => handleSubMenuItemClick('Cursive')}>Cursive</a>
+                </li>
+              </ul>
             </li>
             <li className="menu-item menu-item--collapsed">
-              <a href="#" onClick={() => handleClick('Sounds / Phonics')}>Sounds / Phonics</a>
+              <a href="#" onClick={() => handleMenuItemClick('Sounds / Phonics')}>Sounds / Phonics</a>
             </li>
             {/* Add other menu items similarly */}
           </ul>
         </nav>
       </div>
       <div className="content">
-        {selectedMenuItem && renderSubMenu()}
+        {selectedSubMenuItem && renderSubMenu()}
       </div>
     </div>
   );

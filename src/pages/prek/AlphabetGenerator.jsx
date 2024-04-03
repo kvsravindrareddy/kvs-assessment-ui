@@ -1,7 +1,7 @@
 import React from 'react';
 import '../../css/styles.css';
 
-const AlphabetGenerator = () => {
+const AlphabetGenerator = ({ type }) => {
   const generateAlphabets = (startCharCode, endCharCode) => {
     const alphabets = [];
     for (let i = startCharCode; i <= endCharCode; i++) {
@@ -15,9 +15,9 @@ const AlphabetGenerator = () => {
     const utterance = new SpeechSynthesisUtterance(letter);
     synth.speak(utterance);
   };
-
-  const renderAlphabets = (style) => {
-    const alphabets = generateAlphabets(65, 90); // Capital letters A to Z
+  
+  const renderAlphabets = (startCharCode, endCharCode) => {
+    const alphabets = generateAlphabets(startCharCode, endCharCode);
     return (
       <div className="card-container">
         {alphabets.map((alphabet, index) => (
@@ -33,20 +33,38 @@ const AlphabetGenerator = () => {
     );
   };
 
+  const renderCursiveAlphabets = () => {
+    const cursiveLetters = '𝒜𝐵𝒞𝒟𝐸𝐹𝒢𝐻𝐼𝒥𝒦𝐿𝑀𝒩𝒪𝒫𝒬𝑅𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵';
+    return (
+      <div className="card-container">
+        {cursiveLetters.split('').map((letter, index) => (
+          <div className="card" key={index}>
+            <span className="letter" style={{ type }}>{letter}</span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  let alphabetsComponent;
+  switch (type) {
+    case 'Capital':
+        alphabetsComponent = renderAlphabets(65, 90);
+        break;
+    case 'Small':
+        alphabetsComponent = renderAlphabets(97, 122);
+        break;
+    case 'Cursive':
+        alphabetsComponent = renderCursiveAlphabets();
+        break;
+    default:
+        alphabetsComponent = null;
+  }
+
   return (
     <div>
-      <div>
-        <h3>Capital Letters</h3>
-        {renderAlphabets('Arial')} {/* Change the font family as needed */}
-      </div>
-      <div>
-        <h3>Small Letters</h3>
-        {/* You can add similar render method for small letters */}
-      </div>
-      <div>
-        <h3>Cursive</h3>
-        {/* You can add similar render method for cursive letters */}
-      </div>
+      <h3>{`${type} Letters`}</h3>
+      {alphabetsComponent}
     </div>
   );
 };
