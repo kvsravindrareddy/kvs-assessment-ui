@@ -11,7 +11,7 @@ const AssessmentQuestions = () => {
     const [selectedType, setSelectedType] = useState('addition');
     const [selectedEmail, setSelectedEmail] = useState(null);
     const [selectedComplexity, setSelectedComplexity] = useState('easy');
-    const [numberOfQuestions, setNumberOfQuestions] = useState(1);
+    const [numberOfQuestions, setNumberOfQuestions] = useState(10);
     const [pdfFileName, setPdfFileName] = useState('');
 
     useEffect(() => {
@@ -182,7 +182,7 @@ const AssessmentQuestions = () => {
                             value={numberOfQuestions}
                             onChange={(e) => setNumberOfQuestions(e.target.value)}
                             >
-                            <option value="1">1</option>
+                            <option value="10">10</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
                             </select>

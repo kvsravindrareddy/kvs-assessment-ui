@@ -325,3 +325,58 @@ body {
 .pagination button:hover {
   background-color: #004a8f;
 }
+
+
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.card {
+  width: 120px;
+  height: 120px;
+  margin: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  perspective: 1000px; /* Add perspective for 3D effect */
+  background-color: rgb(71, 237, 255);
+}
+
+
+.letter {
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+  font-size: 8rem;
+  color: white;
+}
+
+.card:hover .letter {
+  transform: scale(1.5); /* Increase the scale to make it larger */
+  transition: transform 0.5s ease;
+  color: coral;
+}
+
+.container {
+  display: flex;
+}
+
+.sidebar {
+  flex: 0 0 250px; /* Set the width of the sidebar */
+  border-right: 1px solid #ccc; /* Add border on the right side */
+  border-left: 1px solid #ccc; /* Add border on the left side */
+  border-bottom: 1px solid #ccc; /* Add border on the bottom */
+  border-top: 1px solid #ccc; /* Add border on the top */
+  background-color: grey; /* Set background color */
+  padding: 20px; /* Add padding to the sidebar */
+  height: fit-content;
+}
+
+.content {
+  flex: 1; /* Allow content to expand to fill remaining space */
+  padding: 20px; /* Add padding to the content area */
+}

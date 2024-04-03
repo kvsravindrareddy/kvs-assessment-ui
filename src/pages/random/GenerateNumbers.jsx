@@ -106,6 +106,7 @@ const GenerateNumbers = () => {
                 <option value="PALINDROME">Palindrome</option>
                 <option value="ARMSTRONG">Armstrong</option>
                 <option value="RANDOM">Random</option>
+                <option value="SEQUENCE">Sequence</option>
               </select>
             </td>
           </tr>
