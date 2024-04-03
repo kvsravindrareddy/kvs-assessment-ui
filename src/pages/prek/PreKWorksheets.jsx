@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AlphabetGenerator from './AlphabetGenerator'; // Import your AlphabetGenerator component
+import AnimalSounds from './AnimalSounds';
 
 const PreKWorksheets = () => {
   const [selectedMenuItem, setSelectedMenuItem] = useState(null);
@@ -16,14 +17,16 @@ const PreKWorksheets = () => {
 
   const renderSubMenu = () => {
     switch (selectedSubMenuItem) {
-      case 'Capital':
-        return <AlphabetGenerator type="Capital" />;
-      case 'Small':
-        return <AlphabetGenerator type="Small" />;
-      case 'Cursive':
-        return <AlphabetGenerator type="Cursive" />;
-      default:
-        return null;
+        case 'Capital':
+            return <AlphabetGenerator type="Capital" />;
+        case 'Small':
+            return <AlphabetGenerator type="Small" />;
+        case 'Cursive':
+            return <AlphabetGenerator type="Cursive" />;
+        case 'Animal Sounds':
+            return <AnimalSounds />;
+        default:
+            return null;
     }
   };
 
@@ -49,6 +52,11 @@ const PreKWorksheets = () => {
             </li>
             <li className="menu-item menu-item--collapsed">
               <a href="#" onClick={() => handleMenuItemClick('Sounds / Phonics')}>Sounds / Phonics</a>
+              <ul className="submenu">
+                <li className="menu-item menu-item--collapsed">
+                  <a href="#" onClick={() => handleSubMenuItemClick('Animal Sounds')}>Animal Sounds</a>
+                </li>
+                </ul>
             </li>
             {/* Add other menu items similarly */}
           </ul>

@@ -24,7 +24,7 @@ const AlphabetGenerator = ({ type }) => {
           <div
             className="card"
             key={index}
-            onMouseEnter={() => speakLetter(alphabet)} // Speak the letter on mouse enter
+            onClick={() => speakLetter(alphabet)} // Speak the letter on click
           >
             <span className="letter">{alphabet}</span>
           </div>
