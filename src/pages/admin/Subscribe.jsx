@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import '../../css/styles.css';
+import '../../css/Subscribe.css';
 import Select from 'react-select';
 
 const Subscribe = () => {
@@ -25,7 +25,7 @@ const Subscribe = () => {
         message: ''
     });
 
-    const [countryOptions, setCountryOptions] = useState([]); // State for country code optios
+    const [countryOptions, setCountryOptions] = useState([]); // State for country code options
     const [formSubmitted, setFormSubmitted] = useState(false); // State for form submission status
 
     useEffect(() => {
@@ -47,7 +47,7 @@ const Subscribe = () => {
         const { name, value } = event.target;
         setFormData({
             ...formData,
-            [event.target.name]: event.target.value
+            [name]: value
         });
     };
 
@@ -94,96 +94,78 @@ const Subscribe = () => {
 
     return (
         <div>
+            <div className="subscribe-header">
+                <h2>Subscribe to KOBS Technologies News and Updates</h2>
+            </div>
+            <p>Stay informed with the latest news, new features, and updates about KOBS Technologies. By subscribing, you'll receive timely notifications straight to your inbox, keeping you up-to-date with our innovations and developments.</p>
             {!formSubmitted ? (
                 <div>
-            <h2>Subscribe</h2>
-            <form onSubmit={handleSubmit} className="subscribe-form">
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>
-                            First Name: 
-                            <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required />
-                        </label>
-                    </div>
-                    <div className="form-group">
-                        <label>
-                            Middle Name: 
-                            <input type="text" name="middleName" value={formData.middleName} onChange={handleChange} />
-                        </label>
-                    </div>
+                    <form onSubmit={handleSubmit} className="subscribe-form">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td><label>First Name</label></td>
+                                    <td><input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Middle Name</label></td>
+                                    <td><input type="text" name="middleName" value={formData.middleName} onChange={handleChange} /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Last Name</label></td>
+                                    <td><input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Email</label></td>
+                                    <td><input type="email" name="email" value={formData.email} onChange={handleChange} required /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Country Code</label></td>
+                                    <td><Select options={countryOptions} onChange={handleCountryChange} required /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Mobile Number</label></td>
+                                    <td><input type="text" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange} /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Notification Type</label></td>
+                                    <td><input type="text" name="notificationType" value={formData.notificationType} onChange={handleChange} /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Subscription Type</label></td>
+                                    <td><input type="text" name="subscriptionType" value={formData.subscriptionType} onChange={handleChange} /></td>
+                                </tr>
+                                <tr>
+                                    <td><label>Update Type</label></td>
+                                    <td>
+                                        <select name="updateType" value={formData.updateType} onChange={handleChange}>
+                                            {updateTypeOptions.map((option, index) => (
+                                                <option key={index} value={option}>{option}</option>
+                                            ))}
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td><button type="submit">Subscribe</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
                 </div>
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>
-                            Last Name: 
-                            <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required />
-                        </label>
-                    </div>
-                    <div className="form-group">
-                        <label>
-                            Email: 
-                            <input type="email" name="email" value={formData.email} onChange={handleChange} required />
-                        </label>
-                    </div>
-                </div>
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>
-                            Country Code: 
-                            <Select options={countryOptions} onChange={handleCountryChange} required />
-                        </label>
-                    </div>
-                    <div className="form-group">
-                        <label>
-                            Mobile Number: 
-                            <input type="text" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange} />
-                        </label>
-                    </div>
-                </div>
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>
-                            Notification Type: 
-                            <input type="text" name="notificationType" value={formData.notificationType} onChange={handleChange} />
-                        </label>
-                    </div>
-                    <div className="form-group">
-                        <label>
-                            Subscription Type: 
-                            <input type="text" name="subscriptionType" value={formData.subscriptionType} onChange={handleChange} />
-                        </label>
-                    </div>
-                </div>
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>
-                            Update Type: 
-                            <select name="updateType" value={formData.updateType} onChange={handleChange}>
-                                {updateTypeOptions.map((option, index) => (
-                                    <option key={index} value={option}>{option}</option>
-                                ))}
-                            </select>
-                        </label>
-                    </div>
-                    <div className="form-group">
-                        <button type="submit">Subscribe</button>
-                    </div>
-                </div>
-            </form>
-            </div>
             ) : (
                 <div>
-            {subResponse.status && (
-                <div>
-                    <h3>Subscription Status</h3>
-                    <p>First Name: {subResponse.firstName}</p>
-                    <p>Last Name: {subResponse.lastName}</p>
-                    <p>Email: {subResponse.email}</p>
-                    <p>Status: {subResponse.status}</p>
-                    <p>Message: {subResponse.message}</p>
+                    {subResponse.status && (
+                        <div>
+                            <h3>Subscription Status</h3>
+                            <p>First Name {subResponse.firstName}</p>
+                            <p>Last Name {subResponse.lastName}</p>
+                            <p>Email {subResponse.email}</p>
+                            <p>Status {subResponse.status}</p>
+                            <p>Message {subResponse.message}</p>
+                        </div>
+                    )}
                 </div>
-            )}
-            </div>
             )}
         </div>
     );

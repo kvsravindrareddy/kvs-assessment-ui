@@ -4,7 +4,9 @@
 }
 
 .header {
-  background-color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 10px 20px;
 }
 
@@ -40,7 +42,7 @@
 .search {
   display: flex;
   align-items: center;
-  margin-left: 20px;
+  margin-top: auto;
 }
 
 .search input[type="text"] {
@@ -157,40 +159,6 @@ body {
     background-color: blue;
   }
 
-  .subscribe-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-.subscribe-form-container {
-    width: 80%; /* Adjust the width as needed */
-    max-width: 400px; /* Set a maximum width */
-}
-
-.subscribe-form {
-    /* Add your form styles here */
-}
-
-/* Adjust the input width */
-.subscribe-form input[type="text"],
-.subscribe-form input[type="email"],
-.subscribe-form select {
-    width: 100%; /* Set width to 100% */
-    max-width: 100%; /* Ensure the input doesn't exceed the container width */
-    padding: 8px; /* Add padding as needed */
-    margin-bottom: 10px; /* Add margin as needed */
-}
-
-/* Adjust the button width */
-.subscribe-form button[type="submit"] {
-    width: 100%; /* Set width to 100% */
-    max-width: 100%; /* Ensure the button doesn't exceed the container width */
-    padding: 10px 20px; /* Add padding as needed */
-    margin-top: 10px; /* Add margin as needed */
-}
-
 * {
   box-sizing: border-box;
 }
@@ -223,6 +191,11 @@ body {
 .topnav a.active {
   background-color: #04AA6D;
   color: white;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
 }
 
 .dropdown-content {
@@ -380,3 +353,39 @@ body {
   flex: 1; /* Allow content to expand to fill remaining space */
   padding: 20px; /* Add padding to the content area */
 }
+
+/* Updated CSS for responsiveness and footer */
+/* Add media queries for responsiveness */
+@media screen and (max-width: 768px) {
+  .topnav {
+    flex-direction: column;
+    align-items: center;
+  }
+  .topnav a {
+    padding: 8px 0;
+  }
+}
+
+.footer-line {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 0;
+  clear: both;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-around;
+  padding: 20px 0;
+}
+.footer-section {
+  flex: 1;
+}
+.footer-section h3 {
+  margin-bottom: 10px;
+}
+.footer-section a {
+  color: #000;
+  text-decoration: none;
+}
+

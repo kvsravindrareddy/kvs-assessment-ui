@@ -1,0 +1,70 @@
+/* AboutUs.css */
+
+/* Ensure the container spans the entire width */
+.container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+  
+/* Ensure content fills the available space */
+.content {
+    width: 100%;
+    max-width: 1200px; /* Adjust as needed */
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start; /* Align items at the top */
+    justify-content: space-between;
+}
+  
+/* Adjust spacing between text and image */
+.text-section {
+    flex: 1; /* Take up remaining space */
+    padding-right: 20px; /* Adjust spacing as needed */
+}
+
+/* Ensure the image does not affect text alignment */
+.what-we-offer-img img {
+    max-width: 100%; /* Make sure the image does not exceed its container */
+    height: auto; /* Maintain aspect ratio */
+}
+
+/* Different text colors for each header */
+.about-kobs h2 {
+    color: blue; /* Example color for 'About KOBS Technologies' heading */
+}
+  
+.our-mission h3 {
+    color: green; /* Example color for 'Our Mission' heading */
+}
+  
+.what-we-offer h3 {
+    color: green; /* Example color for 'What We Offer' heading */
+}
+  
+.get-in-touch h3 {
+    color: green; /* Example color for 'Get in Touch' heading */
+}
+  
+.contact-links {
+    color: purple;
+}
+
+/* Ensure content and image within 'what-we-offer' are displayed side by side */
+.what-we-offer {
+    display: flex;
+    flex-direction: row;
+}
+
+/* Style for content within 'what-we-offer' */
+.what-we-offer-content {
+    flex: 1; /* Take up remaining space */
+}
+
+/* Ensure image within 'what-we-offer' does not affect content alignment */
+.what-we-offer-img {
+    max-width: 50%; /* Adjust the width of the image container */
+    display: flex;
+    justify-content: flex-end; /* Float the image to the right */
+    align-items: center; /* Align image vertically */
+}

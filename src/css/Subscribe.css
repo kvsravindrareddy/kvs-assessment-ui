@@ -1,0 +1,33 @@
+.subscribe-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.subscribe-form-container {
+    width: 80%; /* Adjust the width as needed */
+    max-width: 400px; /* Set a maximum width */
+}
+
+.subscribe-form {
+    /* Add your form styles here */
+}
+
+/* Adjust the input width */
+.subscribe-form input[type="text"],
+.subscribe-form input[type="email"],
+.subscribe-form select {
+    width: 100%; /* Set width to 100% */
+    max-width: 100%; /* Ensure the input doesn't exceed the container width */
+    padding: 8px; /* Add padding as needed */
+    margin-bottom: 10px; /* Add margin as needed */
+}
+
+/* Adjust the button width */
+.subscribe-form button[type="submit"] {
+    width: 100%; /* Set width to 100% */
+    max-width: 100%; /* Ensure the button doesn't exceed the container width */
+    padding: 10px 20px; /* Add padding as needed */
+    margin-top: 10px; /* Add margin as needed */
+}
