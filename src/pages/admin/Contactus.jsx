@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import "../../css/styles.css";
 import "../../css/ContactUs.css";
+import CONFIG from "../../Config";
 
 const Contactus = () => {
     const [formData, setFormData] = useState({
@@ -45,7 +46,7 @@ const Contactus = () => {
 
         // Form is valid, proceed with submission
         try {
-            const response = await axios.post('http://69.127.132.13:9003/contactus', formData);
+            const response = await axios.post(`${CONFIG.development.ADMIN_BASE_URL}/contactus`, formData);
             setSubmitMessage(response.data);
 
             // Clear form data

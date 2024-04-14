@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../../css/styles.css';
+import CONFIG from '../../Config';
 
 const AssessmentQuestions = () => {
     const [userId, setUserid] = useState(null);
@@ -22,7 +23,7 @@ const AssessmentQuestions = () => {
 
     const fetchAssessmentQuestions = async () => {
         try {
-        const response = await axios.get(`http://localhost:9004/allrandoms?userId=${userId}&type=${selectedType}&email=${selectedEmail}&numberOfQuestions=${numberOfQuestions}&complexity=${selectedComplexity}`);
+        const response = await axios.get(`${CONFIG.development.EVALUATION_BASE_URL}/allrandoms?userId=${userId}&type=${selectedType}&email=${selectedEmail}&numberOfQuestions=${numberOfQuestions}&complexity=${selectedComplexity}`);
         const {questions, assessmentId} = response.data;
         if(questions.length > 0) {
         setQuestions(response.data.questions);

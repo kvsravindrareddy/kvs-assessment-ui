@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import '../../css/styles.css';
+import CONFIG from '../../Config';
 
 const GenerateNumbers = () => {
   const [userId, setUserId] = useState('');
@@ -18,7 +19,7 @@ const GenerateNumbers = () => {
 
   const handleGenerateNumbers = async () => {
     try {
-      const response = await axios.get(`http://localhost:9004/generate/numbers`, {
+      const response = await axios.get(`${CONFIG.development.EVALUATION_BASE_URL}/generate/numbers`, {
         params: {
           userId,
           email,
