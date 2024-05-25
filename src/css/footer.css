@@ -2,4 +2,39 @@
     width: 30px;
     height: auto;
     margin-right: 10px;
-}  
+} 
+
+footer {
+    background-color: #04AA6D;
+    color: white;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .footer-line {
+    border: none;
+    border-top: 1px solid #ccc;
+  }
+  
+  .footer-content {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+  }
+  
+  .footer-section {
+    margin: 10px;
+  }
+  
+  .footer-section h3 {
+    margin-top: 0;
+  }
+  
+  .social-icons {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .social-icons a {
+    margin: 0 10px;
+  }
