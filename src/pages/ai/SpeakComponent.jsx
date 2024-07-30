@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../../css/SpeakComponent.css'; // Make sure to create this CSS file for styling purposes
+import CONFIG from '../../Config';
 
 function SpeakComponent() {
   const [storyText, setStoryText] = useState('');
@@ -8,7 +9,7 @@ function SpeakComponent() {
 
   const fetchStory = async () => {
     try {
-      const response = await fetch('http://localhost:9005/story');
+      const response = await fetch('http://69.127.132.13:9005/story');
       const data = await response.json();
       setStoryText(data.text);
     } catch (error) {
@@ -30,7 +31,7 @@ function SpeakComponent() {
 
   const sendCapturedText = async () => {
     try {
-      const response = await fetch('http://localhost:9005/speechtotext', {
+      const response = await fetch('http://69.127.132.13:9005/speechtotext', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

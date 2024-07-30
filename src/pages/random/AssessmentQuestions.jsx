@@ -50,7 +50,7 @@ const AssessmentQuestions = () => {
 
     const handleSubmitAnswer = async () => {
         try {
-            const response = await axios.post('http://localhost:9004/submitrandomquestion', {
+            const response = await axios.post(`${CONFIG.development.EVALUATION_BASE_URL}/submitrandomquestion`, {
                 userId: userId,
                 email: selectedEmail,
                 assessmentId: assessmentSummary.assessmentId,
@@ -80,7 +80,7 @@ const AssessmentQuestions = () => {
 
     const downloadQuestionsPDF = async () => {
       try {
-          const response = await axios.get(`http://localhost:9004/pdf/allrandom?userId=${userId}&assessmentId=${assessmentSummary.assessmentId}&type=${selectedType}`, {
+          const response = await axios.get(`${CONFIG.development.EVALUATION_BASE_URL}/pdf/allrandom?userId=${userId}&assessmentId=${assessmentSummary.assessmentId}&type=${selectedType}`, {
               responseType: 'blob',
           });
           const blob = new Blob([response.data], { type: 'application/pdf' });
