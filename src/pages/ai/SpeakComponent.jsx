@@ -9,7 +9,7 @@ function SpeakComponent() {
 
   const fetchStory = async () => {
     try {
-      const response = await fetch('http://69.127.132.13:9005/story');
+      const response = await fetch(`${CONFIG.development.AI_ASSESSMENT_BASE_URL}/story`);
       const data = await response.json();
       setStoryText(data.text);
     } catch (error) {
@@ -31,7 +31,7 @@ function SpeakComponent() {
 
   const sendCapturedText = async () => {
     try {
-      const response = await fetch('http://69.127.132.13:9005/speechtotext', {
+      const response = await fetch(`${CONFIG.development.AI_ASSESSMENT_BASE_URL}/speechtotext`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

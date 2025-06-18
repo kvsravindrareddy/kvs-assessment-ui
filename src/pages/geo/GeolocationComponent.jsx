@@ -5,6 +5,7 @@ function GeolocationComponent() {
   const [error, setError] = useState(null);
 
   const getLocation = () => {
+    console.log('Getting location...');
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
