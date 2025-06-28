@@ -14,6 +14,8 @@ import Shapes from './pages/prek/Shapes';
 import Colors from './pages/prek/Colors';
 import SpeakComponent from './pages/ai/SpeakComponent';
 import CONFIG from './Config';
+import AssessmentFlow from './pages/random/AssessmentFlow';
+
 
 function App() {
   const [activeSection, setActiveSection] = useState('Home');
@@ -96,7 +98,7 @@ function App() {
   }, [activeSection]); // Re-fetch location when activeSection changes  
 
   const navigationOptions = ['Home', 'AI', 'News', 'Contact', 'About Us', 'Subscribe'];
-  const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money'];
+  const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money', 'Assessment Flow'];
   const prekOptions = ['Alphabets', 'Numbers', 'Shapes', 'Colors'];
 
   const handleNavigationClick = (option) => {
@@ -117,6 +119,8 @@ function App() {
         return <WordProblems />;
       case 'Counting Money':
         return <CountingMoney />;
+      case 'Assessment Flow':
+        return <AssessmentFlow />;
       default:
         return null;
     }
