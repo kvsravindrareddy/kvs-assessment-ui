@@ -46,7 +46,7 @@ const Contactus = () => {
 
         // Form is valid, proceed with submission
         try {
-            const response = await axios.post(`${CONFIG.development.ADMIN_BASE_URL}/contactus`, formData);
+            const response = await axios.post(`${CONFIG.development.ADMIN_SUPPORT_BASE_URL}/contactus`, formData);
             setSubmitMessage(response.data);
 
             // Clear form data

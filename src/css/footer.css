@@ -1,40 +1,65 @@
-.icon {
-    width: 30px;
-    height: auto;
-    margin-right: 10px;
-} 
-
 footer {
-    background-color: #04AA6D;
-    color: white;
-    padding: 20px;
-    text-align: center;
-  }
-  
-  .footer-line {
-    border: none;
-    border-top: 1px solid #ccc;
-  }
-  
-  .footer-content {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-  }
-  
-  .footer-section {
-    margin: 10px;
-  }
-  
-  .footer-section h3 {
-    margin-top: 0;
-  }
-  
-  .social-icons {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .social-icons a {
-    margin: 0 10px;
-  }
+  background-color: #fdf6e3;
+  padding: 30px 10%;
+  font-family: 'Comic Sans MS', 'Baloo Bhai 2', cursive;
+  color: #333;
+}
+
+.footer-line {
+  border: none;
+  height: 4px;
+  background: linear-gradient(to right, #ffb347, #ffcc33, #ffb347);
+  margin-bottom: 20px;
+  border-radius: 2px;
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.footer-section {
+  flex: 1;
+  min-width: 180px;
+}
+
+.footer-section h3 {
+  font-size: 1.6em;
+  color: #ff6600;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #ffcc33;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+.footer-section a {
+  display: block;
+  text-decoration: none;
+  color: #444;
+  margin: 6px 0;
+  font-size: 1.1em;
+  transition: color 0.3s;
+}
+
+.footer-section a:hover {
+  color: #ff6600;
+}
+
+.social-icons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.social-icons .icon {
+  width: 32px;
+  height: 32px;
+  transition: transform 0.3s ease;
+}
+
+.social-icons .icon:hover {
+  transform: scale(1.2);
+}

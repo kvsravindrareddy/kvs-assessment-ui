@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../../css/AssessmentFlow.css';
+import CONFIG from '../../Config';
 
 const AssessmentFlow = () => {
   const [userInfo, setUserInfo] = useState({ userId: '', email: '' });
@@ -17,8 +18,8 @@ const AssessmentFlow = () => {
   const [types, setTypes] = useState([]);
   const [complexities, setComplexities] = useState([]);
 
-  const baseURL = 'http://localhost:9002/v1/assessment';
-  const configURL = 'http://localhost:9002/v1/question-category-config';
+  const baseURL = `${CONFIG.development.ASSESSMENT_BASE_URL}/v1/assessment`;
+  const configURL = `${CONFIG.development.ASSESSMENT_BASE_URL}/v1/question-category-config`;
 
   useEffect(() => {
     axios.get(`${configURL}/categories`).then(res => setCategories(res.data));

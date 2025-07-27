@@ -14,7 +14,7 @@ const Subscribe = () => {
         mobileNumber: '',
         notificationType: '',
         subscriptionType: '',
-        updateType: '',
+        updateType: 'DAILY',
         customerIp: ''
     });
 
@@ -32,7 +32,7 @@ const Subscribe = () => {
     useEffect(() => {
         const fetchCountries = async () => {
             try {
-                const countryResponse = await axios.get(`${CONFIG.development.ADMIN_BASE_URL}/country`);
+                const countryResponse = await axios.get(`${CONFIG.development.ADMIN_SUPPORT_BASE_URL}/country`);
                 setCountryOptions(countryResponse.data.map(country => ({ 
                     label: `${country.name} (${country.dialCode})`,
                     value: country.dialCode 
@@ -69,7 +69,7 @@ const Subscribe = () => {
                 customerIp: clientIp
             });
     
-            const subRes = await axios.post(`${CONFIG.development.ADMIN_BASE_URL}/subscribe`, formData);
+            const subRes = await axios.post(`${CONFIG.development.ADMIN_SUPPORT_BASE_URL}/subscribe`, formData);
             setSubResponse({
                 firstName: subRes.data.firstName,
                 lastName: subRes.data.lastName,
@@ -91,7 +91,9 @@ const Subscribe = () => {
     };
     
 
-    const updateTypeOptions = ['Daily', 'Weekly', 'Monthly'];
+    const updateTypeOptions = ['DAILY', 'WEEKLY', 'MONTHLY', 'QUARTERLY', 'ANNUALLY'];
+    const notificationTypeOptions = ['EMAIL'];
+    const subscriptionTypeOptions = ['EDUCATIONAL'];
 
     return (
         <div>
@@ -130,11 +132,23 @@ const Subscribe = () => {
                                 </tr>
                                 <tr>
                                     <td><label>Notification Type</label></td>
-                                    <td><input type="text" name="notificationType" value={formData.notificationType} onChange={handleChange} /></td>
+                                    <td>
+                                        <select name="notificationType" value={formData.notificationType} onChange={handleChange}>
+                                            {notificationTypeOptions.map((option, index) => (
+                                                <option key={index} value={option}>{option}</option>
+                                            ))}
+                                        </select>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td><label>Subscription Type</label></td>
-                                    <td><input type="text" name="subscriptionType" value={formData.subscriptionType} onChange={handleChange} /></td>
+                                    <td>
+                                        <select name="subscriptionType" value={formData.subscriptionType} onChange={handleChange}>
+                                            {subscriptionTypeOptions.map((option, index) => (
+                                                <option key={index} value={option}>{option}</option>
+                                            ))}
+                                        </select>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td><label>Update Type</label></td>
@@ -159,11 +173,9 @@ const Subscribe = () => {
                     {subResponse.status && (
                         <div>
                             <h3>Subscription Status</h3>
-                            <p>First Name {subResponse.firstName}</p>
-                            <p>Last Name {subResponse.lastName}</p>
-                            <p>Email {subResponse.email}</p>
-                            <p>Status {subResponse.status}</p>
-                            <p>Message {subResponse.message}</p>
+                            <p style={{ backgroundColor: '#d4edda', color: '#155724', padding: '10px', borderRadius: '4px' }}>
+                             Hello {subResponse.lastName} you are {subResponse.message} with email {subResponse.email}
+                            </p>
                         </div>
                     )}
                 </div>

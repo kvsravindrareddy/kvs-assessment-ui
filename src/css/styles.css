@@ -122,31 +122,41 @@
 .topnav {
   display: flex;
   justify-content: center;
-  background-color: #04AA6D;
-  padding: 10px 0;
   flex-wrap: wrap;
+  background: linear-gradient(90deg, #ffcccb, #ffe4b5, #d1f7c4, #b2fefa, #dcd3ff);
+  padding: 12px 0;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  font-family: 'Baloo Bhai 2', cursive;
+}
+
+.topnav div {
+  margin: 6px 10px;
+}
+
+.topnav a {
+  color: #333;
+  background-color: white;
+  border-radius: 25px;
+  padding: 10px 20px;
+  font-size: 18px;
+  text-decoration: none;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .topnav a:hover {
-  background-color: white;
-  color: #04AA6D;
-  border-radius: 10px;
+  background-color: #fdd835;
+  color: #333;
+  transform: scale(1.1);
 }
 
-.topnav a.active {
-  background-color: #4c3939;
+.topnav .active a {
+  background-color: #ff6f61;
   color: white;
-  border-radius: 10px;
-}
-
-/* 3D Effect on Navigation Items */
-.topnav a {
-  position: relative;
-  color: #4c3939;
-  padding: 14px 16px;
-  text-decoration: none;
-  font-size: 18px;
-  transition: background-color 0.3s, color 0.3s;
+  font-weight: bold;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  transform: scale(1.1);
 }
 
 .dropdown-content {

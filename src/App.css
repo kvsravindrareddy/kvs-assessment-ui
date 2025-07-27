@@ -1,3 +1,38 @@
+body {
+  font-family: 'Baloo Bhai 2', 'Comic Sans MS', cursive;
+  background-color: #fffbe6;
+}
+
+#mainpage {
+  padding: 20px;
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #fffde7, #fff9c4);
+}
+
+.section-content {
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-card {
+  background: linear-gradient(to right, #fefcea, #f1da36);
+  border-radius: 20px;
+  padding: 20px;
+  margin: 15px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  font-size: 1.3em;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.section-card:hover {
+  transform: scale(1.02);
+}
+
 .App {
   text-align: center;
 }
