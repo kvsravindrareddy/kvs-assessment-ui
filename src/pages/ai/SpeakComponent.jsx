@@ -1,64 +1,19 @@
-import React, { useState } from 'react';
-import '../../css/SpeakComponent.css'; // Make sure to create this CSS file for styling purposes
-import CONFIG from '../../Config';
-
-function SpeakComponent() {
-  const [storyText, setStoryText] = useState('');
-  const [capturedText, setCapturedText] = useState('');
-  const [isListening, setIsListening] = useState(false);
-
-  const fetchStory = async () => {
-    try {
-      const response = await fetch(`${CONFIG.development.AI_ASSESSMENT_BASE_URL}/story`);
-      const data = await response.json();
-      setStoryText(data.text);
-    } catch (error) {
-      console.error('Error fetching story:', error);
-    }
-  };
-
-  const toggleListening = () => {
-    setIsListening(prevState => !prevState);
-    if (!isListening) {
-      // Start listening
-      // You can integrate a speech recognition library here
-    } else {
-      // Stop listening
-      // Send the captured text to the POST API
-      sendCapturedText();
-    }
-  };
-
-  const sendCapturedText = async () => {
-    try {
-      const response = await fetch(`${CONFIG.development.AI_ASSESSMENT_BASE_URL}/speechtotext`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ text: capturedText })
-      });
-      // Handle response if needed
-    } catch (error) {
-      console.error('Error sending captured text:', error);
-    }
-  };
-
-  const handleChange = (event) => {
-    setCapturedText(event.target.value);
-  };
-
-  return (
-    <div className="speak-component">
-      <button onClick={fetchStory}>Fetch Story</button>
-      <div className="story-text">{storyText}</div>
-      <textarea placeholder="Speak here..." value={capturedText} onChange={handleChange}></textarea>
-      <button onClick={toggleListening}>
-        {isListening ? 'End Test' : 'Start Test'}
-      </button>
-      {isListening && <div className="listening-icon"></div>}
-    </div>
-  );
+function News() {
+    return (
+        <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '60vh',
+            fontFamily: "'Baloo Bhai 2', cursive",
+            background: 'linear-gradient(to right, #fffde7, #fff9c4)',
+            borderRadius: '20px',
+            margin: '20px',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+        }}>
+            <h1 style={{ fontSize: '2em', color: '#f57f17' }}>📰 AI features Coming Soon...</h1>
+        </div>
+    );
 }
 
-export default SpeakComponent;
+export default News;

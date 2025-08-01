@@ -18,56 +18,100 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+.home-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+}
+
+.left-grade-section {
+  width: 25%;
+  padding-right: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.right-section {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .section-card {
   background: linear-gradient(to right, #fefcea, #f1da36);
   border-radius: 20px;
   padding: 20px;
-  margin: 15px;
+  margin: 0;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   font-size: 1.3em;
   cursor: pointer;
   transition: transform 0.3s ease;
+  border: 1px solid #ccc;
 }
 
 .section-card:hover {
   transform: scale(1.02);
+  background-color: #f0f0f0;
 }
 
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.section-card h2 {
+  font-size: 18px;
+  margin: 0;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  padding: 10px 0;
 }
 
-.App-link {
-  color: #61dafb;
+.section-card .arrow {
+  font-size: 16px;
+  margin-left: 10px;
+  color: #666;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.dropdown-content {
+  margin-top: 10px;
+  padding-left: 10px;
+}
+
+.dropdown-content a {
+  display: block;
+  color: #007bff;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.grade-card {
+  background: linear-gradient(to right, #fefcea, #f1da36);
+  border-radius: 20px;
+  padding: 16px 20px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.grade-card:hover {
+  transform: scale(1.03);
+}
+
+.grade-card h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.grade-card:hover {
+  background-color: #fff176;
+}
+
+.section-card,
+.grade-card {
+  margin-bottom: 12px;
 }
