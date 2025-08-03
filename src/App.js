@@ -12,12 +12,15 @@ import EarlyEducation from './components/EarlyEducation';
 import AssessmentComponents from './components/AssessmentComponents';
 import LoadGradeData from './pages/config/LoadGradeData';
 import News from './pages/news/News';
+import AssessmentFlow from './pages/random/AssessmentFlow';
 
 function App() {
   const [activeSection, setActiveSection] = useState('Home');
   const [expandedSection, setExpandedSection] = useState(null);
   const [location, setLocation] = useState({ latitude: null, longitude: null });
   const [gradeData, setGradeData] = useState({});
+  const [selectedGrade, setSelectedGrade] = useState(null);
+  const [selectedSubject, setSelectedSubject] = useState(null);
 
   const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money', 'Assessment Flow'];
   const prekOptions = ['Alphabets', 'Numbers', 'Shapes', 'Colors'];
@@ -26,6 +29,12 @@ function App() {
   useEffect(() => {
     getLocation(setLocation);
   }, [activeSection]);
+
+  const handleSubjectClick = (grade, subject) => {
+    setSelectedGrade(grade);
+    setSelectedSubject(subject);
+    setActiveSection('AssessmentFlow');
+  };
 
   const handleNavigationClick = (option) => {
     setActiveSection(option);
@@ -68,9 +77,14 @@ function App() {
       {/* Home Content Sections */}
       {activeSection === 'Home' && (
         <div className="home-container">
-          {/* Left Column: Dynamic Grades (25% width) */}
           <div className="left-grade-section">
-            <LoadGradeData gradeData={gradeData} setGradeData={setGradeData} onClick={toggleSection} expandedSection={expandedSection} onNavigate={handleNavigationClick} />
+            <LoadGradeData
+              gradeData={gradeData}
+              setGradeData={setGradeData}
+              onClick={toggleSection}
+              expandedSection={expandedSection}
+              onSubjectClick={handleSubjectClick} // << new
+            />
           </div>
 
           {/* Right Column: PreK, Math, KG */}
@@ -115,6 +129,10 @@ function App() {
       {activeSection === 'Contact' && <Contactus />}
       {activeSection === 'About Us' && <AboutUs />}
       {activeSection === 'News' && <News/>}
+      {/* Dynamically show AssessmentFlow with selected values */}
+      {activeSection === 'AssessmentFlow' && (
+        <AssessmentFlow preSelectedCategory={selectedGrade} preSelectedType={selectedSubject} />
+      )}
 
       {/* Footer */}
       <div style={{ clear: 'both' }}>

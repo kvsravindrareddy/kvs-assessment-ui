@@ -3,9 +3,15 @@ import axios from 'axios';
 import '../../css/AssessmentFlow.css';
 import CONFIG from '../../Config';
 
-const AssessmentFlow = () => {
+const AssessmentFlow = ({ preSelectedCategory = '', preSelectedType = '' }) => {
   const [userInfo, setUserInfo] = useState({ userId: '', email: '' });
-  const [settings, setSettings] = useState({ category: '', type: '', complexity: '', numberOfQuestions: 5 });
+  const [settings, setSettings] = useState({
+    category: preSelectedCategory,
+    type: preSelectedType,
+    complexity: '',
+    numberOfQuestions: 5
+  });
+
   const [assessment, setAssessment] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -124,19 +130,27 @@ const AssessmentFlow = () => {
             onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
           />
 
-          <select value={settings.category} onChange={(e) => setSettings({ ...settings, category: e.target.value, type: '' })}>
-            <option value="">Select Grade</option>
-            {Object.keys(categoriesData).map(grade => (
-              <option key={grade} value={grade}>{grade.replace('_', ' ')}</option>
-            ))}
-          </select>
+          {preSelectedCategory ? (
+            <p><strong>Grade:</strong> {preSelectedCategory.replace(/_/g, ' ')}</p>
+          ) : (
+            <select value={settings.category} onChange={(e) => setSettings({ ...settings, category: e.target.value, type: '' })}>
+              <option value="">Select Grade</option>
+              {Object.keys(categoriesData).map(grade => (
+                <option key={grade} value={grade}>{grade.replace('_', ' ')}</option>
+              ))}
+            </select>
+          )}
 
-          <select value={settings.type} onChange={(e) => setSettings({ ...settings, type: e.target.value })}>
-            <option value="">Select Subject</option>
-            {types.map(sub => (
-              <option key={sub} value={sub}>{sub.replace('_', ' ')}</option>
-            ))}
-          </select>
+          {preSelectedType ? (
+            <p><strong>Subject:</strong> {preSelectedType.replace(/_/g, ' ')}</p>
+          ) : (
+            <select value={settings.type} onChange={(e) => setSettings({ ...settings, type: e.target.value })}>
+              <option value="">Select Subject</option>
+              {types.map(sub => (
+                <option key={sub} value={sub}>{sub.replace('_', ' ')}</option>
+              ))}
+            </select>
+          )}
 
           <select value={settings.complexity} onChange={(e) => setSettings({ ...settings, complexity: e.target.value })}>
             <option value="">Select Complexity</option>
