@@ -14,23 +14,26 @@ const AssessmentFlow = () => {
   const [message, setMessage] = useState('');
   const [score, setScore] = useState(0);
   const [invalid, setInvalid] = useState(0);
-  const [categories, setCategories] = useState([]);
+  const [categoriesData, setCategoriesData] = useState({});
   const [types, setTypes] = useState([]);
   const [complexities, setComplexities] = useState([]);
 
   const baseURL = `${CONFIG.development.ASSESSMENT_BASE_URL}/v1/assessment`;
   const configURL = `${CONFIG.development.ASSESSMENT_BASE_URL}/v1/question-category-config`;
+  const adminConfigURL = `${CONFIG.development.ADMIN_SUPPORT_BASE_URL}/v1/app-config`;
 
   useEffect(() => {
-    axios.get(`${configURL}/categories`).then(res => setCategories(res.data));
-    axios.get(`${configURL}/complexity`).then(res => setComplexities(res.data));
+    axios.get(adminConfigURL).then(res => setCategoriesData(res.data)).catch(console.error);
+    axios.get(`${configURL}/complexity`).then(res => setComplexities(res.data)).catch(console.error);
   }, []);
 
   useEffect(() => {
-    if (settings.category) {
-      axios.get(`${configURL}/categories/${settings.category}/types`).then(res => setTypes(res.data));
+    if (settings.category && categoriesData[settings.category]) {
+      setTypes(categoriesData[settings.category]);
+    } else {
+      setTypes([]);
     }
-  }, [settings.category]);
+  }, [settings.category, categoriesData]);
 
   const startAssessment = async () => {
     const request = { ...userInfo, ...settings };
@@ -121,17 +124,17 @@ const AssessmentFlow = () => {
             onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
           />
 
-          <select value={settings.category} onChange={(e) => setSettings({ ...settings, category: e.target.value })}>
-            <option value="">Select Category</option>
-            {categories.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
+          <select value={settings.category} onChange={(e) => setSettings({ ...settings, category: e.target.value, type: '' })}>
+            <option value="">Select Grade</option>
+            {Object.keys(categoriesData).map(grade => (
+              <option key={grade} value={grade}>{grade.replace('_', ' ')}</option>
             ))}
           </select>
 
           <select value={settings.type} onChange={(e) => setSettings({ ...settings, type: e.target.value })}>
-            <option value="">Select Type</option>
-            {types.map(typ => (
-              <option key={typ} value={typ}>{typ}</option>
+            <option value="">Select Subject</option>
+            {types.map(sub => (
+              <option key={sub} value={sub}>{sub.replace('_', ' ')}</option>
             ))}
           </select>
 
