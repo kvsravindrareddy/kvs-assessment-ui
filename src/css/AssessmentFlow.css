@@ -135,3 +135,94 @@
   cursor: not-allowed;
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 }
+
+.story-list {
+  list-style: none;
+  padding: 0;
+}
+.story-list li {
+  margin: 5px 0;
+}
+.story-content {
+  background: #f9f9f9;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.collapsible-header {
+  cursor: pointer;
+  background: #f4f4f4;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.story-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.story-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.story-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.story-list-inline {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.story-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.story-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.story-card h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.story-card p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+.read-btn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.read-btn:hover {
+  background-color: #1e40af;
+}

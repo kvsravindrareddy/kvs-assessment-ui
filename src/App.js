@@ -13,6 +13,8 @@ import AssessmentComponents from './components/AssessmentComponents';
 import LoadGradeData from './pages/config/LoadGradeData';
 import News from './pages/news/News';
 import AssessmentFlow from './pages/random/AssessmentFlow';
+import ReadingFlow from './pages/reading/ReadingFlow';
+
 
 function App() {
   const [activeSection, setActiveSection] = useState('Home');
@@ -24,7 +26,7 @@ function App() {
 
   const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money', 'Assessment Flow'];
   const prekOptions = ['Alphabets', 'Numbers', 'Shapes', 'Colors'];
-  const navigationOptions = ['Home', 'AI', 'News', 'Contact', 'About Us', 'Subscribe'];
+  const navigationOptions = ['Home', 'Reading', 'AI', 'News', 'Contact', 'About Us', 'Subscribe'];
 
   useEffect(() => {
     getLocation(setLocation);
@@ -133,6 +135,8 @@ function App() {
       {activeSection === 'AssessmentFlow' && (
         <AssessmentFlow preSelectedCategory={selectedGrade} preSelectedType={selectedSubject} />
       )}
+      {activeSection === 'Reading' && <ReadingFlow />}
+
 
       {/* Footer */}
       <div style={{ clear: 'both' }}>

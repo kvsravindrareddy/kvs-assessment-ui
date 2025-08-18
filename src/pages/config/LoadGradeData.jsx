@@ -10,7 +10,7 @@ const orderedGrades = [
 
 export default function LoadGradeData({ gradeData, setGradeData, onClick, expandedSection, onSubjectClick }) {
   useEffect(() => {
-    fetch(`${CONFIG.development.ADMIN_SUPPORT_BASE_URL}/v1/app-config`)
+    fetch(`${CONFIG.development.ADMIN_SUPPORT_BASE_URL}/v1/app-config/subject-types`)
       .then((res) => res.json())
       .then((data) => setGradeData(data))
       .catch((err) => console.error('Failed to load grades:', err));
