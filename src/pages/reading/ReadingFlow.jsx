@@ -11,7 +11,7 @@ export default function ReadingFlow() {
   const [gradeData, setGradeData] = useState({});
   const [expandedStories, setExpandedStories] = useState(false);
   const [expandedGrade, setExpandedGrade] = useState(null);
-  const [expandedSubject, setExpandedSubject] = useState(null); // now (grade+subject)
+  const [expandedSubject, setExpandedSubject] = useState(null);
   const [stories, setStories] = useState({});
   const [storyDetails, setStoryDetails] = useState(null);
 
@@ -20,11 +20,12 @@ export default function ReadingFlow() {
   const [score, setScore] = useState(0);
   const [completed, setCompleted] = useState(false);
 
+  const [voices, setVoices] = useState([]);
+
   const adminConfigURL = `${CONFIG.development.ADMIN_SUPPORT_BASE_URL}/v1/app-config/subject-types`;
   const listStoriesURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/list-story-names`;
   const getStoryURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/with-story-id`;
 
-  // Load grade -> subject types
   useEffect(() => {
     fetch(adminConfigURL)
       .then(res => res.json())
@@ -32,9 +33,24 @@ export default function ReadingFlow() {
       .catch(err => console.error('Failed to load grades:', err));
   }, []);
 
+  // 🔊 Load available voices
+  useEffect(() => {
+    const loadVoices = () => {
+      const v = window.speechSynthesis.getVoices();
+      setVoices(v);
+    };
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+
+    return () => {
+      window.speechSynthesis.cancel(); // cleanup speech on unmount
+    };
+  }, []);
+
   const handleSelectSubject = async (grade, subject) => {
+    window.speechSynthesis.cancel();
     const key = `${grade}-${subject}`;
-    setExpandedSubject(prev => (prev === key ? null : key)); // toggle
+    setExpandedSubject(prev => (prev === key ? null : key));
     setStoryDetails(null);
     setCompleted(false);
 
@@ -47,6 +63,7 @@ export default function ReadingFlow() {
   };
 
   const fetchStoryDetails = async (storyId) => {
+    window.speechSynthesis.cancel();
     try {
       const res = await axios.get(`${getStoryURL}?storyId=${storyId}`);
       setStoryDetails(res.data);
@@ -84,11 +101,52 @@ export default function ReadingFlow() {
     }
   };
 
+  // 🗣 Detect language by Unicode range
+  const detectLanguage = (text) => {
+    if (/[ఀ-౿]/.test(text)) return 'te-IN'; // Telugu
+    if (/[ऀ-ॿ]/.test(text)) return 'hi-IN'; // Hindi
+    if (/[஀-௿]/.test(text)) return 'ta-IN'; // Tamil
+    if (/[ഀ-ൿ]/.test(text)) return 'ml-IN'; // Malayalam
+    if (/[ಀ-೿]/.test(text)) return 'kn-IN'; // Kannada
+    return 'en-US'; // fallback English
+  };
+
+  // 🔊 Play everything (story + current Q + options)
+  const playAll = () => {
+    if (!storyDetails) return;
+    window.speechSynthesis.cancel();
+
+    const queue = [];
+
+    if (storyDetails.content) queue.push(storyDetails.content);
+
+    const currentQ = storyDetails.questions?.[questionIndex];
+    if (currentQ?.name) queue.push(currentQ.name);
+
+    if (currentQ?.options) {
+      Object.entries(currentQ.options).forEach(([key, value]) => {
+        queue.push(`${key}: ${value}`);
+      });
+    }
+
+    const speakNext = (i) => {
+      if (i >= queue.length) return;
+      const utt = new SpeechSynthesisUtterance(queue[i]);
+      const lang = detectLanguage(queue[i]);
+      const voice = voices.find(v => v.lang === lang) || voices.find(v => v.lang.includes('IN')) || voices[0];
+      utt.voice = voice;
+      utt.lang = voice?.lang || lang;
+      utt.onend = () => speakNext(i + 1);
+      window.speechSynthesis.speak(utt);
+    };
+
+    speakNext(0);
+  };
+
   return (
     <div className="reading-container">
       {!storyDetails ? (
         <div>
-          {/* Collapsible Stories Header */}
           <h2
             className="collapsible-header"
             onClick={() => setExpandedStories(prev => !prev)}
@@ -96,7 +154,6 @@ export default function ReadingFlow() {
             📚 Stories {expandedStories ? '▲' : '▼'}
           </h2>
 
-          {/* Grades inside Stories */}
           {expandedStories && (
             <div className="grade-list-container">
               {orderedGrades.map((grade) => (
@@ -105,7 +162,6 @@ export default function ReadingFlow() {
                     {grade} {expandedGrade === grade ? '▲' : '▼'}
                   </h3>
 
-                  {/* Subjects */}
                   {expandedGrade === grade && gradeData[grade] && (
                     <div className="dropdown-content">
                       {gradeData[grade].map((subject) => {
@@ -116,7 +172,6 @@ export default function ReadingFlow() {
                               {subject}
                             </a>
 
-                            {/* Inline stories for this subject */}
                             {expandedSubject === key && (
                               <div className="story-list-inline">
                                 {stories[key] && stories[key].length > 0 ? (
@@ -148,20 +203,25 @@ export default function ReadingFlow() {
         </div>
       ) : (
         <div>
-          {/* Story Content */}
           <h2>{storyDetails.title}</h2>
           <p className="story-content">{storyDetails.content}</p>
+
+          {/* 🔊 Single Play Icon for Everything */}
+          <button className="play-btn" onClick={playAll}>🔊 Play</button>
 
           {completed ? (
             <div className="assessment-done">
               <h3>Assessment Completed!</h3>
               <p>Score: {score} / {storyDetails.questions.length}</p>
-              <button onClick={() => setStoryDetails(null)}>Back to Stories</button>
+              <button onClick={() => { window.speechSynthesis.cancel(); setStoryDetails(null); }}>Back to Stories</button>
             </div>
           ) : (
             storyDetails.questions && storyDetails.questions.length > 0 && (
               <div className="question-box">
-                <h3>Question {questionIndex + 1} of {storyDetails.questions.length}</h3>
+                <h3>
+                  Question {questionIndex + 1} of {storyDetails.questions.length}
+                </h3>
+
                 <p>{storyDetails.questions[questionIndex].name}</p>
 
                 <div className="options-list">
