@@ -68,75 +68,84 @@ const Contactus = () => {
     };
 
     return (
-        <div>
-            <table className="contact-container">
-                <tbody>
-                    <tr>
-                        <td className="contact-info">
-                            <h2>Contact Us</h2>
-                            <p>
-                                You can contact us via email for any inquiries or support you may need.
-                            </p>
-                            <p>Email: <a href="mailto:contact@kobstechnologies.com">contact@kobstechnologies.com</a></p>
-                        </td>
-                        <td className="contact-form-container">
-                            <h2>Submit the enquiry Form</h2>
-                            <form onSubmit={handleSubmit} className="contact-form">
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <label>Name</label>
-                                        </td>
-                                        <td>
-                                            <input type="text" name="name" value={formData.name} onChange={handleChange} required />
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label>Email</label>
-                                        </td>
-                                        <td>
-                                            <input type="email" name="email" value={formData.email} onChange={handleChange} required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Please enter a valid email address." />
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label>Phone</label>
-                                        </td>
-                                        <td>
-                                            <input type="text" name="phone" value={formData.phone} onChange={handleChange} />
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label>Subject</label>
-                                        </td>
-                                        <td>
-                                            <input type="text" name="subject" value={formData.subject} onChange={handleChange} required />
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label>Message</label>
-                                        </td>
-                                        <td>
-                                            <textarea name="message" value={formData.message} onChange={handleChange} rows="5" maxLength="2000" required />
-                                            <div>{messageCharsLeft} characters left</div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colSpan="2">
-                                            <button type="submit" onClick={handleSubmit}>Submit</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                                {errorMessage && <p style={{ color: 'red' }}><b>{errorMessage}</b></p>}
-                                {submitMessage && <p style={{ color: 'green' }}><b>{submitMessage}</b></p>}
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <div className="contact-page">
+            <div className="contact-container">
+                <div className="contact-info">
+                    <h2>Contact Us</h2>
+                    <p>
+                        You can contact us via email for any inquiries or support you may need.
+                    </p>
+                    <p>Email: <a href="mailto:contact@kobstechnologies.com">contact@kobstechnologies.com</a></p>
+                </div>
+                <div className="contact-form-container">
+                    <h2>Submit the enquiry Form</h2>
+                    <form onSubmit={handleSubmit} className="contact-form">
+                        <div className="form-group">
+                            <label htmlFor="name">Name *</label>
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="email">Email *</label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
+                                pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                                title="Please enter a valid email address."
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="phone">Phone</label>
+                            <input
+                                type="text"
+                                id="phone"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="subject">Subject *</label>
+                            <input
+                                type="text"
+                                id="subject"
+                                name="subject"
+                                value={formData.subject}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="message">Message *</label>
+                            <textarea
+                                id="message"
+                                name="message"
+                                value={formData.message}
+                                onChange={handleChange}
+                                rows="5"
+                                maxLength="2000"
+                                required
+                            />
+                            <div className="char-count">{messageCharsLeft} characters left</div>
+                        </div>
+                        <div className="form-group">
+                            <button type="submit">Submit</button>
+                        </div>
+                        {errorMessage && <p className="error-message">{errorMessage}</p>}
+                        {submitMessage && <p className="success-message">{submitMessage}</p>}
+                    </form>
+                </div>
+            </div>
         </div>
     );
 };

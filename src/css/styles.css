@@ -7,7 +7,7 @@
 }
 
 .brand-section-buttons button {
-  margin-left: 10px; /* Add space between buttons *
+  margin-left: 10px; /* Add space between buttons */
   background-color: transparent;
   color: white;
   border: none;
@@ -17,46 +17,6 @@
 .brand-section-buttons button.login:hover,
 .brand-section-buttons button.signup:hover {
   background-color: #45A049; /* Highlight color on hover */
-}
-  
-.contact-form {
-    margin: 20px;
-    padding: 20px;
-    width: 90%; /* Adjust the width to make the table slightly bigger */
-    border-collapse: collapse;
-}
-
-.contact-form th, .contact-form td {
-    border: 1px solid green;
-    background-color: white;
-    padding: 8px; /* Adjust the padding for better spacing */
-}
-
-.contact-form input[type="text"],
-.contact-form input[type="email"],
-.contact-form textarea {
-    width: calc(100% - 16px); /* Subtracting the padding from the width */
-    padding: 4px;
-    box-sizing: border-box; /* Include padding in the width calculation */
-    resize: none; /* Prevent textarea from being resized */
-}
-.contact-form button[type="submit"] {
-  margin: auto; /* Center the button horizontally within its parent container */
-  display: block; /* Ensure button takes up entire width of its parent container */
-}
-
-.contact-form input:invalid,
-.contact-form textarea:invalid {
-    border-color: red;
-}
-
-.contact-form input:invalid + span::after,
-.contact-form textarea:invalid + span::after {
-    content: " *Required";
-    color: red;
-    font-size: 12px;
-    display: block;
-    margin-top: 4px;
 }
   .assessment {
     margin: 20px auto;
@@ -575,129 +535,4 @@
 }
 
 
-body {
-  margin: 0;
-  padding: 0;
-  background-color: #add8e6;
-  font-family: 'Comic Sans MS', sans-serif;
-}
-
-.home {
-  background-color: inherit;
-}
-
-.home-sections {
-  display: flex;
-  justify-content: space-around;
-  padding: 20px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  /*background-color: #04AA6D;*/
-}
-
-.brand-section {
-  display: flex;
-  align-items: center;
-}
-
-.brand-section img {
-  width: 180px;
-  height: 80px;
-}
-
-.nav-right {
-  display: flex;
-  align-items: center;
-}
-
-.buttons {
-  /*margin-left: 20px;*/
-  display: flex;
-}
-
-.buttons button {
-  margin-left: 10px;
-  background-color: transparent;
-  color: white;
-  border: none;
-  cursor: pointer;
-  /*padding: 10px 20px;
-  border-radius: 5px;*/
-}
-
-.buttons button.login:hover,
-.buttons button.signup:hover {
-  background-color: #45A049;
-}
-
-.buttons button:hover {
-  background-color: #ff6347;
-}
-
-.search {
-  display: flex;
-  align-items: center;
-  margin-left: 20px;
-}
-
-.search input[type="text"] {
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-}
-
-.search button.search-icon {
-  padding: 6px;
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.search button.search-icon img {
-  width: 20px;
-  height: 20px;
-}
-
-.topnav {
-  display: flex;
-  justify-content: center;
-  background-color: #ffa07a;
-  padding: 10px 0;
-  flex-wrap: wrap;
-}
-
-.topnav a {
-  color: black;
-  padding: 14px 20px;
-  text-decoration: none;
-  font-size: 18px;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.section-card {
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 200px;
-  padding: 20px;
-  text-align: center;
-  cursor: pointer;
-  transition: box-shadow 0.3s;
-}
-
-.section-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.section-card h2 {
-  margin: 0;
-  font-size: 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+/* Duplicate styles removed - using App.css definitions instead */

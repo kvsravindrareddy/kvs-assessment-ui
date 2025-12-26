@@ -96,90 +96,147 @@ const Subscribe = () => {
     const subscriptionTypeOptions = ['EDUCATIONAL'];
 
     return (
-        <div>
-            <div className="subscribe-header">
-                <h2>Subscribe to KOBS Technologies News and Updates</h2>
-            </div>
-            <p>Stay informed with the latest news, new features, and updates about KOBS Technologies. By subscribing, you'll receive timely notifications straight to your inbox, keeping you up-to-date with our innovations and developments.</p>
-            {!formSubmitted ? (
-                <div>
-                    <form onSubmit={handleSubmit} className="subscribe-form">
-                        <table>
-                            <tbody>
-                                <tr>
-                                    <td><label>First Name</label></td>
-                                    <td><input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required /></td>
-                                </tr>
-                                <tr>
-                                    <td><label>Middle Name</label></td>
-                                    <td><input type="text" name="middleName" value={formData.middleName} onChange={handleChange} /></td>
-                                </tr>
-                                <tr>
-                                    <td><label>Last Name</label></td>
-                                    <td><input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required /></td>
-                                </tr>
-                                <tr>
-                                    <td><label>Email</label></td>
-                                    <td><input type="email" name="email" value={formData.email} onChange={handleChange} required /></td>
-                                </tr>
-                                <tr>
-                                    <td><label>Country Code</label></td>
-                                    <td><Select options={countryOptions} onChange={handleCountryChange} required /></td>
-                                </tr>
-                                <tr>
-                                    <td><label>Mobile Number</label></td>
-                                    <td><input type="text" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange} /></td>
-                                </tr>
-                                <tr>
-                                    <td><label>Notification Type</label></td>
-                                    <td>
-                                        <select name="notificationType" value={formData.notificationType} onChange={handleChange}>
-                                            {notificationTypeOptions.map((option, index) => (
-                                                <option key={index} value={option}>{option}</option>
-                                            ))}
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><label>Subscription Type</label></td>
-                                    <td>
-                                        <select name="subscriptionType" value={formData.subscriptionType} onChange={handleChange}>
-                                            {subscriptionTypeOptions.map((option, index) => (
-                                                <option key={index} value={option}>{option}</option>
-                                            ))}
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><label>Update Type</label></td>
-                                    <td>
-                                        <select name="updateType" value={formData.updateType} onChange={handleChange}>
-                                            {updateTypeOptions.map((option, index) => (
-                                                <option key={index} value={option}>{option}</option>
-                                            ))}
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td><button type="submit">Subscribe</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </form>
+        <div className="subscribe-page">
+            <div className="subscribe-container">
+                <div className="subscribe-info">
+                    <h2>Subscribe to Updates</h2>
+                    <p>
+                        Stay informed with the latest news, new features, and updates about KOBS Technologies.
+                        By subscribing, you'll receive timely notifications straight to your inbox, keeping you
+                        up-to-date with our innovations and developments.
+                    </p>
+                    <div className="benefits-list">
+                        <p>📧 Email notifications</p>
+                        <p>🎓 Educational content</p>
+                        <p>🔔 Regular updates</p>
+                        <p>✨ Exclusive features</p>
+                    </div>
                 </div>
-            ) : (
-                <div>
-                    {subResponse.status && (
-                        <div>
-                            <h3>Subscription Status</h3>
-                            <p style={{ backgroundColor: '#d4edda', color: '#155724', padding: '10px', borderRadius: '4px' }}>
-                             Hello {subResponse.lastName} you are {subResponse.message} with email {subResponse.email}
+                <div className="subscribe-form-container">
+                    {!formSubmitted ? (
+                        <>
+                            <h2>Join Our Community</h2>
+                            <form onSubmit={handleSubmit} className="subscribe-form">
+                                <div className="form-group">
+                                    <label htmlFor="firstName">First Name *</label>
+                                    <input
+                                        type="text"
+                                        id="firstName"
+                                        name="firstName"
+                                        value={formData.firstName}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="middleName">Middle Name</label>
+                                    <input
+                                        type="text"
+                                        id="middleName"
+                                        name="middleName"
+                                        value={formData.middleName}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="lastName">Last Name *</label>
+                                    <input
+                                        type="text"
+                                        id="lastName"
+                                        name="lastName"
+                                        value={formData.lastName}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="email">Email *</label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="countryCode">Country Code *</label>
+                                    <Select
+                                        id="countryCode"
+                                        options={countryOptions}
+                                        onChange={handleCountryChange}
+                                        required
+                                        className="country-select"
+                                        classNamePrefix="select"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="mobileNumber">Mobile Number</label>
+                                    <input
+                                        type="text"
+                                        id="mobileNumber"
+                                        name="mobileNumber"
+                                        value={formData.mobileNumber}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="notificationType">Notification Type</label>
+                                    <select
+                                        id="notificationType"
+                                        name="notificationType"
+                                        value={formData.notificationType}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">Select notification type</option>
+                                        {notificationTypeOptions.map((option, index) => (
+                                            <option key={index} value={option}>{option}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="subscriptionType">Subscription Type</label>
+                                    <select
+                                        id="subscriptionType"
+                                        name="subscriptionType"
+                                        value={formData.subscriptionType}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">Select subscription type</option>
+                                        {subscriptionTypeOptions.map((option, index) => (
+                                            <option key={index} value={option}>{option}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="updateType">Update Frequency</label>
+                                    <select
+                                        id="updateType"
+                                        name="updateType"
+                                        value={formData.updateType}
+                                        onChange={handleChange}
+                                    >
+                                        {updateTypeOptions.map((option, index) => (
+                                            <option key={index} value={option}>{option}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <button type="submit">Subscribe Now</button>
+                                </div>
+                            </form>
+                        </>
+                    ) : (
+                        <div className="subscription-success">
+                            <h3>🎉 Subscription Successful!</h3>
+                            <p className="success-message">
+                                Hello {subResponse.firstName} {subResponse.lastName}, you are {subResponse.message} with email {subResponse.email}
                             </p>
                         </div>
                     )}
                 </div>
-            )}
+            </div>
         </div>
     );
 };

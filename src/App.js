@@ -26,7 +26,14 @@ function App() {
 
   const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money', 'Assessment Flow'];
   const prekOptions = ['Alphabets', 'Numbers', 'Shapes', 'Colors'];
-  const navigationOptions = ['Home', 'Reading', 'AI', 'Contact', 'About Us', 'Subscribe'];
+  const navigationOptions = [
+    { label: 'Home', icon: '🏠' },
+    { label: 'Reading', icon: '📚' },
+    { label: 'AI', icon: '🤖' },
+    { label: 'Contact', icon: '✉️' },
+    { label: 'About Us', icon: 'ℹ️' },
+    { label: 'Subscribe', icon: '🔔' }
+  ];
 
   useEffect(() => {
     getLocation(setLocation);
@@ -51,7 +58,10 @@ function App() {
       {/* Header */}
       <div className="header">
         <div className="brand-section">
-          <img src={require('./images/kobstechnologies-color.png')} alt="logo" />
+          <img src={require('./images/kobstechnologies-color.png')} alt="KOBS Technologies Learning Platform" />
+        </div>
+        <div className="welcome-message">
+          <h1>🤖 AI-Powered Learning Adventures - Where Every Student Becomes a Star! ⭐✨</h1>
         </div>
         <div className="nav-right">
           <div className="buttons">
@@ -59,7 +69,7 @@ function App() {
             <button className="signup">Sign Up</button>
           </div>
           <div className="search">
-            <input type="text" placeholder="Search" />
+            <input type="text" placeholder="🔍 Ask AI..." />
             <button className="search-icon">
               <img src={require('./images/search-icon.png')} alt="search" />
             </button>
@@ -68,13 +78,18 @@ function App() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="topnav">
+      <nav className="topnav">
         {navigationOptions.map((option) => (
-          <div key={option} className={activeSection === option ? 'active' : ''}>
-            <a onClick={() => handleNavigationClick(option)}>{option}</a>
-          </div>
+          <button
+            key={option.label}
+            className={`nav-item ${activeSection === option.label ? 'active' : ''}`}
+            onClick={() => handleNavigationClick(option.label)}
+          >
+            <span className="nav-icon">{option.icon}</span>
+            {option.label}
+          </button>
         ))}
-      </div>
+      </nav>
 
       {/* Home Content Sections */}
       {activeSection === 'Home' && (
@@ -89,35 +104,60 @@ function App() {
             />
           </div>
 
-          {/* Right Column: PreK, Math, KG */}
+          {/* Right Column: Learning Sections */}
           <div className="right-section">
             {/* Pre-K Section */}
-            <div className="section-card" onClick={() => toggleSection('Pre-K')}>
-              <h2>Early Education {expandedSection === 'Pre-K' ? '▲' : '▼'}</h2>
+            <div className="section-card prek-card" onClick={() => toggleSection('Pre-K')}>
+              <div className="card-header">
+                <div className="card-icon">🎨</div>
+                <div className="card-title">
+                  <h2>Early Education (Pre-K)</h2>
+                  <p>Ages 3-5 • Foundational Learning</p>
+                </div>
+                <div className="card-arrow">{expandedSection === 'Pre-K' ? '▲' : '▼'}</div>
+              </div>
               {expandedSection === 'Pre-K' && (
                 <div className="dropdown-content">
                   {prekOptions.map(opt => (
-                    <a key={opt} onClick={() => handleNavigationClick(opt)}>{opt}</a>
+                    <a key={opt} onClick={(e) => { e.stopPropagation(); handleNavigationClick(opt); }}>
+                      <span className="option-icon">✓</span> {opt}
+                    </a>
                   ))}
                 </div>
               )}
             </div>
 
             {/* Math Section */}
-            <div className="section-card" onClick={() => toggleSection('Math')}>
-              <h2>Math {expandedSection === 'Math' ? '▲' : '▼'}</h2>
+            <div className="section-card math-card" onClick={() => toggleSection('Math')}>
+              <div className="card-header">
+                <div className="card-icon">🔢</div>
+                <div className="card-title">
+                  <h2>Mathematics Practice</h2>
+                  <p>All Grades • Interactive Exercises</p>
+                </div>
+                <div className="card-arrow">{expandedSection === 'Math' ? '▲' : '▼'}</div>
+              </div>
               {expandedSection === 'Math' && (
                 <div className="dropdown-content">
                   {mathOptions.map(opt => (
-                    <a key={opt} onClick={() => handleNavigationClick(opt)}>{opt}</a>
+                    <a key={opt} onClick={(e) => { e.stopPropagation(); handleNavigationClick(opt); }}>
+                      <span className="option-icon">✓</span> {opt}
+                    </a>
                   ))}
                 </div>
               )}
             </div>
 
             {/* Kindergarten Section */}
-            <div className="section-card" onClick={() => handleNavigationClick('Kindergarten')}>
-              <h2>Kindergarten</h2>
+            <div className="section-card kg-card" onClick={() => handleNavigationClick('Kindergarten')}>
+              <div className="card-header">
+                <div className="card-icon">📖</div>
+                <div className="card-title">
+                  <h2>Kindergarten Ready</h2>
+                  <p>Ages 5-6 • School Preparation</p>
+                </div>
+                <div className="card-arrow">→</div>
+              </div>
             </div>
           </div>
         </div>

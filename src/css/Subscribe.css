@@ -1,33 +1,386 @@
-.subscribe-container {
+/* Subscribe Page Styles */
+
+.subscribe-page {
+    width: 100%;
+    min-height: 80vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    padding: 50px 30px;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+.subscribe-container {
+    display: grid;
+    grid-template-columns: 1fr 1.8fr;
+    gap: 50px;
+    max-width: 1400px;
+    width: 100%;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 25px;
+    padding: 50px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+    animation: fadeInUp 0.6s ease-out;
+    border: 3px solid #e9ecef;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.subscribe-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 35px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    color: white;
+}
+
+.subscribe-info h2 {
+    color: white;
+    font-size: 2.2em;
+    margin-bottom: 25px;
+    font-family: 'Baloo Bhai 2', cursive;
+    font-weight: 800;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.subscribe-info p {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 1.1em;
+    line-height: 1.8;
+    margin-bottom: 25px;
+    font-weight: 500;
+}
+
+.benefits-list {
+    margin-top: 20px;
+}
+
+.benefits-list p {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 1.1em;
+    line-height: 1.8;
+    margin-bottom: 12px;
+    font-weight: 600;
+    padding-left: 10px;
+    border-left: 3px solid #FFE66D;
 }
 
 .subscribe-form-container {
-    width: 80%; /* Adjust the width as needed */
-    max-width: 400px; /* Set a maximum width */
+    padding: 20px;
+}
+
+.subscribe-form-container h2 {
+    color: #2d3436;
+    font-size: 2em;
+    margin-bottom: 30px;
+    text-align: left;
+    font-family: 'Baloo Bhai 2', cursive;
+    font-weight: 800;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.subscribe-form-container h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
 }
 
 .subscribe-form {
-    /* Add your form styles here */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-/* Adjust the input width */
-.subscribe-form input[type="text"],
-.subscribe-form input[type="email"],
-.subscribe-form select {
-    width: 100%; /* Set width to 100% */
-    max-width: 100%; /* Ensure the input doesn't exceed the container width */
-    padding: 8px; /* Add padding as needed */
-    margin-bottom: 10px; /* Add margin as needed */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-/* Adjust the button width */
-.subscribe-form button[type="submit"] {
-    width: 100%; /* Set width to 100% */
-    max-width: 100%; /* Ensure the button doesn't exceed the container width */
-    padding: 10px 20px; /* Add padding as needed */
-    margin-top: 10px; /* Add margin as needed */
+.form-group label {
+    color: #2d3436;
+    font-weight: 700;
+    font-size: 1.05em;
+    font-family: 'Baloo Bhai 2', cursive;
+}
+
+.form-group input,
+.form-group select {
+    padding: 15px 18px;
+    border: 2px solid #dee2e6;
+    border-radius: 12px;
+    font-size: 1em;
+    font-family: 'Baloo Bhai 2', sans-serif;
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+}
+
+.form-group select {
+    cursor: pointer;
+}
+
+/* React-Select Styling */
+.country-select .select__control {
+    padding: 8px 10px;
+    border: 2px solid #dee2e6;
+    border-radius: 12px;
+    font-size: 1em;
+    font-family: 'Baloo Bhai 2', sans-serif;
+    background-color: #f8f9fa;
+    box-shadow: none;
+    transition: all 0.3s ease;
+}
+
+.country-select .select__control:hover {
+    border-color: #667eea;
+}
+
+.country-select .select__control--is-focused {
+    border-color: #667eea;
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.country-select .select__menu {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.country-select .select__option {
+    font-family: 'Baloo Bhai 2', sans-serif;
+    padding: 12px 15px;
+}
+
+.country-select .select__option--is-focused {
+    background-color: rgba(102, 126, 234, 0.1);
+}
+
+.country-select .select__option--is-selected {
+    background-color: #667eea;
+}
+
+.form-group button {
+    padding: 16px 45px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.15em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    font-family: 'Baloo Bhai 2', cursive;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group button:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+}
+
+.form-group button:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.subscription-success {
+    text-align: center;
+    padding: 60px 40px;
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    border-radius: 20px;
+    border: 3px solid #81c784;
+    animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+    0% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.subscription-success h3 {
+    color: #2e7d32;
+    font-size: 2em;
+    margin-bottom: 20px;
+    font-family: 'Baloo Bhai 2', cursive;
+    font-weight: 800;
+}
+
+.success-message {
+    background-color: #fff;
+    color: #2e7d32;
+    padding: 20px 30px;
+    border-radius: 12px;
+    border-left: 4px solid #2e7d32;
+    font-weight: 600;
+    font-size: 1.1em;
+    line-height: 1.6;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1024px) {
+    .subscribe-container {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        padding: 30px;
+    }
+
+    .subscribe-info {
+        text-align: center;
+    }
+
+    .benefits-list p {
+        border-left: none;
+        border-bottom: 3px solid #FFE66D;
+        padding-left: 0;
+        padding-bottom: 8px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .subscribe-page {
+        padding: 20px 10px;
+    }
+
+    .subscribe-container {
+        padding: 25px 20px;
+        gap: 25px;
+    }
+
+    .subscribe-info h2 {
+        font-size: 1.6em;
+    }
+
+    .subscribe-info p {
+        font-size: 1em;
+    }
+
+    .subscribe-form-container h2 {
+        font-size: 1.5em;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 10px 12px;
+        font-size: 0.95em;
+    }
+
+    .form-group button {
+        padding: 12px 30px;
+        font-size: 1.1em;
+    }
+
+    .subscription-success {
+        padding: 40px 25px;
+    }
+
+    .subscription-success h3 {
+        font-size: 1.6em;
+    }
+
+    .success-message {
+        padding: 15px 20px;
+        font-size: 1em;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .subscribe-container {
+        padding: 20px 15px;
+        border-radius: 15px;
+    }
+
+    .subscribe-info {
+        padding: 15px;
+    }
+
+    .subscribe-info h2 {
+        font-size: 1.4em;
+    }
+
+    .subscribe-info p {
+        font-size: 0.95em;
+    }
+
+    .benefits-list p {
+        font-size: 1em;
+    }
+
+    .subscribe-form-container {
+        padding: 10px;
+    }
+
+    .subscribe-form-container h2 {
+        font-size: 1.3em;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        gap: 6px;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+
+    .form-group button {
+        padding: 12px 25px;
+        font-size: 1em;
+    }
+
+    .subscription-success {
+        padding: 30px 20px;
+    }
+
+    .subscription-success h3 {
+        font-size: 1.4em;
+    }
+
+    .success-message {
+        padding: 12px 15px;
+        font-size: 0.95em;
+    }
 }
