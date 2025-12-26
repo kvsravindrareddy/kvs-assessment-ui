@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import jsPDF from 'jspdf';
 import CONFIG from '../../Config';
 import '../../css/AssessmentFlow.css';
 
@@ -111,13 +112,12 @@ export default function ReadingFlow() {
     return 'en-US'; // fallback English
   };
 
-  // 🔊 Play everything (story + current Q + options)
+  // 🔊 Play story + current Q + options
   const playAll = () => {
     if (!storyDetails) return;
     window.speechSynthesis.cancel();
 
     const queue = [];
-
     if (storyDetails.content) queue.push(storyDetails.content);
 
     const currentQ = storyDetails.questions?.[questionIndex];
@@ -141,6 +141,73 @@ export default function ReadingFlow() {
     };
 
     speakNext(0);
+  };
+
+  // 📄 Export story content + current question + options
+  const exportPDF = () => {
+    if (!storyDetails) return;
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text(storyDetails.title || 'Story', 10, 20);
+
+    doc.setFontSize(12);
+    let y = 30;
+    const lines = doc.splitTextToSize(storyDetails.content || '', 180);
+    doc.text(lines, 10, y);
+    y += lines.length * 7 + 10;
+
+    const question = storyDetails.questions[questionIndex];
+    doc.setFontSize(16);
+    doc.text(`Question ${questionIndex + 1}`, 10, y);
+    y += 10;
+
+    doc.setFontSize(12);
+    const qLines = doc.splitTextToSize(question.name, 180);
+    doc.text(qLines, 10, y);
+    y += qLines.length * 7 + 5;
+
+    Object.entries(question.options).forEach(([key, value]) => {
+      const optLines = doc.splitTextToSize(`${key}: ${value}`, 180);
+      doc.text(optLines, 10, y);
+      y += optLines.length * 7 + 3;
+    });
+
+    doc.save(`Story_${storyDetails.title || 'Untitled'}_Q${questionIndex + 1}.pdf`);
+  };
+
+  // 📄 Preview story + question PDF
+  const previewPDF = () => {
+    if (!storyDetails) return;
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text(storyDetails.title || 'Story', 10, 20);
+
+    doc.setFontSize(12);
+    let y = 30;
+    const lines = doc.splitTextToSize(storyDetails.content || '', 180);
+    doc.text(lines, 10, y);
+    y += lines.length * 7 + 10;
+
+    const question = storyDetails.questions[questionIndex];
+    doc.setFontSize(16);
+    doc.text(`Question ${questionIndex + 1}`, 10, y);
+    y += 10;
+
+    doc.setFontSize(12);
+    const qLines = doc.splitTextToSize(question.name, 180);
+    doc.text(qLines, 10, y);
+    y += qLines.length * 7 + 5;
+
+    Object.entries(question.options).forEach(([key, value]) => {
+      const optLines = doc.splitTextToSize(`${key}: ${value}`, 180);
+      doc.text(optLines, 10, y);
+      y += optLines.length * 7 + 3;
+    });
+
+    const blob = doc.output('bloburl');
+    window.open(blob);
   };
 
   return (
@@ -206,8 +273,9 @@ export default function ReadingFlow() {
           <h2>{storyDetails.title}</h2>
           <p className="story-content">{storyDetails.content}</p>
 
-          {/* 🔊 Single Play Icon for Everything */}
           <button className="play-btn" onClick={playAll}>🔊 Play</button>
+          <button onClick={exportPDF}>📄 Download PDF</button>
+          <button onClick={previewPDF}>🖨 Preview & Print</button>
 
           {completed ? (
             <div className="assessment-done">
@@ -267,6 +335,7 @@ export default function ReadingFlow() {
                   Submit Answer
                 </button>
               </div>
+              
             )
           )}
         </div>

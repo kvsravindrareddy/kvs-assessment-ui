@@ -226,3 +226,174 @@
 .read-btn:hover {
   background-color: #1e40af;
 }
+
+/* Add to AssessmentFlow.css */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-section, .print-section * {
+    visibility: visible;
+  }
+
+  .print-section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
+
+/* Responsive Design for Assessment Flow */
+@media screen and (max-width: 768px) {
+  .assessment-container {
+    margin: 10px auto;
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .user-info-form input,
+  .user-info-form select {
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  .user-info-form button {
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  .question-box h3 {
+    font-size: 18px;
+  }
+
+  .options-list label {
+    font-size: 15px;
+    padding: 8px 12px;
+  }
+
+  .submit-btn {
+    padding: 10px 16px;
+    font-size: 16px;
+    width: 100%;
+  }
+
+  .story-grid,
+  .story-list-inline {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .story-card {
+    padding: 12px;
+  }
+
+  .story-card h4 {
+    font-size: 15px;
+  }
+
+  .story-card p {
+    font-size: 13px;
+  }
+
+  .read-btn {
+    width: 100%;
+    padding: 8px 12px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .assessment-container {
+    margin: 5px;
+    padding: 12px;
+  }
+
+  .user-info-form {
+    gap: 12px;
+  }
+
+  .user-info-form input,
+  .user-info-form select {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .user-info-form button {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .question-box h3 {
+    font-size: 16px;
+  }
+
+  .options-list {
+    gap: 8px;
+  }
+
+  .options-list label {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+
+  .submit-btn {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .score-header {
+    font-size: 18px;
+  }
+
+  .assessment-done {
+    padding: 20px 10px;
+    font-size: 16px;
+  }
+
+  .result-summary {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .story-card h4 {
+    font-size: 14px;
+  }
+
+  .story-card p {
+    font-size: 12px;
+  }
+}
+
+/* Touch-friendly improvements for assessment */
+@media (hover: none) and (pointer: coarse) {
+  .options-list label {
+    min-height: 44px;
+    padding: 12px 14px;
+  }
+
+  .user-info-form button,
+  .submit-btn,
+  .read-btn {
+    min-height: 44px;
+  }
+
+  .options-list input[type='radio'] {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+  }
+}
+
+/* iPad specific */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .assessment-container {
+    max-width: 90%;
+    padding: 20px;
+  }
+
+  .story-grid,
+  .story-list-inline {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

@@ -59,3 +59,83 @@ footer {
 .icon:hover {
   transform: scale(1.1);
 }
+
+/* Responsive Footer */
+@media screen and (max-width: 768px) {
+  footer {
+    padding: 15px;
+    font-size: 1em;
+    margin-top: 30px;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .footer-section {
+    flex: 1 1 100%;
+    min-width: 100%;
+    text-align: center;
+  }
+
+  .footer-section h3 {
+    font-size: 16px;
+  }
+
+  .footer-section a {
+    font-size: 14px;
+  }
+
+  .social-icons {
+    justify-content: center;
+  }
+
+  .icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  footer {
+    padding: 12px;
+    font-size: 0.9em;
+    margin-top: 20px;
+  }
+
+  .footer-section h3 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .footer-section a {
+    font-size: 12px;
+    margin: 3px 0;
+  }
+
+  .social-icons {
+    gap: 8px;
+  }
+
+  .icon {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Touch-friendly footer */
+@media (hover: none) and (pointer: coarse) {
+  .footer-section a {
+    padding: 8px 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon {
+    width: 36px;
+    height: 36px;
+  }
+}

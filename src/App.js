@@ -26,7 +26,7 @@ function App() {
 
   const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money', 'Assessment Flow'];
   const prekOptions = ['Alphabets', 'Numbers', 'Shapes', 'Colors'];
-  const navigationOptions = ['Home', 'Reading', 'AI', 'News', 'Contact', 'About Us', 'Subscribe'];
+  const navigationOptions = ['Home', 'Reading', 'AI', 'Contact', 'About Us', 'Subscribe'];
 
   useEffect(() => {
     getLocation(setLocation);
@@ -130,7 +130,6 @@ function App() {
       {activeSection === 'Subscribe' && <Subscribe />}
       {activeSection === 'Contact' && <Contactus />}
       {activeSection === 'About Us' && <AboutUs />}
-      {activeSection === 'News' && <News/>}
       {/* Dynamically show AssessmentFlow with selected values */}
       {activeSection === 'AssessmentFlow' && (
         <AssessmentFlow preSelectedCategory={selectedGrade} preSelectedType={selectedSubject} />

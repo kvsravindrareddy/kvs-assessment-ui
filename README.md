@@ -1,4 +1,27 @@
-# Getting Started with Create React App
+# KVS Assessment UI
+
+An educational assessment platform built with React, optimized for web and mobile devices.
+
+## 📱 Mobile & Cross-Platform Support
+
+This application is **fully responsive** and works seamlessly across:
+- ✅ **Web Browsers** (Desktop & Laptop)
+- ✅ **Android** devices (phones & tablets)
+- ✅ **iOS** devices (iPhone & iPad)
+- ✅ **Progressive Web App (PWA)** - Install on any device!
+
+### Key Features
+- 📱 Touch-optimized interface
+- 🎨 Responsive design for all screen sizes
+- 📴 Offline support via Service Worker
+- 🏠 Installable as a native-like app
+- ⚡ Fast and optimized performance
+
+For detailed mobile responsiveness information, see:
+- [Mobile Responsive Guide](./MOBILE_RESPONSIVE_GUIDE.md)
+- [Responsive Quick Start](./RESPONSIVE_QUICK_START.md)
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
