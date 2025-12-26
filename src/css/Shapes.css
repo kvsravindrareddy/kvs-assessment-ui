@@ -1,0 +1,232 @@
+/* Shapes Module Styles */
+
+.shapes-container {
+  width: 100%;
+  min-height: 80vh;
+  padding: 30px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  font-family: 'Baloo Bhai 2', cursive;
+}
+
+.shapes-header {
+  text-align: center;
+  margin-bottom: 40px;
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.shapes-header h2 {
+  font-size: 2.5em;
+  color: #2d3436;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.shapes-header p {
+  font-size: 1.2em;
+  color: #636e72;
+}
+
+.shapes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 25px;
+  max-width: 1400px;
+  margin: 0 auto 40px;
+}
+
+.shape-card {
+  background: white;
+  border-radius: 20px;
+  padding: 30px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 3px solid transparent;
+  animation: fadeInUp 0.5s ease-out backwards;
+}
+
+.shape-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border-color: var(--shape-color);
+}
+
+.shape-card.selected {
+  border-color: var(--shape-color);
+  background: linear-gradient(135deg, white 0%, var(--shape-color) 5%);
+  transform: scale(1.08);
+}
+
+.shape-icon {
+  font-size: 5em;
+  margin-bottom: 15px;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.shape-card:hover .shape-icon {
+  animation: spin 0.6s ease-in-out;
+}
+
+.shape-name {
+  font-size: 1.4em;
+  font-weight: 700;
+  color: #2d3436;
+  margin-bottom: 8px;
+}
+
+.shape-info {
+  font-size: 1em;
+  color: #636e72;
+  font-weight: 500;
+}
+
+.shape-details {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 30px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  animation: slideInUp 0.5s ease-out;
+}
+
+.shape-details h3 {
+  font-size: 2em;
+  color: #2d3436;
+  margin-bottom: 20px;
+}
+
+.shape-details p {
+  font-size: 1.3em;
+  color: #636e72;
+  line-height: 1.8;
+  margin-bottom: 25px;
+}
+
+.replay-button {
+  padding: 15px 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.2em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  font-family: 'Baloo Bhai 2', cursive;
+}
+
+.replay-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.6);
+}
+
+.replay-button:active {
+  transform: translateY(-1px);
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .shapes-container {
+    padding: 20px;
+  }
+
+  .shapes-header h2 {
+    font-size: 2em;
+  }
+
+  .shapes-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+  }
+
+  .shape-card {
+    padding: 20px 15px;
+  }
+
+  .shape-icon {
+    font-size: 3.5em;
+  }
+
+  .shape-name {
+    font-size: 1.2em;
+  }
+
+  .shape-details {
+    padding: 20px;
+  }
+
+  .shape-details h3 {
+    font-size: 1.5em;
+  }
+
+  .shape-details p {
+    font-size: 1.1em;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .shapes-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+
+  .shape-icon {
+    font-size: 3em;
+  }
+}

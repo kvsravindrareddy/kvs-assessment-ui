@@ -24,8 +24,9 @@ function App() {
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
 
-  const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money', 'Assessment Flow'];
   const prekOptions = ['Alphabets', 'Numbers', 'Shapes', 'Colors'];
+  const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money', 'Assessment Flow'];
+
   const navigationOptions = [
     { label: 'Home', icon: '🏠' },
     { label: 'Reading', icon: '📚' },
@@ -91,74 +92,130 @@ function App() {
         ))}
       </nav>
 
-      {/* Home Content Sections */}
+      {/* Quick Access Tools - Visible on Home Page */}
       {activeSection === 'Home' && (
-        <div className="home-container">
-          <div className="left-grade-section">
+        <div className="quick-access-section">
+          <h2 className="quick-access-title">⚡ Quick Start - Jump Right In!</h2>
+          <div className="quick-tools-grid">
+            <div className="quick-tool-card ai-tool" onClick={() => handleNavigationClick('AI')}>
+              <div className="tool-icon">🤖</div>
+              <h3>AI Assistant</h3>
+              <p>Ask questions & get instant help</p>
+            </div>
+            <div className="quick-tool-card reading-tool" onClick={() => handleNavigationClick('Reading')}>
+              <div className="tool-icon">📚</div>
+              <h3>Reading Practice</h3>
+              <p>Improve reading skills</p>
+            </div>
+            <div className="quick-tool-card math-tool" onClick={() => handleNavigationClick('Random Assessment')}>
+              <div className="tool-icon">🔢</div>
+              <h3>Math Quiz</h3>
+              <p>Test your math skills</p>
+            </div>
+            <div className="quick-tool-card game-tool" onClick={() => handleNavigationClick('Assessment Flow')}>
+              <div className="tool-icon">🎯</div>
+              <h3>Practice Tests</h3>
+              <p>Grade-level assessments</p>
+            </div>
+            <div className="quick-tool-card alphabet-tool" onClick={() => handleNavigationClick('Alphabets')}>
+              <div className="tool-icon">🔤</div>
+              <h3>ABC Learning</h3>
+              <p>Learn alphabets & phonics</p>
+            </div>
+            <div className="quick-tool-card numbers-tool" onClick={() => handleNavigationClick('Numbers')}>
+              <div className="tool-icon">🔢</div>
+              <h3>Number Games</h3>
+              <p>Count & learn numbers</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Home Content Sections - Learning Trees */}
+      {activeSection === 'Home' && (
+        <div className="learning-garden">
+          <h2 className="garden-title">🌳 Learning Garden - Pick Your Path! 🌱</h2>
+
+          <div className="trees-container">
+            {/* Pre-K Tree */}
+            <div className="learning-tree prek-tree">
+              <div className="tree-trunk">
+                <div className="trunk-label">🎨 Pre-K</div>
+              </div>
+              <div className="tree-branches">
+                {prekOptions.map((opt, index) => (
+                  <div
+                    key={opt}
+                    className={`leaf leaf-${index + 1}`}
+                    onClick={() => handleNavigationClick(opt)}
+                  >
+                    <span className="leaf-emoji">🍃</span>
+                    <span className="leaf-text">{opt}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Math Practice Tree */}
+            <div className="learning-tree math-tree">
+              <div className="tree-trunk">
+                <div className="trunk-label">🔢 Math</div>
+              </div>
+              <div className="tree-branches">
+                {mathOptions.map((opt, index) => (
+                  <div
+                    key={opt}
+                    className={`leaf leaf-${index + 1}`}
+                    onClick={() => handleNavigationClick(opt)}
+                  >
+                    <span className="leaf-emoji">🍃</span>
+                    <span className="leaf-text">{opt}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Reading Tree */}
+            <div className="learning-tree reading-tree">
+              <div className="tree-trunk">
+                <div className="trunk-label">📚 Reading</div>
+              </div>
+              <div className="tree-branches">
+                <div
+                  className="leaf leaf-1"
+                  onClick={() => handleNavigationClick('Reading')}
+                >
+                  <span className="leaf-emoji">🍃</span>
+                  <span className="leaf-text">Stories</span>
+                </div>
+                <div
+                  className="leaf leaf-2"
+                  onClick={() => handleNavigationClick('Alphabets')}
+                >
+                  <span className="leaf-emoji">🍃</span>
+                  <span className="leaf-text">ABC</span>
+                </div>
+                <div
+                  className="leaf leaf-3"
+                  onClick={() => handleNavigationClick('Reading')}
+                >
+                  <span className="leaf-emoji">🍃</span>
+                  <span className="leaf-text">Phonics</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* All Grades Tree - Large tree showing all grade levels */}
+          <div className="mega-tree-section">
+            <h3 className="mega-tree-title">📚 Grade Levels - Choose Your Grade & Subject 🎯</h3>
             <LoadGradeData
               gradeData={gradeData}
               setGradeData={setGradeData}
               onClick={toggleSection}
               expandedSection={expandedSection}
-              onSubjectClick={handleSubjectClick} // << new
+              onSubjectClick={handleSubjectClick}
             />
-          </div>
-
-          {/* Right Column: Learning Sections */}
-          <div className="right-section">
-            {/* Pre-K Section */}
-            <div className="section-card prek-card" onClick={() => toggleSection('Pre-K')}>
-              <div className="card-header">
-                <div className="card-icon">🎨</div>
-                <div className="card-title">
-                  <h2>Early Education (Pre-K)</h2>
-                  <p>Ages 3-5 • Foundational Learning</p>
-                </div>
-                <div className="card-arrow">{expandedSection === 'Pre-K' ? '▲' : '▼'}</div>
-              </div>
-              {expandedSection === 'Pre-K' && (
-                <div className="dropdown-content">
-                  {prekOptions.map(opt => (
-                    <a key={opt} onClick={(e) => { e.stopPropagation(); handleNavigationClick(opt); }}>
-                      <span className="option-icon">✓</span> {opt}
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Math Section */}
-            <div className="section-card math-card" onClick={() => toggleSection('Math')}>
-              <div className="card-header">
-                <div className="card-icon">🔢</div>
-                <div className="card-title">
-                  <h2>Mathematics Practice</h2>
-                  <p>All Grades • Interactive Exercises</p>
-                </div>
-                <div className="card-arrow">{expandedSection === 'Math' ? '▲' : '▼'}</div>
-              </div>
-              {expandedSection === 'Math' && (
-                <div className="dropdown-content">
-                  {mathOptions.map(opt => (
-                    <a key={opt} onClick={(e) => { e.stopPropagation(); handleNavigationClick(opt); }}>
-                      <span className="option-icon">✓</span> {opt}
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Kindergarten Section */}
-            <div className="section-card kg-card" onClick={() => handleNavigationClick('Kindergarten')}>
-              <div className="card-header">
-                <div className="card-icon">📖</div>
-                <div className="card-title">
-                  <h2>Kindergarten Ready</h2>
-                  <p>Ages 5-6 • School Preparation</p>
-                </div>
-                <div className="card-arrow">→</div>
-              </div>
-            </div>
           </div>
         </div>
       )}

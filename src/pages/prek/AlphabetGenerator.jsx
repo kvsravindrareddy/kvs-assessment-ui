@@ -12,6 +12,8 @@ const AlphabetGenerator = ({ type }) => {
 
   const speakLetter = (letter) => {
     const synth = window.speechSynthesis;
+    // Cancel any ongoing speech first
+    synth.cancel();
     const utterance = new SpeechSynthesisUtterance(letter);
     synth.speak(utterance);
   };
