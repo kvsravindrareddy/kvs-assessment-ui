@@ -1,0 +1,206 @@
+/* Sudoku Game Styles */
+
+.sudoku-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 30px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border-radius: 25px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+  font-family: 'Baloo Bhai 2', cursive;
+}
+
+.sudoku-header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.sudoku-header h2 {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.sudoku-header p {
+  font-size: 1.1em;
+  opacity: 0.95;
+}
+
+.difficulty-selector, .game-info {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.difficulty-button, .new-game-button {
+  padding: 10px 25px;
+  background: white;
+  color: #f5576c;
+  border: 3px solid transparent;
+  border-radius: 50px;
+  font-size: 1.1em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Baloo Bhai 2', cursive;
+}
+
+.difficulty-button.active {
+  background: #f5576c;
+  color: white;
+  border-color: white;
+}
+
+.difficulty-button:hover, .new-game-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.info-item {
+  background: white;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-weight: 700;
+  color: #f5576c;
+}
+
+.sudoku-board {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.sudoku-row {
+  display: flex;
+}
+
+.sudoku-cell {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2em;
+  font-weight: 800;
+  border: 2px solid #e9ecef;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.sudoku-cell:hover:not(.correct) {
+  background: #f8f9fa;
+  transform: scale(1.05);
+}
+
+.sudoku-cell.selected {
+  background: #fff3cd;
+  border-color: #ffc107;
+}
+
+.sudoku-cell.correct {
+  color: #2d3436;
+}
+
+.sudoku-cell.incorrect {
+  color: #e74c3c;
+}
+
+.sudoku-cell.empty {
+  color: #95a5a6;
+}
+
+.number-pad {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+}
+
+.number-pad h3 {
+  color: #2d3436;
+  margin-bottom: 15px;
+}
+
+.number-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.number-button {
+  width: 60px;
+  height: 60px;
+  font-size: 2em;
+  font-weight: 800;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.number-button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.completion-message {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-radius: 15px;
+  padding: 30px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.completion-message h2 {
+  color: #2e7d32;
+  font-size: 2.5em;
+  margin-bottom: 15px;
+}
+
+.completion-message p {
+  color: #2e7d32;
+  font-size: 1.3em;
+  margin-bottom: 20px;
+}
+
+.play-again-button {
+  padding: 15px 40px;
+  background: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.2em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Baloo Bhai 2', cursive;
+}
+
+.play-again-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(46, 125, 50, 0.4);
+}
+
+@media screen and (max-width: 600px) {
+  .sudoku-cell {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5em;
+  }
+
+  .number-button {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5em;
+  }
+}

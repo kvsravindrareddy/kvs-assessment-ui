@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../../css/Shapes.css';
 
-const Shapes = () => {
+const Shapes = ({ audioEnabled = true }) => {
   const [selectedShape, setSelectedShape] = useState(null);
 
   const shapes = [
@@ -20,16 +20,18 @@ const Shapes = () => {
   ];
 
   const speakShape = (shapeName, sides) => {
-    const synth = window.speechSynthesis;
-    // Cancel any ongoing speech first
-    synth.cancel();
-    let text = `${shapeName}.`;
-    if (sides > 0) {
-      text += ` It has ${sides} sides.`;
+    if (audioEnabled) {
+      const synth = window.speechSynthesis;
+      // Cancel any ongoing speech first
+      synth.cancel();
+      let text = `${shapeName}.`;
+      if (sides > 0) {
+        text += ` It has ${sides} sides.`;
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.8;
+      synth.speak(utterance);
     }
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.8;
-    synth.speak(utterance);
   };
 
   const handleShapeClick = (shape) => {

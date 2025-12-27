@@ -1,0 +1,340 @@
+/* Compare Numbers Game Styles */
+
+.compare-numbers-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px;
+  background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+  border-radius: 25px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+  font-family: 'Baloo Bhai 2', cursive;
+}
+
+.compare-header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.compare-header h2 {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.compare-header p {
+  font-size: 1.1em;
+  opacity: 0.95;
+}
+
+.level-selector {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.level-button {
+  padding: 10px 25px;
+  background: white;
+  color: #d299c2;
+  border: 3px solid transparent;
+  border-radius: 50px;
+  font-size: 1.1em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Baloo Bhai 2', cursive;
+}
+
+.level-button.active {
+  background: #d299c2;
+  color: white;
+  border-color: white;
+}
+
+.level-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.game-stats {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.stat-item {
+  background: white;
+  padding: 12px 25px;
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+  font-size: 1em;
+  color: #636e72;
+  margin-right: 10px;
+}
+
+.stat-value {
+  font-size: 1.5em;
+  font-weight: 800;
+  color: #d299c2;
+}
+
+.reset-button {
+  padding: 10px 25px;
+  background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Baloo Bhai 2', cursive;
+}
+
+.reset-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(210, 153, 194, 0.4);
+}
+
+.game-card {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.comparison-display {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.comparison-display h3 {
+  color: #2d3436;
+  font-size: 1.8em;
+  margin-bottom: 30px;
+  font-weight: 800;
+}
+
+.numbers-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.number-box {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+  border-radius: 20px;
+  font-size: 3.5em;
+  font-weight: 800;
+  color: white;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  animation: popIn 0.5s ease-out;
+}
+
+.symbol-box {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  border-radius: 15px;
+  font-size: 3em;
+  font-weight: 800;
+  color: white;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.symbol-options {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.symbol-button {
+  padding: 20px 30px;
+  background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+  color: white;
+  border: 3px solid transparent;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Baloo Bhai 2', cursive;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 150px;
+}
+
+.symbol-icon {
+  font-size: 3em;
+  font-weight: 800;
+}
+
+.symbol-label {
+  font-size: 1.1em;
+  font-weight: 700;
+}
+
+.symbol-button:hover:not(:disabled) {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.symbol-button.correct {
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  animation: correctPulse 0.5s ease-out;
+}
+
+.symbol-button.incorrect {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  animation: shake 0.5s ease-out;
+}
+
+.symbol-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.feedback-message {
+  margin-top: 20px;
+  padding: 20px 25px;
+  border-radius: 15px;
+  font-size: 1.4em;
+  font-weight: 700;
+  text-align: center;
+  animation: bounceIn 0.5s ease-out;
+}
+
+.feedback-message.success {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  color: #2e7d32;
+  border: 3px solid #81c784;
+}
+
+.feedback-message.error {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  color: #c62828;
+  border: 3px solid #e57373;
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes correctPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  75% {
+    transform: translateX(10px);
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .compare-numbers-container {
+    padding: 20px;
+  }
+
+  .compare-header h2 {
+    font-size: 2em;
+  }
+
+  .numbers-row {
+    gap: 10px;
+  }
+
+  .number-box {
+    width: 90px;
+    height: 90px;
+    font-size: 2.5em;
+  }
+
+  .symbol-box {
+    width: 60px;
+    height: 60px;
+    font-size: 2.5em;
+  }
+
+  .symbol-options {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .symbol-button {
+    min-width: 100%;
+    padding: 15px 20px;
+  }
+
+  .symbol-icon {
+    font-size: 2.5em;
+  }
+
+  .symbol-label {
+    font-size: 1em;
+  }
+}

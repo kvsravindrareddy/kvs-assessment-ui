@@ -6,7 +6,7 @@ import { getLocation } from './utils/location';
 import Contactus from './pages/admin/Contactus';
 import AboutUs from './pages/admin/AboutUs';
 import Subscribe from './pages/admin/Subscribe';
-import SpeakComponent from './pages/ai/SpeakComponent';
+import AIHub from './pages/ai/AIHub';
 import Footer from './footer';
 import EarlyEducation from './components/EarlyEducation';
 import AssessmentComponents from './components/AssessmentComponents';
@@ -14,6 +14,7 @@ import LoadGradeData from './pages/config/LoadGradeData';
 import News from './pages/news/News';
 import AssessmentFlow from './pages/random/AssessmentFlow';
 import ReadingFlow from './pages/reading/ReadingFlow';
+import GamesHub from './pages/games/GamesHub';
 
 
 function App() {
@@ -23,13 +24,42 @@ function App() {
   const [gradeData, setGradeData] = useState({});
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [selectedGame, setSelectedGame] = useState(null);
+  const [audioEnabled, setAudioEnabled] = useState(true);
 
   const prekOptions = ['Alphabets', 'Numbers', 'Shapes', 'Colors'];
   const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money', 'Assessment Flow'];
 
+  // All searchable features
+  const allFeatures = [
+    { name: 'Alphabets', category: 'Pre-K', description: 'Learn ABC with words and emojis', icon: '🔤', keywords: ['abc', 'letters', 'alphabet', 'a-z'], navigateTo: 'Alphabets', gameId: null },
+    { name: 'Numbers', category: 'Pre-K', description: 'Learn numbers 1-1000 with voice', icon: '🔢', keywords: ['count', 'counting', 'numbers', 'digits', '123'], navigateTo: 'Numbers', gameId: null },
+    { name: 'Shapes', category: 'Pre-K', description: 'Learn different shapes', icon: '🔷', keywords: ['shapes', 'circle', 'square', 'triangle', 'geometry'], navigateTo: 'Shapes', gameId: null },
+    { name: 'Colors', category: 'Pre-K', description: 'Learn colors with examples', icon: '🎨', keywords: ['colors', 'red', 'blue', 'green', 'rainbow'], navigateTo: 'Colors', gameId: null },
+    { name: 'Games', category: 'Games', description: 'Educational games hub', icon: '🎮', keywords: ['games', 'play', 'fun', 'activities'], navigateTo: 'Games', gameId: null },
+    { name: 'Sudoku', category: 'Games', description: '4x4 logic puzzle', icon: '🧩', keywords: ['sudoku', 'puzzle', 'logic', 'brain'], navigateTo: 'Games', gameId: 'sudoku' },
+    { name: 'Math Challenge', category: 'Games', description: 'Arithmetic practice', icon: '🔢', keywords: ['math', 'addition', 'subtraction', 'multiplication', 'division', 'arithmetic'], navigateTo: 'Games', gameId: 'math' },
+    { name: 'Number Match', category: 'Games', description: 'Match numbers with dots and words', icon: '🎯', keywords: ['number', 'match', 'dots', 'counting', 'recognition'], navigateTo: 'Games', gameId: 'numbermatch' },
+    { name: 'Skip Counting', category: 'Games', description: 'Count by 2s, 5s, and 10s', icon: '🔄', keywords: ['skip', 'counting', 'sequence', 'pattern', 'multiply'], navigateTo: 'Games', gameId: 'skipcounting' },
+    { name: 'Compare Numbers', category: 'Games', description: 'Greater than, less than, equal', icon: '⚖️', keywords: ['compare', 'greater', 'less', 'equal', 'bigger', 'smaller'], navigateTo: 'Games', gameId: 'compare' },
+    { name: 'Memory Match', category: 'Games', description: 'Find matching pairs', icon: '🎴', keywords: ['memory', 'match', 'pairs', 'concentration', 'cards'], navigateTo: 'Games', gameId: 'memory' },
+    { name: 'Drawing Board', category: 'Games', description: 'Create artwork', icon: '🎨', keywords: ['draw', 'paint', 'art', 'creative', 'colors', 'brush'], navigateTo: 'Games', gameId: 'drawing' },
+    { name: 'Reading', category: 'Reading', description: 'Reading practice and stories', icon: '📚', keywords: ['read', 'stories', 'books', 'comprehension'], navigateTo: 'Reading', gameId: null },
+    { name: 'AI', category: 'AI', description: 'AI assistant for help', icon: '🤖', keywords: ['ai', 'assistant', 'help', 'questions', 'chat'], navigateTo: 'AI', gameId: null },
+    { name: 'Random Assessment', category: 'Math', description: 'Random math problems', icon: '🎲', keywords: ['test', 'quiz', 'assessment', 'practice', 'random'], navigateTo: 'Random Assessment', gameId: null },
+    { name: 'Generate Numbers', category: 'Math', description: 'Number generation tool', icon: '🔢', keywords: ['generate', 'random', 'numbers'], navigateTo: 'Generate Numbers', gameId: null },
+    { name: 'Word Problems', category: 'Math', description: 'Math word problems', icon: '📝', keywords: ['word', 'problems', 'story', 'math'], navigateTo: 'Word Problems', gameId: null },
+    { name: 'Counting Money', category: 'Math', description: 'Learn to count money', icon: '💰', keywords: ['money', 'coins', 'dollars', 'cents', 'currency'], navigateTo: 'Counting Money', gameId: null },
+    { name: 'Assessment Flow', category: 'Assessment', description: 'Grade-level assessments', icon: '🎯', keywords: ['test', 'grade', 'assessment', 'exam', 'practice'], navigateTo: 'Assessment Flow', gameId: null }
+  ];
+
   const navigationOptions = [
     { label: 'Home', icon: '🏠' },
     { label: 'Reading', icon: '📚' },
+    { label: 'Games', icon: '🎮' },
     { label: 'AI', icon: '🤖' },
     { label: 'Contact', icon: '✉️' },
     { label: 'About Us', icon: 'ℹ️' },
@@ -54,6 +84,41 @@ function App() {
     setExpandedSection(prev => (prev === section ? null : section));
   };
 
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+
+    if (query.trim().length < 2) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    const lowerQuery = query.toLowerCase();
+    const filtered = allFeatures.filter(feature =>
+      feature.name.toLowerCase().includes(lowerQuery) ||
+      feature.description.toLowerCase().includes(lowerQuery) ||
+      feature.category.toLowerCase().includes(lowerQuery) ||
+      feature.keywords.some(keyword => keyword.includes(lowerQuery))
+    );
+
+    setSearchResults(filtered);
+    setShowSearchResults(true);
+  };
+
+  const handleSearchResultClick = (feature) => {
+    // If it's a game with a specific gameId, set it
+    if (feature.gameId) {
+      setSelectedGame(feature.gameId);
+    } else {
+      setSelectedGame(null);
+    }
+
+    handleNavigationClick(feature.navigateTo);
+    setSearchQuery('');
+    setShowSearchResults(false);
+    setSearchResults([]);
+  };
+
   return (
     <div id="mainpage" className={activeSection === 'Home' ? 'home' : ''}>
       {/* Header */}
@@ -65,15 +130,75 @@ function App() {
           <h1>🤖 AI-Powered Learning Adventures - Where Every Student Becomes a Star! ⭐✨</h1>
         </div>
         <div className="nav-right">
+          <div className="audio-toggle-container">
+            <button
+              className={`audio-toggle ${audioEnabled ? 'enabled' : 'disabled'}`}
+              onClick={() => setAudioEnabled(!audioEnabled)}
+              title={audioEnabled ? 'Audio ON - Click to disable' : 'Audio OFF - Click to enable'}
+            >
+              <span className="audio-icon">{audioEnabled ? '🔊' : '🔇'}</span>
+              <span className="audio-label">{audioEnabled ? 'Audio ON' : 'Audio OFF'}</span>
+            </button>
+          </div>
           <div className="buttons">
             <button className="login">Login</button>
             <button className="signup">Sign Up</button>
           </div>
           <div className="search">
-            <input type="text" placeholder="🔍 Ask AI..." />
-            <button className="search-icon">
+            <input
+              type="text"
+              placeholder="🔍 Ask AI..."
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              onFocus={() => searchQuery.length >= 2 && setShowSearchResults(true)}
+            />
+            <button className="search-icon" onClick={() => searchQuery.length >= 2 && setShowSearchResults(true)}>
               <img src={require('./images/search-icon.png')} alt="search" />
             </button>
+
+            {/* Search Results Backdrop */}
+            {showSearchResults && (
+              <div
+                className="search-backdrop"
+                onClick={() => setShowSearchResults(false)}
+              />
+            )}
+
+            {/* Search Results Dropdown */}
+            {showSearchResults && searchResults.length > 0 && (
+              <div className="search-results-dropdown">
+                <div className="search-results-header">
+                  <span>Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}</span>
+                  <button className="close-search" onClick={() => setShowSearchResults(false)}>✕</button>
+                </div>
+                <div className="search-results-list">
+                  {searchResults.map((result, index) => (
+                    <div
+                      key={index}
+                      className="search-result-item"
+                      onClick={() => handleSearchResultClick(result)}
+                    >
+                      <span className="result-icon">{result.icon}</span>
+                      <div className="result-info">
+                        <div className="result-name">{result.name}</div>
+                        <div className="result-description">{result.description}</div>
+                      </div>
+                      <span className="result-category">{result.category}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {showSearchResults && searchResults.length === 0 && searchQuery.length >= 2 && (
+              <div className="search-results-dropdown">
+                <div className="search-no-results">
+                  <span className="no-results-icon">🔍</span>
+                  <p>No results found for "{searchQuery}"</p>
+                  <small>Try searching for: games, numbers, colors, math, reading</small>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -84,7 +209,12 @@ function App() {
           <button
             key={option.label}
             className={`nav-item ${activeSection === option.label ? 'active' : ''}`}
-            onClick={() => handleNavigationClick(option.label)}
+            onClick={() => {
+              if (option.label === 'Games') {
+                setSelectedGame(null);
+              }
+              handleNavigationClick(option.label);
+            }}
           >
             <span className="nav-icon">{option.icon}</span>
             {option.label}
@@ -221,17 +351,18 @@ function App() {
       )}
 
       {/* Dynamic Section Components */}
-      {activeSection === 'AI' && <SpeakComponent />}
-      {prekOptions.includes(activeSection) && <EarlyEducation option={activeSection} />}
-      {mathOptions.includes(activeSection) && <AssessmentComponents option={activeSection} />}
+      {activeSection === 'AI' && <AIHub audioEnabled={audioEnabled} />}
+      {prekOptions.includes(activeSection) && <EarlyEducation option={activeSection} audioEnabled={audioEnabled} />}
+      {mathOptions.includes(activeSection) && <AssessmentComponents option={activeSection} audioEnabled={audioEnabled} />}
       {activeSection === 'Subscribe' && <Subscribe />}
       {activeSection === 'Contact' && <Contactus />}
       {activeSection === 'About Us' && <AboutUs />}
       {/* Dynamically show AssessmentFlow with selected values */}
       {activeSection === 'AssessmentFlow' && (
-        <AssessmentFlow preSelectedCategory={selectedGrade} preSelectedType={selectedSubject} />
+        <AssessmentFlow preSelectedCategory={selectedGrade} preSelectedType={selectedSubject} audioEnabled={audioEnabled} />
       )}
-      {activeSection === 'Reading' && <ReadingFlow />}
+      {activeSection === 'Reading' && <ReadingFlow audioEnabled={audioEnabled} />}
+      {activeSection === 'Games' && <GamesHub preSelectedGame={selectedGame} audioEnabled={audioEnabled} />}
 
 
       {/* Footer */}

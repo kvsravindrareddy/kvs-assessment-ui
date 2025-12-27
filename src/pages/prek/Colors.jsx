@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../../css/Colors.css';
 
-const Colors = () => {
+const Colors = ({ audioEnabled = true }) => {
   const [selectedColor, setSelectedColor] = useState(null);
 
   const colors = [
@@ -43,13 +43,15 @@ const Colors = () => {
   };
 
   const speakColor = (colorName, examples) => {
-    const synth = window.speechSynthesis;
-    // Cancel any ongoing speech first
-    synth.cancel();
-    let text = `${colorName}. Examples: ${examples.join(', ')}`;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.8;
-    synth.speak(utterance);
+    if (audioEnabled) {
+      const synth = window.speechSynthesis;
+      // Cancel any ongoing speech first
+      synth.cancel();
+      let text = `${colorName}. Examples: ${examples.join(', ')}`;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.8;
+      synth.speak(utterance);
+    }
   };
 
   const handleColorClick = (color) => {

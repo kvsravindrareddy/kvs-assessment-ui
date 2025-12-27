@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../../css/Alphabets.css';
 
-const Alphabets = () => {
+const Alphabets = ({ audioEnabled = true }) => {
   const [selectedLetter, setSelectedLetter] = useState(null);
   const [letterType, setLetterType] = useState('uppercase');
 
@@ -37,13 +37,15 @@ const Alphabets = () => {
   const letters = Object.keys(alphabetData);
 
   const speakLetter = (letter, word) => {
-    const synth = window.speechSynthesis;
-    // Cancel any ongoing speech first
-    synth.cancel();
-    const text = `${letter}. ${letter} for ${word}.`;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.7;
-    synth.speak(utterance);
+    if (audioEnabled) {
+      const synth = window.speechSynthesis;
+      // Cancel any ongoing speech first
+      synth.cancel();
+      const text = `${letter}. ${letter} for ${word}.`;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.7;
+      synth.speak(utterance);
+    }
   };
 
   const handleLetterClick = (letter) => {

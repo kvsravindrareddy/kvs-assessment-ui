@@ -5,12 +5,12 @@ import NumberSequence from '../pages/random/NumberSequence';
 import Shapes from '../pages/prek/Shapes';
 import Colors from '../pages/prek/Colors';
 
-const EarlyEducation = ({ option }) => {
+const EarlyEducation = ({ option, audioEnabled = true }) => {
   switch (option) {
-    case 'Alphabets': return <PreKWorksheets />;
-    case 'Numbers': return <NumberSequence />;
-    case 'Shapes': return <Shapes />;
-    case 'Colors': return <Colors />;
+    case 'Alphabets': return <PreKWorksheets audioEnabled={audioEnabled} />;
+    case 'Numbers': return <NumberSequence audioEnabled={audioEnabled} />;
+    case 'Shapes': return <Shapes audioEnabled={audioEnabled} />;
+    case 'Colors': return <Colors audioEnabled={audioEnabled} />;
     default: return null;
   }
 };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../../css/Numbers.css';
 
-const NumberSequence = () => {
+const NumberSequence = ({ audioEnabled = true }) => {
   const [selectedNumber, setSelectedNumber] = useState(null);
   const [mode, setMode] = useState('learn');
   const [rangeStart, setRangeStart] = useState(1);
@@ -70,14 +70,16 @@ const NumberSequence = () => {
   const numbers = Array.from({ length: rangeEnd - rangeStart + 1 }, (_, i) => rangeStart + i);
 
   const speakNumber = (number) => {
-    const synth = window.speechSynthesis;
-    // Cancel any ongoing speech first
-    synth.cancel();
-    const word = getNumberWord(number);
-    const text = `${word}`;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.7;
-    synth.speak(utterance);
+    if (audioEnabled) {
+      const synth = window.speechSynthesis;
+      // Cancel any ongoing speech first
+      synth.cancel();
+      const word = getNumberWord(number);
+      const text = `${word}`;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.7;
+      synth.speak(utterance);
+    }
   };
 
   const handleNumberClick = (number) => {
@@ -132,9 +134,11 @@ const NumberSequence = () => {
     const nextNum = practiceNumber + 1;
     if (parseInt(userAnswer) === nextNum) {
       setFeedback({ type: 'success', message: `Correct! ${practiceNumber} + 1 = ${nextNum}` });
-      const synth = window.speechSynthesis;
-      const utterance = new SpeechSynthesisUtterance(`Excellent! ${practiceNumber} plus one equals ${nextNum}`);
-      synth.speak(utterance);
+      if (audioEnabled) {
+        const synth = window.speechSynthesis;
+        const utterance = new SpeechSynthesisUtterance(`Excellent! ${practiceNumber} plus one equals ${nextNum}`);
+        synth.speak(utterance);
+      }
       setTimeout(() => {
         const newNum = Math.floor(Math.random() * (rangeEnd - rangeStart + 1)) + rangeStart;
         setPracticeNumber(newNum);
@@ -143,9 +147,11 @@ const NumberSequence = () => {
       }, 2000);
     } else {
       setFeedback({ type: 'error', message: `Try again! What comes after ${practiceNumber}?` });
-      const synth = window.speechSynthesis;
-      const utterance = new SpeechSynthesisUtterance('Try again!');
-      synth.speak(utterance);
+      if (audioEnabled) {
+        const synth = window.speechSynthesis;
+        const utterance = new SpeechSynthesisUtterance('Try again!');
+        synth.speak(utterance);
+      }
     }
   };
 
