@@ -29,6 +29,8 @@ function App() {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [selectedGame, setSelectedGame] = useState(null);
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const prekOptions = ['Alphabets', 'Numbers', 'Shapes', 'Colors'];
   const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money', 'Assessment Flow'];
@@ -60,10 +62,7 @@ function App() {
     { label: 'Home', icon: '🏠' },
     { label: 'Reading', icon: '📚' },
     { label: 'Games', icon: '🎮' },
-    { label: 'AI', icon: '🤖' },
-    { label: 'Contact', icon: '✉️' },
-    { label: 'About Us', icon: 'ℹ️' },
-    { label: 'Subscribe', icon: '🔔' }
+    { label: 'AI', icon: '🤖' }
   ];
 
   useEffect(() => {
@@ -124,7 +123,10 @@ function App() {
       {/* Header */}
       <div className="header">
         <div className="brand-section">
-          <img src={require('./images/kobstechnologies-color.png')} alt="KOBS Technologies Learning Platform" />
+          <div className="logo-container">
+            <span className="logo-icon">📚</span>
+            <span className="logo-text">GoStudyLab</span>
+          </div>
         </div>
         <div className="welcome-message">
           <h1>🤖 AI-Powered Learning Adventures - Where Every Student Becomes a Star! ⭐✨</h1>
@@ -137,70 +139,140 @@ function App() {
               title={audioEnabled ? 'Audio ON - Click to disable' : 'Audio OFF - Click to enable'}
             >
               <span className="audio-icon">{audioEnabled ? '🔊' : '🔇'}</span>
-              <span className="audio-label">{audioEnabled ? 'Audio ON' : 'Audio OFF'}</span>
             </button>
           </div>
-          <div className="buttons">
-            <button className="login">Login</button>
-            <button className="signup">Sign Up</button>
-          </div>
-          <div className="search">
-            <input
-              type="text"
-              placeholder="🔍 Ask AI..."
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              onFocus={() => searchQuery.length >= 2 && setShowSearchResults(true)}
-            />
-            <button className="search-icon" onClick={() => searchQuery.length >= 2 && setShowSearchResults(true)}>
-              <img src={require('./images/search-icon.png')} alt="search" />
+
+          {/* Search Icon Button */}
+          <button
+            className="icon-button search-button"
+            onClick={() => setShowSearchModal(!showSearchModal)}
+            title="Search"
+          >
+            🔍
+          </button>
+
+          {/* Profile Icon Button with Dropdown */}
+          <div className="profile-container">
+            <button
+              className="icon-button profile-button"
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              title="Profile"
+            >
+              👤
             </button>
 
-            {/* Search Results Backdrop */}
-            {showSearchResults && (
-              <div
-                className="search-backdrop"
-                onClick={() => setShowSearchResults(false)}
-              />
-            )}
-
-            {/* Search Results Dropdown */}
-            {showSearchResults && searchResults.length > 0 && (
-              <div className="search-results-dropdown">
-                <div className="search-results-header">
-                  <span>Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}</span>
-                  <button className="close-search" onClick={() => setShowSearchResults(false)}>✕</button>
+            {showProfileMenu && (
+              <>
+                <div
+                  className="profile-backdrop"
+                  onClick={() => setShowProfileMenu(false)}
+                />
+                <div className="profile-dropdown">
+                  <button className="profile-menu-item login-item">
+                    <span className="menu-icon">🔑</span>
+                    <span>Login</span>
+                  </button>
+                  <button className="profile-menu-item signup-item">
+                    <span className="menu-icon">✨</span>
+                    <span>Sign Up</span>
+                  </button>
                 </div>
-                <div className="search-results-list">
-                  {searchResults.map((result, index) => (
-                    <div
-                      key={index}
-                      className="search-result-item"
-                      onClick={() => handleSearchResultClick(result)}
-                    >
-                      <span className="result-icon">{result.icon}</span>
-                      <div className="result-info">
-                        <div className="result-name">{result.name}</div>
-                        <div className="result-description">{result.description}</div>
-                      </div>
-                      <span className="result-category">{result.category}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {showSearchResults && searchResults.length === 0 && searchQuery.length >= 2 && (
-              <div className="search-results-dropdown">
-                <div className="search-no-results">
-                  <span className="no-results-icon">🔍</span>
-                  <p>No results found for "{searchQuery}"</p>
-                  <small>Try searching for: games, numbers, colors, math, reading</small>
-                </div>
-              </div>
+              </>
             )}
           </div>
         </div>
+
+        {/* Search Modal */}
+        {showSearchModal && (
+          <>
+            <div
+              className="search-modal-backdrop"
+              onClick={() => {
+                setShowSearchModal(false);
+                setSearchQuery('');
+                setShowSearchResults(false);
+              }}
+            />
+            <div className="search-modal">
+              <div className="search-modal-header">
+                <h3>🔍 Search</h3>
+                <button
+                  className="close-modal"
+                  onClick={() => {
+                    setShowSearchModal(false);
+                    setSearchQuery('');
+                    setShowSearchResults(false);
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="search-modal-content">
+                <input
+                  type="text"
+                  placeholder="Search for games, activities, subjects..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="search-modal-input"
+                  autoFocus
+                />
+
+                {searchResults.length > 0 && (
+                  <div className="search-results-list">
+                    <div className="results-count">
+                      Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+                    </div>
+                    {searchResults.map((result, index) => (
+                      <div
+                        key={index}
+                        className="search-result-item"
+                        onClick={() => {
+                          handleSearchResultClick(result);
+                          setShowSearchModal(false);
+                        }}
+                      >
+                        <span className="result-icon">{result.icon}</span>
+                        <div className="result-info">
+                          <div className="result-name">{result.name}</div>
+                          <div className="result-description">{result.description}</div>
+                        </div>
+                        <span className="result-category">{result.category}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {searchResults.length === 0 && searchQuery.length >= 2 && (
+                  <div className="search-no-results">
+                    <span className="no-results-icon">🔍</span>
+                    <p>No results found for "{searchQuery}"</p>
+                    <small>Try searching for: games, numbers, colors, math, reading</small>
+                  </div>
+                )}
+
+                {searchQuery.length < 2 && (
+                  <div className="search-suggestions">
+                    <p>💡 Popular searches:</p>
+                    <div className="suggestion-chips">
+                      {['Sudoku', 'Math Challenge', 'Reading', 'Alphabets', 'AI Assistant'].map((term) => (
+                        <button
+                          key={term}
+                          className="suggestion-chip"
+                          onClick={() => {
+                            setSearchQuery(term);
+                            handleSearch(term);
+                          }}
+                        >
+                          {term}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Navigation Tabs */}
