@@ -5,7 +5,10 @@ import './css/mobile-responsive.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+import { setupAxiosInterceptors } from './utils/axiosInterceptor';
 
+// Setup axios interceptors for authentication
+setupAxiosInterceptors();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

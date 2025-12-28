@@ -312,6 +312,53 @@ body {
 
 .signup-item:hover {
   background: linear-gradient(135deg, #e6f9f7 0%, #d4f4f0 100%);
+}
+
+.admin-login-item:hover {
+  background: linear-gradient(135deg, #fff4e6 0%, #ffe6cc 100%);
+  color: #FF9800;
+}
+
+.logout-item:hover {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  color: #f44336;
+}
+
+.profile-info {
+  padding: 15px 20px;
+  border-bottom: 2px solid #f0f0f0;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+}
+
+.profile-info p {
+  margin: 5px 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.profile-info .profile-email {
+  font-size: 12px;
+  color: #666;
+}
+
+.profile-role {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 5px;
+}
+
+.profile-role.admin {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  color: white;
+}
+
+.profile-role.user {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+  color: white;
   color: #4ECDC4;
 }
 

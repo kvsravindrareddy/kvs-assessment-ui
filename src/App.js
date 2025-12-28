@@ -6,6 +6,7 @@ import { getLocation } from './utils/location';
 import Contactus from './pages/admin/Contactus';
 import AboutUs from './pages/admin/AboutUs';
 import Subscribe from './pages/admin/Subscribe';
+import UserManagement from './pages/admin/UserManagement';
 import AIHub from './pages/ai/AIHub';
 import Footer from './footer';
 import EarlyEducation from './components/EarlyEducation';
@@ -15,9 +16,12 @@ import News from './pages/news/News';
 import AssessmentFlow from './pages/random/AssessmentFlow';
 import ReadingFlow from './pages/reading/ReadingFlow';
 import GamesHub from './pages/games/GamesHub';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Login from './pages/auth/Login';
+import Signup from './pages/auth/Signup';
 
 
-function App() {
+function AppContent() {
   const [activeSection, setActiveSection] = useState('Home');
   const [expandedSection, setExpandedSection] = useState(null);
   const [location, setLocation] = useState({ latitude: null, longitude: null });
@@ -31,6 +35,10 @@ function App() {
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const { user, logout, isAdmin } = useAuth();
 
   const prekOptions = ['Alphabets', 'Numbers', 'Shapes', 'Colors'];
   const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money', 'Assessment Flow'];
@@ -168,14 +176,71 @@ function App() {
                   onClick={() => setShowProfileMenu(false)}
                 />
                 <div className="profile-dropdown">
-                  <button className="profile-menu-item login-item">
-                    <span className="menu-icon">🔑</span>
-                    <span>Login</span>
-                  </button>
-                  <button className="profile-menu-item signup-item">
-                    <span className="menu-icon">✨</span>
-                    <span>Sign Up</span>
-                  </button>
+                  {user ? (
+                    <>
+                      <div className="profile-info">
+                        <p><strong>{user.firstName} {user.lastName}</strong></p>
+                        <p className="profile-email">{user.email}</p>
+                        <span className={`profile-role ${user.role.toLowerCase()}`}>{user.role}</span>
+                      </div>
+                      {isAdmin() && (
+                        <button
+                          className="profile-menu-item"
+                          onClick={() => {
+                            setActiveSection('UserManagement');
+                            setShowProfileMenu(false);
+                          }}
+                        >
+                          <span className="menu-icon">👥</span>
+                          <span>Manage Users</span>
+                        </button>
+                      )}
+                      <button
+                        className="profile-menu-item logout-item"
+                        onClick={() => {
+                          logout();
+                          setShowProfileMenu(false);
+                          alert('Logged out successfully!');
+                        }}
+                      >
+                        <span className="menu-icon">🚪</span>
+                        <span>Logout</span>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        className="profile-menu-item login-item"
+                        onClick={() => {
+                          setShowLogin(true);
+                          setShowProfileMenu(false);
+                        }}
+                      >
+                        <span className="menu-icon">🔑</span>
+                        <span>User Login</span>
+                      </button>
+                      <button
+                        className="profile-menu-item signup-item"
+                        onClick={() => {
+                          setShowSignup(true);
+                          setShowProfileMenu(false);
+                        }}
+                      >
+                        <span className="menu-icon">✨</span>
+                        <span>Sign Up</span>
+                      </button>
+                      <button
+                        className="profile-menu-item admin-login-item"
+                        onClick={() => {
+                          setShowAdminLogin(true);
+                          setShowProfileMenu(false);
+                        }}
+                      >
+                        <span className="menu-icon">👑</span>
+                        <span>Admin Login</span>
+                      </button>
+                    </>
+                  )}
                 </div>
               </>
             )}
@@ -429,6 +494,7 @@ function App() {
       {activeSection === 'Subscribe' && <Subscribe />}
       {activeSection === 'Contact' && <Contactus />}
       {activeSection === 'About Us' && <AboutUs />}
+      {activeSection === 'UserManagement' && <UserManagement />}
       {/* Dynamically show AssessmentFlow with selected values */}
       {activeSection === 'AssessmentFlow' && (
         <AssessmentFlow preSelectedCategory={selectedGrade} preSelectedType={selectedSubject} audioEnabled={audioEnabled} />
@@ -441,7 +507,44 @@ function App() {
       <div style={{ clear: 'both' }}>
         <Footer onNavigate={handleNavigationClick} />
       </div>
+
+      {/* Authentication Modals */}
+      {showLogin && (
+        <Login
+          onClose={() => setShowLogin(false)}
+          onSwitchToSignup={() => {
+            setShowLogin(false);
+            setShowSignup(true);
+          }}
+        />
+      )}
+
+      {showSignup && (
+        <Signup
+          onClose={() => setShowSignup(false)}
+          onSwitchToLogin={() => {
+            setShowSignup(false);
+            setShowLogin(true);
+          }}
+        />
+      )}
+
+      {showAdminLogin && (
+        <Login
+          onClose={() => setShowAdminLogin(false)}
+          onSwitchToSignup={() => {}}
+          isAdmin={true}
+        />
+      )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
