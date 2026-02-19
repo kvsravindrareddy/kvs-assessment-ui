@@ -19,28 +19,48 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (credentials, isAdmin = false) => {
-    const endpoint = isAdmin ? '/auth/admin/login' : '/auth/login';
-    const response = await axios.post(`http://localhost:9000${endpoint}`, credentials);
+    try {
+      const endpoint = isAdmin ? '/auth/admin/login' : '/auth/login';
+      console.log('Login attempt:', { endpoint, username: credentials.username, isAdmin });
 
-    if (response.data.token) {
-      const userData = {
-        username: response.data.username,
-        email: response.data.email,
-        firstName: response.data.firstName,
-        lastName: response.data.lastName,
-        role: response.data.role,
-        status: response.data.status,
-        permissions: response.data.permissions
-      };
+      const response = await axios.post(`http://localhost:9000${endpoint}`, credentials);
+      console.log('Login response:', response.status, response.data);
 
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('token', response.data.token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      if (response.data.token) {
+        const userData = {
+          username: response.data.username,
+          email: response.data.email,
+          firstName: response.data.firstName,
+          lastName: response.data.lastName,
+          role: response.data.role,
+          status: response.data.status,
+          permissions: response.data.permissions
+        };
 
-      return response.data;
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('token', response.data.token);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+
+        return response.data;
+      }
+      throw new Error('No token in response');
+    } catch (error) {
+      console.error('Login error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+
+      // Re-throw with better error message
+      if (error.response?.status === 401) {
+        throw new Error(error.response.data?.message || 'Invalid credentials');
+      } else if (error.response?.status === 403) {
+        throw new Error('Access forbidden. Please check your credentials.');
+      } else if (error.message.includes('Network Error')) {
+        throw new Error('Cannot connect to server. Please check if services are running.');
+      } else {
+        throw error;
+      }
     }
-    throw new Error('Login failed');
   };
 
   const signup = async (signupData) => {
@@ -60,7 +80,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isAdmin = () => {
-    return user && user.role === 'ADMIN';
+    return user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN');
+  };
+
+  const hasRole = (requiredRole) => {
+    if (!user) return false;
+
+    // SUPER_ADMIN has access to everything
+    if (user.role === 'SUPER_ADMIN') return true;
+
+    // Check if user has the specific role
+    if (Array.isArray(requiredRole)) {
+      return requiredRole.includes(user.role);
+    }
+
+    return user.role === requiredRole;
   };
 
   const value = {
@@ -70,6 +104,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     isAuthenticated,
     isAdmin,
+    hasRole,
     loading
   };
 

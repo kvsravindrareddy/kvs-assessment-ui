@@ -19,6 +19,7 @@ import GamesHub from './pages/games/GamesHub';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 
 function AppContent() {
@@ -184,16 +185,28 @@ function AppContent() {
                         <span className={`profile-role ${user.role.toLowerCase()}`}>{user.role}</span>
                       </div>
                       {isAdmin() && (
-                        <button
-                          className="profile-menu-item"
-                          onClick={() => {
-                            setActiveSection('UserManagement');
-                            setShowProfileMenu(false);
-                          }}
-                        >
-                          <span className="menu-icon">👥</span>
-                          <span>Manage Users</span>
-                        </button>
+                        <>
+                          <button
+                            className="profile-menu-item"
+                            onClick={() => {
+                              setActiveSection('AdminDashboard');
+                              setShowProfileMenu(false);
+                            }}
+                          >
+                            <span className="menu-icon">🔧</span>
+                            <span>Admin Dashboard</span>
+                          </button>
+                          <button
+                            className="profile-menu-item"
+                            onClick={() => {
+                              setActiveSection('UserManagement');
+                              setShowProfileMenu(false);
+                            }}
+                          >
+                            <span className="menu-icon">👥</span>
+                            <span>Manage Users</span>
+                          </button>
+                        </>
                       )}
                       <button
                         className="profile-menu-item logout-item"
@@ -494,6 +507,7 @@ function AppContent() {
       {activeSection === 'Subscribe' && <Subscribe />}
       {activeSection === 'Contact' && <Contactus />}
       {activeSection === 'About Us' && <AboutUs />}
+      {activeSection === 'AdminDashboard' && <AdminDashboard />}
       {activeSection === 'UserManagement' && <UserManagement />}
       {/* Dynamically show AssessmentFlow with selected values */}
       {activeSection === 'AssessmentFlow' && (

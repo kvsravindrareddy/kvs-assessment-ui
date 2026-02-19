@@ -25,11 +25,15 @@ const Login = ({ onClose, onSwitchToSignup, isAdmin = false }) => {
     setLoading(true);
 
     try {
+      console.log('Login form submitted:', credentials.username, isAdmin ? 'Admin' : 'User');
       await login(credentials, isAdmin);
       alert(`${isAdmin ? 'Admin' : 'User'} login successful!`);
       onClose();
     } catch (err) {
-      setError(err.response?.data || 'Login failed. Please check your credentials.');
+      console.error('Login component error:', err);
+      const errorMessage = err.message || err.response?.data?.message || err.response?.data || 'Login failed. Please check your credentials.';
+      console.error('Error message:', errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
