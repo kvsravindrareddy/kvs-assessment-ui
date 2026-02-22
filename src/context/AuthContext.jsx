@@ -90,7 +90,8 @@ export const AuthProvider = ({ children }) => {
           roles: response.data.roles || [response.data.role], // Support multiple roles
           status: response.data.status,
           permissions: response.data.permissions,
-          linkedAccounts: response.data.linkedAccounts || [] // For parents linked to children
+          linkedAccounts: response.data.linkedAccounts || [], // For parents linked to children
+          subscriptionTier: response.data.subscriptionTier || 'DISTRICT_ENTERPRISE' // Default for admins
         };
 
         setUser(userData);
