@@ -62,21 +62,21 @@
 
 .alphabets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 20px;
-  max-width: 1600px;
+  max-width: 1200px;
   margin: 0 auto 40px;
 }
 
 .alphabet-card {
   background: white;
-  border-radius: 20px;
-  padding: 25px 15px;
+  border-radius: 15px;
+  padding: 25px 8px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  border: 3px solid transparent;
+  border: 2px solid transparent;
   animation: fadeInUp 0.5s ease-out backwards;
   position: relative;
   overflow: hidden;
@@ -111,6 +111,39 @@
   border-color: #667eea;
   background: linear-gradient(135deg, white 0%, rgba(102, 126, 234, 0.15) 100%);
   transform: scale(1.08);
+}
+
+.alphabet-card.bubble-out {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  z-index: 9999;
+  width: 400px;
+  height: auto;
+  animation: bubbleZoom 3s ease-out forwards;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 30px 80px rgba(102, 126, 234, 0.8);
+  padding: 60px 40px;
+}
+
+.alphabet-card.bubble-out .letter-display {
+  font-size: 12em;
+  color: white;
+  text-shadow: 6px 6px 12px rgba(0, 0, 0, 0.4);
+  margin-bottom: 20px;
+}
+
+.alphabet-card.bubble-out .word-emoji {
+  font-size: 6em;
+  margin: 30px 0;
+}
+
+.alphabet-card.bubble-out .word-name {
+  font-size: 3em;
+  color: white;
+  font-weight: 900;
+  margin-top: 20px;
 }
 
 .letter-display {
@@ -303,6 +336,31 @@
   }
   50% {
     transform: scale(1.1);
+  }
+}
+
+@keyframes bubbleZoom {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  60% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  85% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
   }
 }
 

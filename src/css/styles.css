@@ -80,14 +80,20 @@
 }
 
 .topnav {
-  display: flex;
+  display: flex !important;
+  flex-direction: row !important;
   justify-content: center;
-  flex-wrap: wrap;
-  background: linear-gradient(90deg, #ffcccb, #ffe4b5, #d1f7c4, #b2fefa, #dcd3ff);
-  padding: 12px 0;
-  border-radius: 0 0 20px 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  flex-wrap: nowrap !important;
+  background: transparent;
+  padding: 20px 0;
+  border-radius: 0;
+  box-shadow: none;
   font-family: 'Baloo Bhai 2', cursive;
+  gap: 20px;
+  max-width: 100%;
+  width: fit-content;
+  margin: 0 auto 30px;
+  border: none;
 }
 
 .topnav div {
@@ -205,6 +211,55 @@
 .generated-numbers-table td {
   padding: 8px;
   border-bottom: 1px solid #ddd;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.generated-numbers-table td.number-bubble-out {
+  position: fixed !important;
+  left: var(--start-x) !important;
+  top: var(--start-y) !important;
+  z-index: 9999 !important;
+  transform: translate(-50%, -50%) scale(1) !important;
+  animation: numberBubbleZoom 3s ease-out forwards !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  box-shadow: 0 30px 80px rgba(102, 126, 234, 0.8) !important;
+  border-radius: 30px !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 900 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 400px !important;
+  height: 400px !important;
+  font-size: 12em !important;
+  text-shadow: 8px 8px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+@keyframes numberBubbleZoom {
+  0% {
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0;
+  }
+  20% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  60% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  85% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0;
+  }
 }
 
 .pagination {

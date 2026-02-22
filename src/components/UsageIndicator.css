@@ -1,0 +1,128 @@
+/* Usage Indicator Component */
+.usage-indicator {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 16px 0;
+}
+
+.usage-indicator-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.usage-indicator-icon {
+  font-size: 24px;
+}
+
+.usage-indicator-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.usage-indicator-bar {
+  height: 10px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.usage-indicator-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.usage-indicator-fill.normal {
+  background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+}
+
+.usage-indicator-fill.low {
+  background: linear-gradient(90deg, #ed8936 0%, #dd6b20 100%);
+}
+
+.usage-indicator-fill.critical {
+  background: linear-gradient(90deg, #e53e3e 0%, #c53030 100%);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.usage-indicator-text {
+  font-size: 13px;
+  color: #718096;
+  text-align: center;
+}
+
+/* Header Badge (compact version) */
+.usage-header-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 13px;
+  font-weight: 600;
+  color: #2d3748;
+  transition: all 0.2s ease;
+}
+
+.usage-header-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.usage-header-badge.low {
+  border-color: rgba(237, 137, 54, 0.5);
+  background: rgba(255, 250, 240, 0.95);
+}
+
+.usage-header-badge.critical {
+  border-color: rgba(229, 62, 62, 0.5);
+  background: rgba(255, 245, 245, 0.95);
+  animation: shake 0.5s ease;
+}
+
+.usage-header-badge .usage-icon {
+  font-size: 18px;
+}
+
+.usage-header-badge .usage-text {
+  font-family: 'Fira Code', monospace;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .usage-indicator {
+    padding: 12px;
+  }
+
+  .usage-indicator-icon {
+    font-size: 20px;
+  }
+
+  .usage-indicator-label {
+    font-size: 14px;
+  }
+
+  .usage-header-badge {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .usage-header-badge .usage-icon {
+    font-size: 16px;
+  }
+}

@@ -74,8 +74,8 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
           <div className="auth-success">
             <div className="success-icon">✓</div>
             <h2>Registration Successful!</h2>
-            <p>Your account has been created and is pending admin approval.</p>
-            <p>You will be able to login once an administrator approves your account.</p>
+            <p>Your account has been created successfully!</p>
+            <p>You can now login and start using the platform immediately. Upgrade your plan anytime to unlock more features.</p>
             <button className="auth-submit-btn" onClick={onSwitchToLogin}>
               Go to Login
             </button>

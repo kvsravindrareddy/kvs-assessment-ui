@@ -3,12 +3,18 @@ import axios from 'axios';
 import jsPDF from 'jspdf';
 import CONFIG from '../../Config';
 import '../../css/AssessmentFlow.css';
+import { useSubscription } from '../../context/SubscriptionContext';
+import UpgradePrompt from '../../components/UpgradePrompt';
+import UsageIndicator from '../../components/UsageIndicator';
 
 const orderedGrades = [
   'PRE_K', 'KINDERGARTEN', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'
 ];
 
 export default function ReadingFlow() {
+  const { canPerformAction, trackUsage, getUpgradeMessage } = useSubscription();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
   const [gradeData, setGradeData] = useState({});
   const [expandedStories, setExpandedStories] = useState(false);
   const [expandedGrade, setExpandedGrade] = useState(null);
@@ -64,6 +70,15 @@ export default function ReadingFlow() {
   };
 
   const fetchStoryDetails = async (storyId) => {
+    // Check if user can access stories
+    if (!canPerformAction('story')) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
+    // Track usage
+    trackUsage('story');
+
     window.speechSynthesis.cancel();
     try {
       const res = await axios.get(`${getStoryURL}?storyId=${storyId}`);
@@ -212,6 +227,9 @@ export default function ReadingFlow() {
 
   return (
     <div className="reading-container">
+      {/* Usage Indicator */}
+      {!storyDetails && <UsageIndicator type="story" />}
+
       {!storyDetails ? (
         <div>
           <h2
@@ -339,6 +357,16 @@ export default function ReadingFlow() {
             )
           )}
         </div>
+      )}
+
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <UpgradePrompt
+          message={getUpgradeMessage('story')}
+          showModal
+          onClose={() => setShowUpgradeModal(false)}
+          onUpgrade={() => window.location.href = '#Pricing'}
+        />
       )}
     </div>
   );

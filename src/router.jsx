@@ -14,6 +14,15 @@ import UsersManagement from './pages/admin/UsersManagement';
 import Analytics from './pages/admin/Analytics';
 import Settings from './pages/admin/Settings';
 
+// Landing Page
+import LandingPage from './pages/landing/LandingPage';
+
+// Assessment Pages
+import GradeSelection from './pages/GradeSelection';
+import SubjectSelection from './pages/SubjectSelection';
+import AssessmentConfig from './pages/AssessmentConfig';
+import AnswerKey from './pages/AnswerKey';
+
 // Protected Route
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -25,6 +34,10 @@ import App from './App';
  * Combines new admin dashboard with existing app features
  */
 export const router = createBrowserRouter([
+  {
+    path: '/landing',
+    element: <LandingPage />
+  },
   {
     path: '/login',
     element: <Login />
@@ -70,6 +83,22 @@ export const router = createBrowserRouter([
         element: <Settings />
       }
     ]
+  },
+  {
+    path: '/select-grade',
+    element: <GradeSelection />
+  },
+  {
+    path: '/select-subject/:gradeCode',
+    element: <SubjectSelection />
+  },
+  {
+    path: '/configure-assessment/:gradeCode/:subjectCode',
+    element: <AssessmentConfig />
+  },
+  {
+    path: '/answer-key/:assessmentId',
+    element: <AnswerKey />
   },
   {
     path: '/*',

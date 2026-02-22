@@ -1,0 +1,284 @@
+/* Beautiful Modern Home Page */
+
+.modern-home-container {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Baloo Bhai 2', 'Comic Sans MS', cursive;
+}
+
+/* Hero Section */
+.hero-section-beautiful {
+  text-align: center;
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  border-radius: 30px;
+  margin-bottom: 40px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+}
+
+.hero-stars {
+  font-size: 80px;
+  letter-spacing: 30px;
+  animation: twinkleStars 3s ease-in-out infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes twinkleStars {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+  50% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+}
+
+.hero-title-beautiful {
+  font-size: 4em;
+  color: white;
+  margin: 0 0 15px 0;
+  text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+  font-weight: 900;
+  animation: bounceIn 1s ease-out;
+}
+
+.hero-subtitle-beautiful {
+  font-size: 1.8em;
+  color: white;
+  opacity: 0.95;
+  margin: 0;
+  font-weight: 600;
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Learning Sections */
+.learning-section {
+  margin-bottom: 50px;
+}
+
+.section-title-beautiful {
+  font-size: 2.5em;
+  color: #2d3436;
+  margin-bottom: 25px;
+  text-align: center;
+  font-weight: 800;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Large Cards Grid (4 columns) */
+.cards-grid-large {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+  margin-bottom: 20px;
+}
+
+/* Medium Cards Grid (6 columns) */
+.cards-grid-medium {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+/* Beautiful Cards */
+.card-beautiful {
+  border-radius: 25px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-beautiful::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: rotate(45deg);
+  transition: all 0.6s ease;
+}
+
+.card-beautiful:hover::before {
+  left: 100%;
+}
+
+.card-beautiful:hover {
+  transform: translateY(-15px) scale(1.05) rotate(2deg);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.card-beautiful.large {
+  min-height: 200px;
+}
+
+.card-beautiful.medium {
+  min-height: 150px;
+  padding: 30px 15px;
+}
+
+/* Card Icons */
+.card-icon-beautiful {
+  font-size: 6em;
+  margin-bottom: 15px;
+  animation: floatIcon 3s ease-in-out infinite;
+  filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.3));
+}
+
+.card-icon-beautiful.medium {
+  font-size: 4em;
+  margin-bottom: 10px;
+}
+
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.card-beautiful:hover .card-icon-beautiful {
+  animation: spinBounce 0.8s ease-in-out;
+}
+
+@keyframes spinBounce {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.3); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* Card Titles */
+.card-title-beautiful {
+  color: white;
+  font-weight: 900;
+  font-size: 2em;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.card-title-beautiful.small {
+  font-size: 1.4em;
+}
+
+/* Grade Cards */
+.grades-grid-beautiful {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+}
+
+.grade-card-beautiful {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 25px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  transition: transform 0.3s ease;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.grade-card-beautiful:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+}
+
+.grade-badge {
+  font-size: 2em;
+  font-weight: 900;
+  color: white;
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.subject-button-beautiful {
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 15px;
+  padding: 15px 10px;
+  font-size: 1.1em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-family: 'Baloo Bhai 2', cursive;
+}
+
+.subject-button-beautiful:hover {
+  transform: scale(1.1);
+  background: #ffd700;
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-title-beautiful {
+    font-size: 2.5em;
+  }
+
+  .hero-stars {
+    font-size: 50px;
+  }
+
+  .section-title-beautiful {
+    font-size: 2em;
+  }
+
+  .cards-grid-large {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+  }
+
+  .cards-grid-medium {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 15px;
+  }
+
+  .card-icon-beautiful {
+    font-size: 4em;
+  }
+
+  .card-icon-beautiful.medium {
+    font-size: 3em;
+  }
+
+  .card-title-beautiful {
+    font-size: 1.5em;
+  }
+
+  .card-title-beautiful.small {
+    font-size: 1.2em;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section-beautiful {
+    padding: 40px 15px;
+  }
+
+  .hero-title-beautiful {
+    font-size: 2em;
+  }
+
+  .cards-grid-large,
+  .cards-grid-medium {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

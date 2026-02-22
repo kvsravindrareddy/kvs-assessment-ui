@@ -57,7 +57,7 @@ function Footer({onNavigate}) {
 
       {/* Footer Bottom */}
       <div className="footer-bottom">
-        <p>© 2025 KOBS Technologies. Making learning fun for students worldwide! 🚀</p>
+        <p>© 2025 Kobyte Technologies (OPC) Private Limited. Making learning fun for students worldwide! 🚀</p>
         <div className="footer-links">
           <a href="#" onClick={(e) => { e.preventDefault(); alert('Privacy Policy'); }}>Privacy Policy</a>
           <span>•</span>

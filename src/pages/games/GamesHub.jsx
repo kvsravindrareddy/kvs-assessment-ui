@@ -7,8 +7,13 @@ import NumberMatch from './NumberMatch';
 import SkipCounting from './SkipCounting';
 import CompareNumbers from './CompareNumbers';
 import '../../css/GamesHub.css';
+import { useSubscription } from '../../context/SubscriptionContext';
+import UpgradePrompt from '../../components/UpgradePrompt';
+import UsageIndicator from '../../components/UsageIndicator';
 
 const GamesHub = ({ preSelectedGame = null }) => {
+  const { canPerformAction, trackUsage, getUpgradeMessage } = useSubscription();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [selectedGame, setSelectedGame] = useState(preSelectedGame);
 
   useEffect(() => {
@@ -88,6 +93,9 @@ const GamesHub = ({ preSelectedGame = null }) => {
 
   return (
     <div className="games-hub-container">
+      {/* Usage Indicator */}
+      {!selectedGame && <UsageIndicator type="game" />}
+
       <div className="games-hub-header">
         <h1>Learning Games</h1>
         <p>Choose a game to play and learn!</p>
@@ -98,7 +106,14 @@ const GamesHub = ({ preSelectedGame = null }) => {
           <div
             key={game.id}
             className="game-card"
-            onClick={() => setSelectedGame(game.id)}
+            onClick={() => {
+              if (!canPerformAction('game')) {
+                setShowUpgradeModal(true);
+                return;
+              }
+              trackUsage('game');
+              setSelectedGame(game.id);
+            }}
             style={{ '--game-color': game.color }}
           >
             <div className="game-icon">{game.icon}</div>
@@ -108,6 +123,16 @@ const GamesHub = ({ preSelectedGame = null }) => {
           </div>
         ))}
       </div>
+
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <UpgradePrompt
+          message={getUpgradeMessage('game')}
+          showModal
+          onClose={() => setShowUpgradeModal(false)}
+          onUpgrade={() => window.location.href = '#Pricing'}
+        />
+      )}
     </div>
   );
 };

@@ -13,6 +13,9 @@ const GenerateNumbers = () => {
   const [to, setTo] = useState('');
   const [generatedNumbers, setGeneratedNumbers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedNumber, setSelectedNumber] = useState(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
   const numbersPerPage = 100;
   const cellsPerRow = 10;
   const rowsPerPage = 10;
@@ -71,6 +74,44 @@ const GenerateNumbers = () => {
 
   const lastPage = () => {
     setCurrentPage(totalPageNumbers);
+  };
+
+  const handleNumberClick = (number, event) => {
+    const rect = event.target.getBoundingClientRect();
+    setClickPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2
+    });
+    setSelectedNumber(number);
+    setIsAnimating(true);
+    speakNumber(number);
+
+    setTimeout(() => {
+      setIsAnimating(false);
+      setSelectedNumber(null);
+    }, 3000);
+  };
+
+  const speakNumber = (number) => {
+    const synth = window.speechSynthesis;
+    synth.cancel();
+
+    const text = `${number}`;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.7;
+    utterance.pitch = 1.3;
+
+    const voices = synth.getVoices();
+    const childVoice = voices.find(voice =>
+      voice.name.includes('Samantha') ||
+      voice.name.includes('Karen') ||
+      voice.name.includes('Fiona')
+    );
+    if (childVoice) {
+      utterance.voice = childVoice;
+    }
+
+    synth.speak(utterance);
   };
 
   //Logic for displaying numbers for the current page
@@ -146,9 +187,25 @@ const GenerateNumbers = () => {
             <tbody>
               {rows.map((row, rowIndex) => (
                 <tr key={rowIndex}>
-                  {row.map((number, cellIndex) => (
-                    <td key={cellIndex}>{number}</td>
-                  ))}
+                  {row.map((number, cellIndex) => {
+                    const isSelected = selectedNumber === number && isAnimating;
+                    return (
+                      <td
+                        key={cellIndex}
+                        className={isSelected ? 'number-bubble-out' : ''}
+                        onClick={(e) => handleNumberClick(number, e)}
+                        style={{
+                          cursor: 'pointer',
+                          ...(isSelected && {
+                            '--start-x': `${clickPosition.x}px`,
+                            '--start-y': `${clickPosition.y}px`
+                          })
+                        }}
+                      >
+                        {number}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>

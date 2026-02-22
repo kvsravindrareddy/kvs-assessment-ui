@@ -2,8 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../../css/AssessmentFlow.css';
 import CONFIG from '../../Config';
+import { useSubscription } from '../../context/SubscriptionContext';
+import UpgradePrompt from '../../components/UpgradePrompt';
+import UsageIndicator from '../../components/UsageIndicator';
 
 const AssessmentFlow = ({ preSelectedCategory = '', preSelectedType = '' }) => {
+  const { canPerformAction, trackUsage, getUpgradeMessage } = useSubscription();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
   const [userInfo, setUserInfo] = useState({ userId: '', email: '' });
   const [settings, setSettings] = useState({
     category: preSelectedCategory,
@@ -42,6 +48,15 @@ const AssessmentFlow = ({ preSelectedCategory = '', preSelectedType = '' }) => {
   }, [settings.category, categoriesData]);
 
   const startAssessment = async () => {
+    // Check if user can perform assessment
+    if (!canPerformAction('assessment')) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
+    // Track usage
+    trackUsage('assessment');
+
     const request = { ...userInfo, ...settings };
     try {
       const res = await axios.post(`${baseURL}/load`, request);
@@ -108,6 +123,9 @@ const AssessmentFlow = ({ preSelectedCategory = '', preSelectedType = '' }) => {
 
   return (
     <div className="assessment-container">
+      {/* Usage Indicator */}
+      {!assessment && <UsageIndicator type="assessment" />}
+
       {assessment && (
         <div className="score-header">
           <h4>Score: {score} | Invalid: {invalid}</h4>
@@ -241,6 +259,16 @@ const AssessmentFlow = ({ preSelectedCategory = '', preSelectedType = '' }) => {
             </button>
           </div>
         )
+      )}
+
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <UpgradePrompt
+          message={getUpgradeMessage('assessment')}
+          showModal
+          onClose={() => setShowUpgradeModal(false)}
+          onUpgrade={() => window.location.href = '#Pricing'}
+        />
       )}
     </div>
   );

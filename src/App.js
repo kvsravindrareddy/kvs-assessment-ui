@@ -6,20 +6,23 @@ import { getLocation } from './utils/location';
 import Contactus from './pages/admin/Contactus';
 import AboutUs from './pages/admin/AboutUs';
 import Subscribe from './pages/admin/Subscribe';
-import UserManagement from './pages/admin/UserManagement';
 import AIHub from './pages/ai/AIHub';
 import Footer from './footer';
 import EarlyEducation from './components/EarlyEducation';
 import AssessmentComponents from './components/AssessmentComponents';
 import LoadGradeData from './pages/config/LoadGradeData';
+import ModernHomePage from './components/ModernHomePage';
 import News from './pages/news/News';
 import AssessmentFlow from './pages/random/AssessmentFlow';
 import ReadingFlow from './pages/reading/ReadingFlow';
 import GamesHub from './pages/games/GamesHub';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { SubscriptionProvider, useSubscription } from './context/SubscriptionContext';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
-import AdminDashboard from './pages/admin/AdminDashboard';
+import UnifiedDashboard from './pages/dashboard/UnifiedDashboard';
+import PricingPage from './pages/subscription/PricingPage';
+import UsageIndicator from './components/UsageIndicator';
 
 
 function AppContent() {
@@ -40,6 +43,28 @@ function AppContent() {
   const [showSignup, setShowSignup] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const { user, logout, isAdmin } = useAuth();
+  const { subscriptionTier, SUBSCRIPTION_TIERS, getRemainingUsage } = useSubscription();
+
+  // Determine if user is an admin/teacher/super user
+  const isAdminUser = user && (
+    user.role === 'SUPER_ADMIN' ||
+    user.role === 'DISTRICT_ADMIN' ||
+    user.role === 'SCHOOL_ADMIN' ||
+    user.role === 'TEACHER' ||
+    user.role === 'CONTENT_CREATOR' ||
+    user.role === 'COUNSELOR' ||
+    user.role === 'LIBRARIAN' ||
+    user.role === 'SUPPORT_STAFF'
+  );
+
+  // State for showing/hiding student navigation for admin users
+  const [showStudentNav, setShowStudentNav] = useState(!isAdminUser);
+
+  // Check if user is guest or free tier
+  const isGuestUser = !user;
+  const isFreeTier = subscriptionTier === SUBSCRIPTION_TIERS.GUEST ||
+                     subscriptionTier === SUBSCRIPTION_TIERS.STUDENT_FREE ||
+                     subscriptionTier === SUBSCRIPTION_TIERS.TEACHER_FREE;
 
   const prekOptions = ['Alphabets', 'Numbers', 'Shapes', 'Colors'];
   const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money', 'Assessment Flow'];
@@ -151,6 +176,17 @@ function AppContent() {
             </button>
           </div>
 
+          {/* Student Navigation Toggle for Admin Users */}
+          {isAdminUser && (
+            <button
+              className={`icon-button nav-toggle-button ${showStudentNav ? 'enabled' : 'disabled'}`}
+              onClick={() => setShowStudentNav(!showStudentNav)}
+              title={showStudentNav ? 'Hide student navigation' : 'Show student navigation'}
+            >
+              <span className="nav-toggle-icon">{showStudentNav ? '👁️' : '👁️‍🗨️'}</span>
+            </button>
+          )}
+
           {/* Search Icon Button */}
           <button
             className="icon-button search-button"
@@ -184,30 +220,26 @@ function AppContent() {
                         <p className="profile-email">{user.email}</p>
                         <span className={`profile-role ${user.role.toLowerCase()}`}>{user.role}</span>
                       </div>
-                      {isAdmin() && (
-                        <>
-                          <button
-                            className="profile-menu-item"
-                            onClick={() => {
-                              setActiveSection('AdminDashboard');
-                              setShowProfileMenu(false);
-                            }}
-                          >
-                            <span className="menu-icon">🔧</span>
-                            <span>Admin Dashboard</span>
-                          </button>
-                          <button
-                            className="profile-menu-item"
-                            onClick={() => {
-                              setActiveSection('UserManagement');
-                              setShowProfileMenu(false);
-                            }}
-                          >
-                            <span className="menu-icon">👥</span>
-                            <span>Manage Users</span>
-                          </button>
-                        </>
-                      )}
+                      <button
+                        className="profile-menu-item"
+                        onClick={() => {
+                          setActiveSection('Dashboard');
+                          setShowProfileMenu(false);
+                        }}
+                      >
+                        <span className="menu-icon">📊</span>
+                        <span>My Dashboard</span>
+                      </button>
+                      <button
+                        className="profile-menu-item"
+                        onClick={() => {
+                          setActiveSection('Pricing');
+                          setShowProfileMenu(false);
+                        }}
+                      >
+                        <span className="menu-icon">💎</span>
+                        <span>Upgrade Plan</span>
+                      </button>
                       <button
                         className="profile-menu-item logout-item"
                         onClick={() => {
@@ -241,6 +273,16 @@ function AppContent() {
                       >
                         <span className="menu-icon">✨</span>
                         <span>Sign Up</span>
+                      </button>
+                      <button
+                        className="profile-menu-item"
+                        onClick={() => {
+                          setActiveSection('Pricing');
+                          setShowProfileMenu(false);
+                        }}
+                      >
+                        <span className="menu-icon">💎</span>
+                        <span>View Plans</span>
                       </button>
                       <button
                         className="profile-menu-item admin-login-item"
@@ -353,162 +395,67 @@ function AppContent() {
         )}
       </div>
 
-      {/* Navigation Tabs */}
-      <nav className="topnav">
-        {navigationOptions.map((option) => (
-          <button
-            key={option.label}
-            className={`nav-item ${activeSection === option.label ? 'active' : ''}`}
-            onClick={() => {
-              if (option.label === 'Games') {
-                setSelectedGame(null);
-              }
-              handleNavigationClick(option.label);
-            }}
-          >
-            <span className="nav-icon">{option.icon}</span>
-            {option.label}
-          </button>
-        ))}
-      </nav>
-
-      {/* Quick Access Tools - Visible on Home Page */}
-      {activeSection === 'Home' && (
-        <div className="quick-access-section">
-          <h2 className="quick-access-title">⚡ Quick Start - Jump Right In!</h2>
-          <div className="quick-tools-grid">
-            <div className="quick-tool-card ai-tool" onClick={() => handleNavigationClick('AI')}>
-              <div className="tool-icon">🤖</div>
-              <h3>AI Assistant</h3>
-              <p>Ask questions & get instant help</p>
-            </div>
-            <div className="quick-tool-card reading-tool" onClick={() => handleNavigationClick('Reading')}>
-              <div className="tool-icon">📚</div>
-              <h3>Reading Practice</h3>
-              <p>Improve reading skills</p>
-            </div>
-            <div className="quick-tool-card math-tool" onClick={() => handleNavigationClick('Random Assessment')}>
-              <div className="tool-icon">🔢</div>
-              <h3>Math Quiz</h3>
-              <p>Test your math skills</p>
-            </div>
-            <div className="quick-tool-card game-tool" onClick={() => handleNavigationClick('Assessment Flow')}>
-              <div className="tool-icon">🎯</div>
-              <h3>Practice Tests</h3>
-              <p>Grade-level assessments</p>
-            </div>
-            <div className="quick-tool-card alphabet-tool" onClick={() => handleNavigationClick('Alphabets')}>
-              <div className="tool-icon">🔤</div>
-              <h3>ABC Learning</h3>
-              <p>Learn alphabets & phonics</p>
-            </div>
-            <div className="quick-tool-card numbers-tool" onClick={() => handleNavigationClick('Numbers')}>
-              <div className="tool-icon">🔢</div>
-              <h3>Number Games</h3>
-              <p>Count & learn numbers</p>
-            </div>
+      {/* Guest Mode Banner */}
+      {isGuestUser && (
+        <div className="guest-mode-banner">
+          <div className="guest-banner-content">
+            <span className="guest-icon">⚡</span>
+            <span className="guest-message">You're in Guest Mode - Sign up for unlimited access!</span>
           </div>
+          <button className="guest-signup-btn" onClick={() => setShowSignup(true)}>
+            Sign Up Free
+          </button>
         </div>
       )}
 
-      {/* Home Content Sections - Learning Trees */}
-      {activeSection === 'Home' && (
-        <div className="learning-garden">
-          <h2 className="garden-title">🌳 Learning Garden - Pick Your Path! 🌱</h2>
 
-          <div className="trees-container">
-            {/* Pre-K Tree */}
-            <div className="learning-tree prek-tree">
-              <div className="tree-trunk">
-                <div className="trunk-label">🎨 Pre-K</div>
-              </div>
-              <div className="tree-branches">
-                {prekOptions.map((opt, index) => (
-                  <div
-                    key={opt}
-                    className={`leaf leaf-${index + 1}`}
-                    onClick={() => handleNavigationClick(opt)}
-                  >
-                    <span className="leaf-emoji">🍃</span>
-                    <span className="leaf-text">{opt}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+      {/* Navigation Tabs - Conditionally shown for admin users */}
+      {showStudentNav && (
+        <nav className="topnav">
+          {navigationOptions.map((option) => (
+            <button
+              key={option.label}
+              className={`nav-item ${activeSection === option.label ? 'active' : ''}`}
+              onClick={() => {
+                if (option.label === 'Games') {
+                  setSelectedGame(null);
+                }
+                handleNavigationClick(option.label);
+              }}
+              title={option.label}
+            >
+              <span className="nav-icon">{option.icon}</span>
+            </button>
+          ))}
+        </nav>
+      )}
 
-            {/* Math Practice Tree */}
-            <div className="learning-tree math-tree">
-              <div className="tree-trunk">
-                <div className="trunk-label">🔢 Math</div>
-              </div>
-              <div className="tree-branches">
-                {mathOptions.map((opt, index) => (
-                  <div
-                    key={opt}
-                    className={`leaf leaf-${index + 1}`}
-                    onClick={() => handleNavigationClick(opt)}
-                  >
-                    <span className="leaf-emoji">🍃</span>
-                    <span className="leaf-text">{opt}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Reading Tree */}
-            <div className="learning-tree reading-tree">
-              <div className="tree-trunk">
-                <div className="trunk-label">📚 Reading</div>
-              </div>
-              <div className="tree-branches">
-                <div
-                  className="leaf leaf-1"
-                  onClick={() => handleNavigationClick('Reading')}
-                >
-                  <span className="leaf-emoji">🍃</span>
-                  <span className="leaf-text">Stories</span>
-                </div>
-                <div
-                  className="leaf leaf-2"
-                  onClick={() => handleNavigationClick('Alphabets')}
-                >
-                  <span className="leaf-emoji">🍃</span>
-                  <span className="leaf-text">ABC</span>
-                </div>
-                <div
-                  className="leaf leaf-3"
-                  onClick={() => handleNavigationClick('Reading')}
-                >
-                  <span className="leaf-emoji">🍃</span>
-                  <span className="leaf-text">Phonics</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* All Grades Tree - Large tree showing all grade levels */}
-          <div className="mega-tree-section">
-            <h3 className="mega-tree-title">📚 Grade Levels - Choose Your Grade & Subject 🎯</h3>
-            <LoadGradeData
-              gradeData={gradeData}
-              setGradeData={setGradeData}
-              onClick={toggleSection}
-              expandedSection={expandedSection}
-              onSubjectClick={handleSubjectClick}
-            />
-          </div>
+      {/* Info banner for admin users when student navigation is hidden */}
+      {isAdminUser && !showStudentNav && activeSection === 'Home' && (
+        <div className="admin-nav-info-banner">
+          <span className="info-icon">ℹ️</span>
+          <p>Student navigation is hidden. Click the eye icon (👁️‍🗨️) in the header to show Home, Reading, Games, and AI options.</p>
         </div>
+      )}
+
+      {/* Modern Home Page (conditionally for admin users) */}
+      {activeSection === 'Home' && showStudentNav && (
+        <ModernHomePage
+          onNavigate={handleNavigationClick}
+          gradeData={gradeData}
+          onSubjectClick={handleSubjectClick}
+        />
       )}
 
       {/* Dynamic Section Components */}
+      {activeSection === 'Dashboard' && <UnifiedDashboard />}
+      {activeSection === 'Pricing' && <PricingPage />}
       {activeSection === 'AI' && <AIHub audioEnabled={audioEnabled} />}
       {prekOptions.includes(activeSection) && <EarlyEducation option={activeSection} audioEnabled={audioEnabled} />}
       {mathOptions.includes(activeSection) && <AssessmentComponents option={activeSection} audioEnabled={audioEnabled} />}
       {activeSection === 'Subscribe' && <Subscribe />}
       {activeSection === 'Contact' && <Contactus />}
       {activeSection === 'About Us' && <AboutUs />}
-      {activeSection === 'AdminDashboard' && <AdminDashboard />}
-      {activeSection === 'UserManagement' && <UserManagement />}
       {/* Dynamically show AssessmentFlow with selected values */}
       {activeSection === 'AssessmentFlow' && (
         <AssessmentFlow preSelectedCategory={selectedGrade} preSelectedType={selectedSubject} audioEnabled={audioEnabled} />
@@ -557,7 +504,9 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <SubscriptionProvider>
+        <AppContent />
+      </SubscriptionProvider>
     </AuthProvider>
   );
 }

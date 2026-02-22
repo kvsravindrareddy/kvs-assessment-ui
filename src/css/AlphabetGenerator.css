@@ -1,0 +1,366 @@
+/* AlphabetGenerator.css - Optimized for kids aged 1-3 years */
+
+.alphabet-generator {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive;
+  background: linear-gradient(135deg, #fff5f5 0%, #fff9e6 50%, #f0f9ff 100%);
+  min-height: 100vh;
+}
+
+/* Header */
+.alphabet-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: linear-gradient(135deg, #ff6b9d 0%, #ffa06b 100%);
+  border-radius: 25px;
+  box-shadow: 0 8px 20px rgba(255, 107, 157, 0.3);
+}
+
+.alphabet-title {
+  margin: 0;
+  font-size: 36px;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  font-weight: bold;
+}
+
+.alphabet-emoji {
+  font-size: 48px;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+/* Instruction Text */
+.instruction-text {
+  text-align: center;
+  font-size: 24px;
+  color: #ff6b9d;
+  margin-bottom: 30px;
+  font-weight: bold;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.instruction-emoji {
+  font-size: 32px;
+  margin: 0 10px;
+}
+
+/* Alphabet Content */
+.alphabet-content {
+  width: 100%;
+}
+
+/* Alphabet Grid - Smaller Cards (Half Size) */
+.alphabet-grid {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 8px;
+  padding: 20px;
+  max-width: 100%;
+  justify-items: center;
+}
+
+/* Individual Alphabet Card - Reduced to Half Size */
+.alphabet-card {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border: 2px solid white;
+}
+
+.alphabet-card:hover {
+  transform: scale(1.2) rotate(5deg);
+  box-shadow: 0 8px 20px rgba(255, 107, 157, 0.4);
+  background: linear-gradient(135deg, #ffeaa7 0%, #ff6b9d 100%);
+}
+
+.alphabet-card:active {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.alphabet-letter {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+}
+
+/* Big Letter Display - Full Screen Animated */
+.letter-display {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.letter-display.animating .letter-display-content {
+  animation: zoomBounce 2s ease-in-out;
+}
+
+.letter-display-content {
+  text-align: center;
+  position: relative;
+}
+
+.big-letter {
+  font-size: 300px;
+  font-weight: bold;
+  color: white;
+  text-shadow:
+    0 0 20px rgba(255, 255, 255, 0.5),
+    0 0 40px rgba(255, 255, 255, 0.4),
+    0 0 60px rgba(255, 255, 255, 0.3),
+    8px 8px 0 rgba(0, 0, 0, 0.2);
+  line-height: 1;
+  animation: rainbow 3s linear infinite, float 3s ease-in-out infinite;
+}
+
+.letter-name {
+  font-size: 72px;
+  color: white;
+  margin-top: 20px;
+  font-weight: bold;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Play Again Button */
+.play-again-btn {
+  margin-top: 50px;
+  padding: 20px 50px;
+  font-size: 32px;
+  background: linear-gradient(135deg, #ff6b9d 0%, #ffa06b 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 15px;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+.play-again-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 15px 40px rgba(255, 107, 157, 0.5);
+}
+
+.play-again-btn:active {
+  transform: scale(1.05);
+}
+
+.play-icon {
+  font-size: 40px;
+  animation: spin 2s linear infinite;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zoomBounce {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+  }
+  70% {
+    transform: scale(0.9) rotate(-5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes rainbow {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design for Mobile */
+@media (max-width: 768px) {
+  .alphabet-title {
+    font-size: 28px;
+  }
+
+  .alphabet-emoji {
+    font-size: 36px;
+  }
+
+  .alphabet-grid {
+    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+    gap: 10px;
+    padding: 15px;
+  }
+
+  .alphabet-card {
+    width: 50px;
+    height: 50px;
+  }
+
+  .alphabet-letter {
+    font-size: 24px;
+  }
+
+  .big-letter {
+    font-size: 180px;
+  }
+
+  .letter-name {
+    font-size: 48px;
+  }
+
+  .play-again-btn {
+    font-size: 24px;
+    padding: 15px 35px;
+  }
+
+  .play-icon {
+    font-size: 32px;
+  }
+
+  .instruction-text {
+    font-size: 18px;
+  }
+
+  .instruction-emoji {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .alphabet-grid {
+    grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .alphabet-card {
+    width: 45px;
+    height: 45px;
+  }
+
+  .alphabet-letter {
+    font-size: 20px;
+  }
+
+  .big-letter {
+    font-size: 120px;
+  }
+
+  .letter-name {
+    font-size: 36px;
+  }
+
+  .play-again-btn {
+    font-size: 20px;
+    padding: 12px 25px;
+  }
+
+  .instruction-text {
+    font-size: 16px;
+  }
+}
+
+/* Accessibility - Touch friendly */
+@media (hover: none) and (pointer: coarse) {
+  .alphabet-card {
+    min-width: 60px;
+    min-height: 60px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .alphabet-card {
+    border: 4px solid #000;
+  }
+
+  .big-letter {
+    text-shadow: 4px 4px 0 #000;
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

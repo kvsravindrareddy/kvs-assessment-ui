@@ -4,6 +4,7 @@ import '../../css/Alphabets.css';
 const Alphabets = ({ audioEnabled = true }) => {
   const [selectedLetter, setSelectedLetter] = useState(null);
   const [letterType, setLetterType] = useState('uppercase');
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const alphabetData = {
     A: { word: 'Apple', emoji: '🍎' },
@@ -41,17 +42,41 @@ const Alphabets = ({ audioEnabled = true }) => {
       const synth = window.speechSynthesis;
       // Cancel any ongoing speech first
       synth.cancel();
-      const text = `${letter}. ${letter} for ${word}.`;
+
+      const text = `${letter} for ${word}`;
+
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.7;
+      utterance.pitch = 1.3;
+
+      // Try to get a child/female voice
+      const voices = synth.getVoices();
+      const childVoice = voices.find(voice =>
+        voice.name.includes('Samantha') ||
+        voice.name.includes('Karen') ||
+        voice.name.includes('Fiona') ||
+        voice.name.includes('female') ||
+        voice.name.includes('child')
+      );
+      if (childVoice) {
+        utterance.voice = childVoice;
+      }
+
       synth.speak(utterance);
     }
   };
 
   const handleLetterClick = (letter) => {
     setSelectedLetter(letter);
+    setIsAnimating(true);
     const data = alphabetData[letter];
     speakLetter(letter, data.word);
+
+    // Reset animation after 3 seconds
+    setTimeout(() => {
+      setIsAnimating(false);
+      setSelectedLetter(null);
+    }, 3000);
   };
 
   const getDisplayLetter = (letter) => {
@@ -84,10 +109,11 @@ const Alphabets = ({ audioEnabled = true }) => {
       <div className="alphabets-grid">
         {letters.map((letter, index) => {
           const data = alphabetData[letter];
+          const isSelected = selectedLetter === letter && isAnimating;
           return (
             <div
               key={letter}
-              className={`alphabet-card ${selectedLetter === letter ? 'selected' : ''}`}
+              className={`alphabet-card ${isSelected ? 'bubble-out' : ''}`}
               onClick={() => handleLetterClick(letter)}
               style={{ animationDelay: `${index * 0.02}s` }}
             >
@@ -98,30 +124,6 @@ const Alphabets = ({ audioEnabled = true }) => {
           );
         })}
       </div>
-
-      {selectedLetter && (
-        <div className="alphabet-details">
-          <div className="detail-content">
-            <div className="big-letter-display">
-              <span className="big-letter uppercase">{selectedLetter}</span>
-              <span className="big-letter lowercase">{selectedLetter.toLowerCase()}</span>
-            </div>
-            <div className="detail-info">
-              <h3>{selectedLetter} is for {alphabetData[selectedLetter].word}</h3>
-              <div className="detail-emoji">{alphabetData[selectedLetter].emoji}</div>
-              <p className="phonetic-info">
-                Say: "{selectedLetter}" like in "{alphabetData[selectedLetter].word}"
-              </p>
-            </div>
-          </div>
-          <button
-            className="replay-button"
-            onClick={() => speakLetter(selectedLetter, alphabetData[selectedLetter].word)}
-          >
-            Play Again
-          </button>
-        </div>
-      )}
     </div>
   );
 };

@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { getConfig } from '../../Config';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../../context/AuthContext';
+import { getConfig } from '../../../Config';
 import axios from 'axios';
-import './AdminDashboard.css';
+import './ContentManagement.css';
 
-const AdminDashboard = () => {
-  const { user, isAdmin } = useAuth();
+const ContentManagement = () => {
+  const { user } = useAuth();
   const config = getConfig();
 
-  const [activeTab, setActiveTab] = useState('load-questions');
+  const [activeSubTab, setActiveSubTab] = useState('load-questions');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
@@ -37,16 +37,16 @@ const AdminDashboard = () => {
   });
 
   // Load statistics on mount
-  React.useEffect(() => {
-    if (isAdmin()) {
-      loadStatistics();
-    }
+  useEffect(() => {
+    loadStatistics();
   }, []);
 
   const loadStatistics = async () => {
     try {
-      const questionsRes = await axios.get(`${config.ADMIN_BASE_URL}/listallquestions`);
-      const storiesRes = await axios.get(`${config.ADMIN_BASE_URL}/listAllStories`);
+      const [questionsRes, storiesRes] = await Promise.all([
+        axios.get(`${config.ADMIN_BASE_URL}/listallquestions`),
+        axios.get(`${config.ADMIN_BASE_URL}/listAllStories`)
+      ]);
 
       setStatistics({
         totalQuestions: questionsRes.data?.length || 0,
@@ -90,7 +90,7 @@ const AdminDashboard = () => {
         ]
       };
 
-      const response = await axios.post(
+      await axios.post(
         `${config.ADMIN_BASE_URL}/loadquestions`,
         payload
       );
@@ -103,6 +103,7 @@ const AdminDashboard = () => {
       // Reload statistics
       setTimeout(() => loadStatistics(), 1000);
     } catch (error) {
+      console.error('Error loading questions:', error);
       setMessage({
         type: 'error',
         text: error.response?.data?.message || 'Failed to load questions. Please try again.'
@@ -153,7 +154,7 @@ const AdminDashboard = () => {
         }
       };
 
-      const response = await axios.post(
+      await axios.post(
         `${config.ADMIN_BASE_URL}/loadstories`,
         payload
       );
@@ -166,6 +167,7 @@ const AdminDashboard = () => {
       // Reload statistics
       setTimeout(() => loadStatistics(), 1000);
     } catch (error) {
+      console.error('Error loading stories:', error);
       setMessage({
         type: 'error',
         text: error.response?.data?.message || 'Failed to load stories. Please try again.'
@@ -175,84 +177,71 @@ const AdminDashboard = () => {
     }
   };
 
-  if (!isAdmin()) {
-    return (
-      <div className="admin-dashboard">
-        <div className="error-message">
-          <h2>Access Denied</h2>
-          <p>You do not have permission to access the admin dashboard.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="admin-dashboard">
-      <div className="dashboard-header">
-        <h1>🔧 Admin Dashboard</h1>
-        <p className="welcome-text">Welcome, {user.firstName || user.username}!</p>
-      </div>
+    <div className="content-management">
+      <h3 className="section-title">
+        <span className="title-icon">📝</span>
+        Content Management
+      </h3>
 
       {/* Statistics Cards */}
-      <div className="stats-container">
+      <div className="content-stats">
         <div className="stat-card">
-          <div className="stat-icon">📝</div>
-          <div className="stat-content">
-            <h3>Total Questions</h3>
-            <p className="stat-number">
+          <div className="stat-icon" style={{ background: '#667eea20', color: '#667eea' }}>📝</div>
+          <div className="stat-info">
+            <div className="stat-value">
               {statistics.loading ? '...' : statistics.totalQuestions}
-            </p>
+            </div>
+            <div className="stat-label">Total Questions</div>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon">📚</div>
-          <div className="stat-content">
-            <h3>Total Stories</h3>
-            <p className="stat-number">
+          <div className="stat-icon" style={{ background: '#48bb7820', color: '#48bb78' }}>📚</div>
+          <div className="stat-info">
+            <div className="stat-value">
               {statistics.loading ? '...' : statistics.totalStories}
-            </p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">👤</div>
-          <div className="stat-content">
-            <h3>Role</h3>
-            <p className="stat-text">{user.role}</p>
+            </div>
+            <div className="stat-label">Total Stories</div>
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="tabs-container">
+      {/* Sub Tabs */}
+      <div className="content-sub-tabs">
         <button
-          className={`tab-button ${activeTab === 'load-questions' ? 'active' : ''}`}
-          onClick={() => setActiveTab('load-questions')}
+          className={`content-sub-tab ${activeSubTab === 'load-questions' ? 'active' : ''}`}
+          onClick={() => setActiveSubTab('load-questions')}
         >
-          📝 Load Questions
+          <span className="tab-icon">📝</span>
+          Load Questions
         </button>
         <button
-          className={`tab-button ${activeTab === 'load-stories' ? 'active' : ''}`}
-          onClick={() => setActiveTab('load-stories')}
+          className={`content-sub-tab ${activeSubTab === 'load-stories' ? 'active' : ''}`}
+          onClick={() => setActiveSubTab('load-stories')}
         >
-          📚 Load Stories
+          <span className="tab-icon">📚</span>
+          Load Stories
         </button>
       </div>
 
       {/* Message Display */}
       {message && (
-        <div className={`message ${message.type}`}>
+        <div className={`content-message ${message.type}`}>
+          <span className="message-icon">{message.type === 'success' ? '✓' : '⚠'}</span>
           {message.text}
         </div>
       )}
 
       {/* Tab Content */}
-      <div className="tab-content">
-        {activeTab === 'load-questions' && (
-          <div className="form-container">
-            <h2>Load Questions from AI</h2>
-            <p className="form-description">
-              Generate questions using ChatGPT or other AI sources. This may take 30-60 seconds.
-            </p>
+      <div className="content-tab-body">
+        {activeSubTab === 'load-questions' && (
+          <div className="content-form-container">
+            <div className="form-header">
+              <h4>Load Questions from AI</h4>
+              <p className="form-description">
+                Generate questions using ChatGPT or other AI sources. This may take 30-60 seconds.
+              </p>
+            </div>
 
             <form onSubmit={handleLoadQuestions}>
               <div className="form-grid">
@@ -351,18 +340,30 @@ const AdminDashboard = () => {
                 className="submit-button"
                 disabled={loading}
               >
-                {loading ? '⏳ Loading Questions...' : '🚀 Load Questions'}
+                {loading ? (
+                  <>
+                    <span className="spinner"></span>
+                    Loading Questions...
+                  </>
+                ) : (
+                  <>
+                    <span className="button-icon">🚀</span>
+                    Load Questions
+                  </>
+                )}
               </button>
             </form>
           </div>
         )}
 
-        {activeTab === 'load-stories' && (
-          <div className="form-container">
-            <h2>Load Reading Comprehension Stories</h2>
-            <p className="form-description">
-              Generate reading stories with comprehension questions. This may take 60-90 seconds.
-            </p>
+        {activeSubTab === 'load-stories' && (
+          <div className="content-form-container">
+            <div className="form-header">
+              <h4>Load Reading Comprehension Stories</h4>
+              <p className="form-description">
+                Generate reading stories with comprehension questions. This may take 60-90 seconds.
+              </p>
+            </div>
 
             <form onSubmit={handleLoadStories}>
               <div className="form-grid">
@@ -431,7 +432,17 @@ const AdminDashboard = () => {
                 className="submit-button"
                 disabled={loading}
               >
-                {loading ? '⏳ Loading Stories...' : '🚀 Load Stories'}
+                {loading ? (
+                  <>
+                    <span className="spinner"></span>
+                    Loading Stories...
+                  </>
+                ) : (
+                  <>
+                    <span className="button-icon">🚀</span>
+                    Load Stories
+                  </>
+                )}
               </button>
             </form>
           </div>
@@ -441,4 +452,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default ContentManagement;
