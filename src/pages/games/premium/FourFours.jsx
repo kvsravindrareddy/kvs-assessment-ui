@@ -62,8 +62,8 @@ const FourFours = ({ audioEnabled = true }) => {
         return { valid: false, message: `You must use exactly four 4s! (You used ${fourCount})` };
       }
 
-      // Evaluate
-      const result = eval(expr);
+      // Evaluate using Function constructor (safer than eval)
+      const result = Function('"use strict"; return (' + expr + ')')();
 
       if (Math.abs(result - targetNumber) < 0.001) {
         return { valid: true, result: targetNumber };

@@ -11,6 +11,11 @@ import MathRace from './premium/MathRace';
 import GameOf24 from './premium/GameOf24';
 import FourFours from './premium/FourFours';
 import Chess from './premium/Chess';
+import TicTacToe from './TicTacToe';
+import SimonSays from './cognitive/SimonSays';
+import PatternMatch from './cognitive/PatternMatch';
+import YogaInstructor from './physical/YogaInstructor';
+import DanceChallenge from './physical/DanceChallenge';
 import '../../css/GamesHub.css';
 import { useAuth } from '../../context/AuthContext';
 import { useSubscription } from '../../context/SubscriptionContext';
@@ -147,6 +152,51 @@ const GamesHub = ({ preSelectedGame = null }) => {
       color: '#8b4513',
       category: 'strategy',
       premium: true
+    },
+    {
+      id: 'tictactoe',
+      name: 'Tic-Tac-Toe',
+      icon: '❌',
+      description: 'Classic 3-in-a-row strategy game!',
+      color: '#e74c3c',
+      category: 'strategy',
+      premium: false
+    },
+    {
+      id: 'simonsays',
+      name: 'Simon Says',
+      icon: '🧠',
+      description: 'Memory sequence game - Train your focus!',
+      color: '#667eea',
+      category: 'cognitive',
+      premium: false
+    },
+    {
+      id: 'patternmatch',
+      name: 'Pattern Match',
+      icon: '🎯',
+      description: 'Visual pattern recognition - Beat the clock!',
+      color: '#764ba2',
+      category: 'cognitive',
+      premium: false
+    },
+    {
+      id: 'yoga',
+      name: 'AI Yoga Instructor',
+      icon: '🧘',
+      description: 'Guided yoga poses - Relax and stretch!',
+      color: '#fa8bff',
+      category: 'physical',
+      premium: false
+    },
+    {
+      id: 'dance',
+      name: 'Dance Challenge',
+      icon: '💃',
+      description: 'Follow the dance moves - Get active!',
+      color: '#2bd2ff',
+      category: 'physical',
+      premium: false
     }
   ];
 
@@ -155,8 +205,10 @@ const GamesHub = ({ preSelectedGame = null }) => {
     { id: 'math', name: 'Math Games', icon: '🔢', color: '#4ECDC4' },
     { id: 'logic', name: 'Logic Puzzles', icon: '🧩', color: '#FF6B6B' },
     { id: 'strategy', name: 'Strategy', icon: '♟️', color: '#8b4513' },
+    { id: 'cognitive', name: 'Cognitive Focus', icon: '🧠', color: '#667eea' },
+    { id: 'physical', name: 'Physical Activity', icon: '🏃', color: '#fa8bff' },
     { id: 'language', name: 'Language', icon: '🔤', color: '#667eea' },
-    { id: 'memory', name: 'Memory', icon: '🧠', color: '#FFE66D' },
+    { id: 'memory', name: 'Memory', icon: '🃏', color: '#FFE66D' },
     { id: 'creative', name: 'Creative', icon: '🎨', color: '#9b59b6' }
   ];
 
@@ -204,6 +256,11 @@ const GamesHub = ({ preSelectedGame = null }) => {
         {selectedGame === 'gameof24' && <GameOf24 />}
         {selectedGame === 'fourfours' && <FourFours />}
         {selectedGame === 'chess' && <Chess />}
+        {selectedGame === 'tictactoe' && <TicTacToe />}
+        {selectedGame === 'simonsays' && <SimonSays />}
+        {selectedGame === 'patternmatch' && <PatternMatch />}
+        {selectedGame === 'yoga' && <YogaInstructor />}
+        {selectedGame === 'dance' && <DanceChallenge />}
       </div>
     );
   }

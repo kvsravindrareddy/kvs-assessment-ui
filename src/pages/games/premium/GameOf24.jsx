@@ -87,8 +87,8 @@ const GameOf24 = ({ audioEnabled = true }) => {
         return { valid: false, message: 'You must use all four numbers exactly once!' };
       }
 
-      // Evaluate the expression
-      const result = eval(expr);
+      // Evaluate the expression using Function constructor (safer than eval)
+      const result = Function('"use strict"; return (' + expr + ')')();
 
       if (Math.abs(result - 24) < 0.001) {
         return { valid: true, result: 24 };
