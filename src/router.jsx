@@ -104,7 +104,6 @@ export const router = createBrowserRouter([
     path: '/answer-key/:assessmentId',
     element: <AnswerKey />
   },
-  // 👇 NEW GAMES ROUTES ADDED HERE 👇
   {
     path: '/games/math-balance',
     element: <MathBalance />
@@ -113,11 +112,19 @@ export const router = createBrowserRouter([
     path: '/games/next-pattern',
     element: <NextInPattern />
   },
-  // 👆 NEW GAMES ROUTES ADDED HERE 👆
   {
     path: '/*',
     element: <App />
   }
-]);
+], {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true,
+    v7_fetcherPersist: true,
+    v7_normalizeFormMethod: true,
+    v7_partialHydration: true,
+    v7_skipActionErrorRevalidation: true
+  }
+});
 
 export default router;
