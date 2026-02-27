@@ -5,6 +5,10 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 
+// 🎮 NEW GAMES IMPORTS
+import MathBalance from './pages/games/MathBalance';
+import NextInPattern from './pages/games/cognitive/NextInPattern';
+
 // Admin Pages
 import AdminLayout from './pages/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
@@ -100,6 +104,16 @@ export const router = createBrowserRouter([
     path: '/answer-key/:assessmentId',
     element: <AnswerKey />
   },
+  // 👇 NEW GAMES ROUTES ADDED HERE 👇
+  {
+    path: '/games/math-balance',
+    element: <MathBalance />
+  },
+  {
+    path: '/games/next-pattern',
+    element: <NextInPattern />
+  },
+  // 👆 NEW GAMES ROUTES ADDED HERE 👆
   {
     path: '/*',
     element: <App />

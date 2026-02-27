@@ -1,39 +1,69 @@
-// src/utils/location.js
-import CONFIG from '../Config';
+import { trackUserAction } from './auditHelper';
 
-export const getLocation = (setLocation) => {
-  const getIpLocation = () => {
-    fetch('https://ipapi.co/json/')
-      .then(response => response.json())
-      .then(data => {
-        setLocation({ latitude: data.latitude, longitude: data.longitude });
-        sendLocationToApi(data.latitude, data.longitude);
-      })
-      .catch(error => console.error('IP location error:', error));
+export const getLocation = (setLocation, user = null) => {
+  const userId = user ? user.email : null;
+
+  const fetchLocationData = async (browserLat = null, browserLon = null) => {
+    try {
+      // 1. Fetch Geo Location Data
+      const geoResponse = await fetch('https://ipapi.co/json/');
+      const geoData = await geoResponse.json();
+
+      // 2. Explicitly fetch IPv4
+      let ipv4Address = 'Unknown';
+      try {
+        const ipv4Response = await fetch('https://api4.ipify.org?format=json');
+        const ipv4Data = await ipv4Response.json();
+        ipv4Address = ipv4Data.ip;
+      } catch (ipv4Error) {
+        console.warn('Could not fetch explicitly IPv4 address', ipv4Error);
+      }
+
+      // 3. Merge data
+      const finalData = {
+        latitude: browserLat || geoData.latitude,
+        longitude: browserLon || geoData.longitude,
+        city: geoData.city || 'Unknown',
+        country: geoData.country_name || 'Unknown',
+        defaultIp: geoData.ip || 'Unknown', 
+        ipv4: ipv4Address                   
+      };
+
+      setLocation({ latitude: finalData.latitude, longitude: finalData.longitude });
+      logLocationToAudit(finalData, userId);
+
+    } catch (error) {
+      console.error('Failed to fetch IP location data:', error);
+      if (browserLat && browserLon) {
+        logLocationToAudit({ latitude: browserLat, longitude: browserLon }, userId);
+      }
+    }
   };
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       position => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        setLocation({ latitude: lat, longitude: lon });
-        sendLocationToApi(lat, lon);
+        fetchLocationData(position.coords.latitude, position.coords.longitude);
       },
       error => {
-        console.warn('Geolocation error:', error);
-        getIpLocation();
+        console.warn('User denied GPS or error occurred:', error);
+        fetchLocationData(); 
       }
     );
   } else {
-    getIpLocation();
+    fetchLocationData();
   }
 };
 
-const sendLocationToApi = (lat, lon) => {
-  const url = `${CONFIG.development.EVALUATION_BASE_URL}/geo/locate?lat=${lat}&lon=${lon}`;
-  fetch(url)
-    .then(res => res.json())
-    .then(data => console.log('Location sent:', data))
-    .catch(error => console.error('Send location error:', error));
+const logLocationToAudit = (locationData, userId) => {
+  const metadata = {
+    ipAddress: locationData.defaultIp || 'Unknown', 
+    ipv4Address: locationData.ipv4 || 'Unknown',    
+    city: locationData.city || 'Unknown',
+    country: locationData.country || 'Unknown',
+    latitude: locationData.latitude,
+    longitude: locationData.longitude
+  };
+
+  trackUserAction(userId, 'APP_OPENED_WITH_LOCATION', null, metadata);
 };

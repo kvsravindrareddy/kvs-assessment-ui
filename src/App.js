@@ -100,8 +100,8 @@ function AppContent() {
   ];
 
   useEffect(() => {
-    getLocation(setLocation);
-  }, [activeSection]);
+    getLocation(setLocation, user); 
+  }, [user]);
 
   const handleSubjectClick = (grade, subject) => {
     setSelectedGrade(grade);

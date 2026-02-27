@@ -21,8 +21,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useSubscription } from '../../context/SubscriptionContext';
 import UpgradePrompt from '../../components/UpgradePrompt';
 import UsageIndicator from '../../components/UsageIndicator';
+import MathBalance from './MathBalance';
+import NextInPattern from './cognitive/NextInPattern';
+import { speakText } from '../../utils/audioHelper';
 
-const GamesHub = ({ preSelectedGame = null }) => {
+const GamesHub = ({ preSelectedGame = null, audioEnabled = true }) => {
   const { canPerformAction, trackUsage, getUpgradeMessage } = useSubscription();
   const { user } = useAuth();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -197,7 +200,25 @@ const GamesHub = ({ preSelectedGame = null }) => {
       color: '#2bd2ff',
       category: 'physical',
       premium: false
-    }
+    },
+    {
+      id: 'math-balance',
+      name: 'Math Balance Scale',
+      icon: '⚖️',
+      description: 'Balance the scale to solve equations! Great for visual math.',
+      color: '#4CAF50',
+      category: 'math',
+      premium: false
+    },
+    {
+      id: 'next-pattern',
+      name: 'What Comes Next?',
+      icon: '🧩',
+      description: 'Find the missing puzzle piece in the visual sequence!',
+      color: '#FF9800',
+      category: 'cognitive',
+      premium: false
+    },
   ];
 
   const categories = [
@@ -217,6 +238,7 @@ const GamesHub = ({ preSelectedGame = null }) => {
     : games.filter(game => game.category === selectedCategory);
 
   const handleGameSelect = (game) => {
+    speakText(`Let's play ${game.name}`, audioEnabled);
     // Super users and admins have access to all games
     if (game.premium && !isAdminUser) {
       // Check if user has premium subscription
@@ -261,6 +283,10 @@ const GamesHub = ({ preSelectedGame = null }) => {
         {selectedGame === 'patternmatch' && <PatternMatch />}
         {selectedGame === 'yoga' && <YogaInstructor />}
         {selectedGame === 'dance' && <DanceChallenge />}
+        
+        {/* 👇 NEW GAMES ADDED HERE 👇 */}
+        {selectedGame === 'math-balance' && <MathBalance audioEnabled={audioEnabled} />}
+        {selectedGame === 'next-pattern' && <NextInPattern audioEnabled={audioEnabled} />}
       </div>
     );
   }
@@ -287,7 +313,10 @@ const GamesHub = ({ preSelectedGame = null }) => {
               <button
                 key={category.id}
                 className={`category-btn ${selectedCategory === category.id ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(category.id)}
+                onClick={() => {
+                  setSelectedCategory(category.id);
+                  speakText(category.name, audioEnabled);
+                }}
                 style={{ '--category-color': category.color }}
               >
                 <span className="category-icon">{category.icon}</span>
