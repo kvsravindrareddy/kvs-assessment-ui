@@ -37,18 +37,18 @@ const SubjectSelection = () => {
   };
 
   const getSubjectIcon = (subjectName) => {
-    if (subjectName.includes('Math')) return '🔢';
-    if (subjectName.includes('English')) return '📝';
-    if (subjectName.includes('Science')) return '🔬';
-    if (subjectName.includes('Social')) return '🌍';
-    if (subjectName.includes('History')) return '📜';
-    if (subjectName.includes('Geography')) return '🗺️';
-    if (subjectName.includes('Computer')) return '💻';
-    if (subjectName.includes('General')) return '🧠';
-    if (subjectName.includes('Telugu')) return '🅰️';
-    if (subjectName.includes('Hindi')) return '🅱️';
-    return '📚';
-  };
+  const s = subjectName.toUpperCase();
+  if (s.includes('MATH')) return '📐';
+  if (s.includes('ENGLISH')) return '📚';
+  if (s.includes('SCIENCE')) return '🔬';
+  if (s.includes('HISTORY')) return '🏛️';
+  if (s.includes('GEOGRAPHY')) return '🌍';
+  if (s.includes('SOCIAL')) return '🤝';
+  if (s.includes('COMPUTER') || s.includes('IT')) return '💻';
+  if (s.includes('HINDI') || s.includes('TELUGU') || s.includes('LANGUAGE')) return '🗣️';
+  if (s.includes('KNOWLEDGE') || s.includes('GENERAL')) return '💡';
+  return '📝'; // Default fallback
+};
 
   const getSubjectColor = (index) => {
     const colors = [

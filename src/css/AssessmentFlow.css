@@ -117,35 +117,85 @@
   letter-spacing: -0.5px;
 }
 
-.subject-pills {
+/* --- INNOVATIVE SUBJECT DOCK (COMPACT & WRAPPED) --- */
+.main-header {
+  margin-bottom: 1.5rem;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 1rem; /* Reduced gap */
 }
 
-.subject-pill {
-  padding: 8px 20px;
+.header-text-group {
+  margin-bottom: 0;
+}
+
+.grade-subtitle {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-top: -0.5rem;
+  font-weight: 500;
+}
+
+.innovative-subject-dock {
+  display: flex;
+  flex-wrap: wrap; /* Allows subjects to drop to the next line if there are many */
+  gap: 0.75rem; /* Tighter spacing */
+  padding: 0.5rem 0.25rem 0.5rem 0.25rem;
+}
+
+.subject-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Shrunk from 100px to 85px to fit more on screen */
+  min-width: 85px; 
+  /* Reduced padding for a sleeker profile */
+  padding: 0.75rem 0.5rem; 
   background: white;
   border: 1px solid #e2e8f0;
-  border-radius: 50px;
-  color: #64748b;
-  font-weight: 600;
-  font-size: 0.9rem;
+  border-radius: 16px; /* Slightly tighter corners */
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 }
 
-.subject-pill:hover {
+.subject-tab:hover {
   border-color: #cbd5e1;
-  transform: translateY(-1px);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.04);
 }
 
-.subject-pill.active {
-  background: #0f172a;
-  border-color: #0f172a;
+.subject-tab.active {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   color: white;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+  border-color: #0f172a;
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 15px -5px rgba(15, 23, 42, 0.3);
+}
+
+.subject-tab .subject-icon {
+  font-size: 1.5rem; /* Shrunk from 2rem so it doesn't dominate the screen */
+  margin-bottom: 0.3rem;
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.1));
+}
+
+.subject-tab.active .subject-icon {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.subject-tab .subject-name {
+  font-size: 0.7rem; /* Smaller text to fit tightly */
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #64748b;
+  text-align: center;
+}
+
+.subject-tab.active .subject-name {
+  color: #f8fafc;
 }
 
 /* --- AI / GLASSMORPHISM CARDS GRID --- */
@@ -414,4 +464,98 @@
 
 .tool-btn:hover {
   background: #e2e8f0;
+}
+
+/* --- ULTRA-COMPACT STORY CARDS (MAXIMUM SPACE UTILIZATION) --- */
+.story-grid.small-cards {
+  display: grid;
+  /* Pack as many cards side-by-side as possible (min 160px width per card) */
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem; /* Tighter gap between cards */
+}
+
+.story-grid.small-cards .timeless-card {
+  min-height: 130px; 
+  padding: 1.25rem;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.story-grid.small-cards .card-graphic {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 0.75rem;
+  border-radius: 10px;
+}
+
+.story-grid.small-cards .graphic-icon {
+  font-size: 1rem;
+}
+
+.story-grid.small-cards .card-content {
+  flex-grow: 1; /* Allows the title to take up available space */
+}
+
+.story-grid.small-cards .card-content h4 {
+  font-size: 0.95rem; /* Slightly smaller text */
+  line-height: 1.3;
+  margin-bottom: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Truncates long titles nicely after 3 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.story-grid.small-cards .card-footer {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  border-top: 1px solid rgba(0,0,0,0.05); /* Adds a nice subtle divider */
+  padding-top: 0.5rem;
+}
+
+/* --- PAGINATION CONTROLS --- */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.page-btn {
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  color: #0f172a;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+}
+
+.page-btn:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.page-info {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.page-info strong {
+  color: #0f172a;
 }

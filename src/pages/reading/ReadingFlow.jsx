@@ -11,6 +11,23 @@ const orderedGrades = [
   'PRE_K', 'KINDERGARTEN', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'
 ];
 
+const STORIES_PER_PAGE = 16; 
+
+// 👇 Defined right here so ESLint knows exactly what it is!
+const getSubjectIcon = (subjectName) => {
+  const s = subjectName.toUpperCase();
+  if (s.includes('MATH')) return '📐';
+  if (s.includes('ENGLISH')) return '📚';
+  if (s.includes('SCIENCE')) return '🔬';
+  if (s.includes('HISTORY')) return '🏛️';
+  if (s.includes('GEOGRAPHY')) return '🌍';
+  if (s.includes('SOCIAL')) return '🤝';
+  if (s.includes('COMPUTER') || s.includes('IT')) return '💻';
+  if (s.includes('HINDI') || s.includes('TELUGU') || s.includes('LANGUAGE')) return '🗣️';
+  if (s.includes('KNOWLEDGE') || s.includes('GENERAL')) return '💡';
+  return '📝'; 
+};
+
 export default function ReadingFlow() {
   const { canPerformAction, trackUsage, getUpgradeMessage } = useSubscription();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -19,10 +36,11 @@ export default function ReadingFlow() {
   const [stories, setStories] = useState({});
   const [storyDetails, setStoryDetails] = useState(null);
 
-  // Timeless Navigation States
+  // Timeless Navigation & Pagination States
   const [selectedGrade, setSelectedGrade] = useState(orderedGrades[0]);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [isLoadingStories, setIsLoadingStories] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Assessment States
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -35,7 +53,6 @@ export default function ReadingFlow() {
   const listStoriesURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/load`;
   const getStoryURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/with-story-id`;
 
-  // 1. Fetch Grade Config
   useEffect(() => {
     fetch(adminConfigURL)
       .then(res => res.json())
@@ -48,7 +65,6 @@ export default function ReadingFlow() {
       .catch(err => console.error('Failed to load grades:', err));
   }, [adminConfigURL]);
 
-  // 2. Load TTS Voices
   useEffect(() => {
     const loadVoices = () => setVoices(window.speechSynthesis.getVoices());
     loadVoices();
@@ -56,9 +72,9 @@ export default function ReadingFlow() {
     return () => window.speechSynthesis.cancel();
   }, []);
 
-  // 3. Handle Navigation Selection
   const handleSelectGrade = (grade) => {
     setSelectedGrade(grade);
+    setCurrentPage(1); 
     const subjectsForGrade = gradeData[grade] || [];
     if (subjectsForGrade.length > 0) {
       handleSelectSubject(grade, subjectsForGrade[0]);
@@ -72,6 +88,7 @@ export default function ReadingFlow() {
     setSelectedSubject(subject);
     setStoryDetails(null);
     setCompleted(false);
+    setCurrentPage(1); 
 
     const key = `${grade}-${subject}`;
     if (stories[key]) return; 
@@ -79,16 +96,19 @@ export default function ReadingFlow() {
     setIsLoadingStories(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(
-        listStoriesURL,
-        { category: grade, storyType: subject },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token ? `Bearer ${token}` : ''
-          }
+      const payload = { 
+        category: grade, 
+        storyType: subject,
+        numberOfStories: 50, 
+        storyLength: "ALL" 
+      };
+
+      const res = await axios.post(listStoriesURL, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
         }
-      );
+      });
       setStories(prev => ({ ...prev, [key]: res.data }));
     } catch (err) {
       console.error('Error fetching stories:', err);
@@ -180,27 +200,22 @@ export default function ReadingFlow() {
   const exportPDF = () => {
     if (!storyDetails) return;
     const doc = new jsPDF();
-
     doc.setFontSize(18);
     doc.text(storyDetails.title || 'Story', 10, 20);
-
     doc.setFontSize(12);
     let y = 30;
     const lines = doc.splitTextToSize(storyDetails.content || '', 180);
     doc.text(lines, 10, y);
     y += lines.length * 7 + 10;
-
     const question = storyDetails.questions[questionIndex];
     if (question) {
       doc.setFontSize(16);
       doc.text(`Question ${questionIndex + 1}`, 10, y);
       y += 10;
-
       doc.setFontSize(12);
       const qLines = doc.splitTextToSize(question.name, 180);
       doc.text(qLines, 10, y);
       y += qLines.length * 7 + 5;
-
       if (question.options) {
         Object.entries(question.options).forEach(([key, value]) => {
           const optLines = doc.splitTextToSize(`${key}: ${value}`, 180);
@@ -209,34 +224,28 @@ export default function ReadingFlow() {
         });
       }
     }
-
     doc.save(`Story_${storyDetails.title || 'Untitled'}_Q${questionIndex + 1}.pdf`);
   };
 
   const previewPDF = () => {
     if (!storyDetails) return;
     const doc = new jsPDF();
-
     doc.setFontSize(18);
     doc.text(storyDetails.title || 'Story', 10, 20);
-
     doc.setFontSize(12);
     let y = 30;
     const lines = doc.splitTextToSize(storyDetails.content || '', 180);
     doc.text(lines, 10, y);
     y += lines.length * 7 + 10;
-
     const question = storyDetails.questions[questionIndex];
     if (question) {
       doc.setFontSize(16);
       doc.text(`Question ${questionIndex + 1}`, 10, y);
       y += 10;
-
       doc.setFontSize(12);
       const qLines = doc.splitTextToSize(question.name, 180);
       doc.text(qLines, 10, y);
       y += qLines.length * 7 + 5;
-
       if (question.options) {
         Object.entries(question.options).forEach(([key, value]) => {
           const optLines = doc.splitTextToSize(`${key}: ${value}`, 180);
@@ -245,13 +254,16 @@ export default function ReadingFlow() {
         });
       }
     }
-
     const blob = doc.output('bloburl');
     window.open(blob);
   };
 
+  // Pagination Logic
   const currentStoriesKey = `${selectedGrade}-${selectedSubject}`;
   const currentStories = stories[currentStoriesKey] || [];
+  const totalPages = Math.ceil(currentStories.length / STORIES_PER_PAGE);
+  const startIndex = (currentPage - 1) * STORIES_PER_PAGE;
+  const displayedStories = currentStories.slice(startIndex, startIndex + STORIES_PER_PAGE);
 
   return (
     <div className="timeless-layout">
@@ -259,7 +271,6 @@ export default function ReadingFlow() {
 
       {!storyDetails ? (
         <div className="timeless-grid">
-          {/* LEFT NAVIGATION: Grades */}
           <aside className="timeless-sidebar">
             <h2 className="sidebar-title">Grade Levels</h2>
             <nav className="grade-nav">
@@ -275,20 +286,23 @@ export default function ReadingFlow() {
             </nav>
           </aside>
 
-          {/* MAIN CONTENT: Subjects & Story Cards */}
           <main className="timeless-main">
             <header className="main-header">
-              <h1 className="grade-title">Subjects for {selectedGrade.replace('_', ' ')}</h1>
+              <div className="header-text-group">
+                <h1 className="grade-title">Explore {selectedGrade.replace('_', ' ')}</h1>
+                <p className="grade-subtitle">Select a subject to discover new stories and challenges.</p>
+              </div>
               
               {gradeData[selectedGrade] && gradeData[selectedGrade].length > 0 && (
-                <div className="subject-pills">
+                <div className="innovative-subject-dock">
                   {gradeData[selectedGrade].map(subject => (
                     <button
                       key={subject}
-                      className={`subject-pill ${selectedSubject === subject ? 'active' : ''}`}
+                      className={`subject-tab ${selectedSubject === subject ? 'active' : ''}`}
                       onClick={() => handleSelectSubject(selectedGrade, subject)}
                     >
-                      {subject}
+                      <span className="subject-icon">{getSubjectIcon(subject)}</span>
+                      <span className="subject-name">{subject.replace('_', ' ')}</span>
                     </button>
                   ))}
                 </div>
@@ -301,24 +315,49 @@ export default function ReadingFlow() {
                   <div className="spinner"></div>
                   <p>Synthesizing stories...</p>
                 </div>
-              ) : currentStories.length > 0 ? (
-                <div className="story-grid">
-                  {currentStories.map(story => (
-                    <div key={story.id} className="timeless-card" onClick={() => fetchStoryDetails(story.id)}>
-                      <div className="card-graphic">
-                         <span className="graphic-icon">✨</span>
+              ) : displayedStories.length > 0 ? (
+                <>
+                  {/* Smaller Card Grid */}
+                  <div className="story-grid small-cards">
+                    {displayedStories.map(story => (
+                      <div key={story.id} className="timeless-card" onClick={() => fetchStoryDetails(story.id)}>
+                        <div className="card-graphic">
+                           <span className="graphic-icon">✨</span>
+                        </div>
+                        <div className="card-content">
+                          <h4>{story.title}</h4>
+                        </div>
+                        <div className="card-footer">
+                          <span>Read</span>
+                          <span className="arrow">→</span>
+                        </div>
                       </div>
-                      <div className="card-content">
-                        <h4>{story.title}</h4>
-                        <p>{story.description || 'Embark on a new reading adventure.'}</p>
-                      </div>
-                      <div className="card-footer">
-                        <span>Read Story</span>
-                        <span className="arrow">→</span>
-                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className="pagination-controls">
+                      <button 
+                        className="page-btn" 
+                        disabled={currentPage === 1} 
+                        onClick={() => setCurrentPage(prev => prev - 1)}
+                      >
+                        ← Prev
+                      </button>
+                      <span className="page-info">
+                        Page <strong>{currentPage}</strong> of {totalPages}
+                      </span>
+                      <button 
+                        className="page-btn" 
+                        disabled={currentPage === totalPages} 
+                        onClick={() => setCurrentPage(prev => prev + 1)}
+                      >
+                        Next →
+                      </button>
                     </div>
-                  ))}
-                </div>
+                  )}
+                </>
               ) : (
                 <div className="empty-state">
                   <span className="empty-icon">📭</span>
