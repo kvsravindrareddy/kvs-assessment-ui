@@ -1,13 +1,139 @@
-/* styles.css */
+=/* styles.css */
+
+* {
+  box-sizing: border-box;
+}
+
+#mainpage {
+  /* CHANGED: 20% was way too huge and crushed the layout. 
+     5% gives you plenty of breathing room while utilizing the screen! */
+  padding: 0 5%; 
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   CLEAN HORIZONTAL NAVIGATION (BULLETPROOF ALIGNMENT)
+   ========================================================================== */
+
+.student-nav-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 20px 0 30px 0;
+}
+
+.flat-topnav {
+  display: flex !important;
+  flex-direction: row !important; 
+  flex-wrap: wrap !important; 
+  justify-content: center;
+  align-items: center;
+  background-color: #f1f5f9; 
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  gap: 8px;
+  
+  /* CRITICAL: forces the bar to only be as wide as the buttons inside it */
+  width: max-content; 
+  max-width: 100%; 
+}
+
+.nav-item {
+  display: inline-flex !important; 
+  flex-direction: column !important; /* CRITICAL: Stacks text under the icon */
+  align-items: center; 
+  justify-content: center;
+  width: auto !important; 
+  flex: 0 0 auto !important; 
+  
+  gap: 4px; /* Reduced gap so it doesn't get too tall */
+  padding: 6px 16px; /* Tighter vertical padding to maintain the same overall size */
+  
+  background-color: transparent;
+  border: none;
+  border-radius: 8px;
+  
+  color: #334155 !important; 
+  font-size: 13px; /* Slightly smaller text since it sits below */
+  font-weight: 700; 
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap !important; 
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-icon {
+  font-size: 22px; /* Keeps the icon prominent */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1; 
+}
+
+.nav-text {
+  white-space: nowrap !important; 
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  /* Removed the Y-transform since it is no longer side-by-side */
+}
+
+/* --- SIMPLE HOVER STATE --- */
+.nav-item:hover:not(.active) {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important; /* Turns almost black on hover for contrast */
+}
+
+/* --- SIMPLE ACTIVE STATE --- */
+.nav-item.active {
+  background-color: #3b82f6 !important; 
+  
+  /* CRITICAL: Forces text to be white ONLY when the blue background is active */
+  color: #ffffff !important; 
+  
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* --- RESPONSIVENESS --- */
+@media screen and (max-width: 900px) {
+  .nav-item {
+    padding: 8px 14px !important;
+    font-size: 15px !important;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .flat-topnav {
+    gap: 4px;
+    padding: 6px;
+  }
+  .nav-text {
+    display: none !important; /* Hides text so icons fit perfectly */
+  }
+  .nav-item {
+    padding: 10px 14px !important;
+  }
+  .nav-icon {
+    font-size: 20px !important;
+    margin: 0 !important;
+  }
+}
+
+/* ==========================================================================
+   GENERAL COMPONENTS & PAGE STYLES (PRESERVED)
+   ========================================================================== */
 
 .brand-section-buttons {
-  margin-left: auto; /* Push buttons to the right */
-  display: flex; /* Ensure buttons stay in the same line */
-  align-items: center; /* Center buttons vertically */
+  margin-left: auto;
+  display: flex;
+  align-items: center;
 }
 
 .brand-section-buttons button {
-  margin-left: 10px; /* Add space between buttons */
+  margin-left: 10px;
   background-color: transparent;
   color: white;
   border: none;
@@ -16,113 +142,59 @@
 
 .brand-section-buttons button.login:hover,
 .brand-section-buttons button.signup:hover {
-  background-color: #45A049; /* Highlight color on hover */
-}
-  .assessment {
-    margin: 20px auto;
-    padding: 20px;
-    max-width: 80%;
-    border-collapse: collapse;
-  }
-
-  .assessment th, .assessment td {
-    border: 1px solid #ddd;
-    background-color: white;
-  }
-  
-  .summary {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    border: 1px solid #ccc;
-  }
-  
-  .question {
-    margin-top: 20px;
-    background-color: #f9f9f9;
-  }
-  
-  input[type="text"] {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-  }
-  
-  button {
-    padding: 10px 20px;
-    background-color: #04AA6D;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-  
-  button:hover {
-    background-color: #04AA6D;
-  }
-  
-  button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-  }
-
-  .selected {
-    background-color: blue;
-  }
-
-* {
-  box-sizing: border-box;
+  background-color: #45A049;
 }
 
-#mainpage {
-  padding: 0 20%; /* Adjust the padding to leave white space on the left and right */
-  /*background-color: #97ab68;*/
+.assessment {
+  margin: 20px auto;
+  padding: 20px;
+  max-width: 80%;
+  border-collapse: collapse;
 }
 
-.topnav {
-  display: flex !important;
-  flex-direction: row !important;
-  justify-content: center;
-  flex-wrap: nowrap !important;
-  background: transparent;
-  padding: 20px 0;
-  border-radius: 0;
-  box-shadow: none;
-  font-family: 'Baloo Bhai 2', cursive;
-  gap: 20px;
-  max-width: 100%;
-  width: fit-content;
-  margin: 0 auto 30px;
-  border: none;
-}
-
-.topnav div {
-  margin: 6px 10px;
-}
-
-.topnav a {
-  color: #333;
+.assessment th, .assessment td {
+  border: 1px solid #ddd;
   background-color: white;
-  border-radius: 25px;
+}
+
+.summary {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+}
+
+.question {
+  margin-top: 20px;
+  background-color: #f9f9f9;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+button {
   padding: 10px 20px;
-  font-size: 18px;
-  text-decoration: none;
-  transition: transform 0.2s ease, background-color 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.topnav a:hover {
-  background-color: #fdd835;
-  color: #333;
-  transform: scale(1.1);
-}
-
-.topnav .active a {
-  background-color: #ff6f61;
+  background-color: #04AA6D;
   color: white;
-  font-weight: bold;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-  transform: scale(1.1);
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #04AA6D;
+}
+
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.selected {
+  background-color: blue;
 }
 
 .dropdown-content {
@@ -143,17 +215,8 @@
   text-decoration: underline;
 }
 
-.generated-numbers-table {
-  width: 100%;
-  border-collapse: collapse;
-}
 
-.generated-numbers-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: center;
-}
-
+/* --- GENERATE NUMBERS TOOLS --- */
 
 .generateNumbersMainDiv {
   margin: 0 auto;
@@ -188,9 +251,9 @@
 }
 
 .generateNumberQuesTb button {
-  width: 40%; /* Make the button width 100% */
+  width: 40%; 
   margin: auto;
-  padding: 8px 0; /* Adjust padding to center the button vertically */
+  padding: 8px 0; 
   background-color: #4CAF50;
   color: white;
   border: none;
@@ -209,8 +272,9 @@
 }
 
 .generated-numbers-table td {
+  border: 1px solid #ddd;
   padding: 8px;
-  border-bottom: 1px solid #ddd;
+  text-align: center;
   position: relative;
   transition: all 0.3s ease;
 }
@@ -238,29 +302,16 @@
 }
 
 @keyframes numberBubbleZoom {
-  0% {
-    transform: translate(-50%, -50%) scale(0.1);
-    opacity: 0;
-  }
-  20% {
-    transform: translate(-50%, -50%) scale(1.1);
-    opacity: 1;
-  }
-  40% {
-    transform: translate(-50%, -50%) scale(0.95);
-  }
-  60% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-  85% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(0.1);
-    opacity: 0;
-  }
+  0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
+  20% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+  40% { transform: translate(-50%, -50%) scale(0.95); }
+  60% { transform: translate(-50%, -50%) scale(1); }
+  85% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
 }
+
+
+/* --- PAGINATION & CARDS --- */
 
 .pagination {
   margin-top: 10px;
@@ -280,7 +331,6 @@
   background-color: #004a8f;
 }
 
-
 .card-container {
   display: flex;
   flex-wrap: wrap;
@@ -297,10 +347,9 @@
   justify-content: center;
   align-items: center;
   font-size: 2rem;
-  perspective: 1000px; /* Add perspective for 3D effect */
+  perspective: 1000px; 
   background-color: rgb(71, 237, 255);
 }
-
 
 .letter {
   transform-style: preserve-3d;
@@ -310,284 +359,114 @@
 }
 
 .card:hover .letter {
-  transform: scale(1.5); /* Increase the scale to make it larger */
+  transform: scale(1.5); 
   transition: transform 0.5s ease;
   color: coral;
 }
+
+/* --- SIDEBAR LAYOUT --- */
 
 .container {
   display: flex;
 }
 
 .sidebar {
-  flex: 0 0 250px; /* Set the width of the sidebar */
-  border-right: 1px solid #ccc; /* Add border on the right side */
-  border-left: 1px solid #ccc; /* Add border on the left side */
-  border-bottom: 1px solid #ccc; /* Add border on the bottom */
-  border-top: 1px solid #ccc; /* Add border on the top */
-  background-color: grey; /* Set background color */
-  padding: 20px; /* Add padding to the sidebar */
+  flex: 0 0 250px; 
+  border: 1px solid #ccc; 
+  background-color: grey; 
+  padding: 20px; 
   height: fit-content;
 }
 
 .content {
-  flex: 1; /* Allow content to expand to fill remaining space */
-  padding: 20px; /* Add padding to the content area */
+  flex: 1; 
+  padding: 20px; 
 }
 
-/* Updated CSS for responsiveness and footer */
-/* Add media queries for responsiveness */
-/* Responsive Adjustments */
+
+/* ==========================================================================
+   GLOBAL RESPONSIVE ADJUSTMENTS
+   ========================================================================== */
+
 @media screen and (max-width: 1024px) {
-  #mainpage {
-    padding: 0 10%;
-  }
-
-  .container {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    flex: 1;
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid #ccc;
-  }
+  .container { flex-direction: column; }
+  .sidebar { flex: 1; width: 100%; border-right: none; border-bottom: 1px solid #ccc; }
 }
 
 @media screen and (max-width: 768px) {
-  #mainpage {
-    padding: 0 5%;
-  }
-
-  .topnav {
-    flex-direction: row;
-    align-items: center;
-    padding: 8px 0;
-  }
-
-  .topnav a {
-    padding: 8px 12px;
-    font-size: 14px;
-  }
-
-  .header {
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-  }
-
-  .nav-right {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
-
-  .buttons {
-    flex-direction: row;
-    width: 100%;
-    justify-content: center;
-    margin-bottom: 10px;
-  }
-
-  .buttons button {
-    margin: 0 5px;
-  }
-
-  .search {
-    margin-top: 10px;
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .search input[type="text"] {
-    width: 100%;
-  }
-
-  .contact-form {
-    width: 95%;
-    margin: 10px;
-    padding: 10px;
-  }
-
-  .assessment {
-    max-width: 95%;
-    padding: 10px;
-  }
-
-  .generateNumbersMainDiv {
-    padding: 10px;
-  }
-
-  .card-container {
-    justify-content: center;
-  }
-
-  .card {
-    width: 100px;
-    height: 100px;
-    margin: 5px;
-    font-size: 1.5rem;
-  }
-
-  .letter {
-    font-size: 6rem;
-  }
-
-  .section-card {
-    width: 100%;
-    margin: 10px 0;
-  }
-
-  .brand-section img {
-    width: 140px;
-    height: 60px;
-  }
+  .header { flex-direction: column; align-items: center; padding: 10px; }
+  .nav-right { flex-direction: column; align-items: center; width: 100%; }
+  .buttons { flex-direction: row; width: 100%; justify-content: center; margin-bottom: 10px; }
+  .buttons button { margin: 0 5px; }
+  
+  .search { margin-top: 10px; margin-left: 0; width: 100%; }
+  .search input[type="text"] { width: 100%; }
+  .contact-form { width: 95%; margin: 10px; padding: 10px; }
+  .assessment { max-width: 95%; padding: 10px; }
+  .generateNumbersMainDiv { padding: 10px; }
+  .card-container { justify-content: center; }
+  .card { width: 100px; height: 100px; margin: 5px; font-size: 1.5rem; }
+  .letter { font-size: 6rem; }
+  .section-card { width: 100%; margin: 10px 0; }
+  .brand-section img { width: 140px; height: 60px; }
 }
 
 @media screen and (max-width: 480px) {
-  #mainpage {
-    padding: 0 2%;
-  }
-
-  .topnav a {
-    padding: 6px 8px;
-    font-size: 12px;
-  }
-
-  .header {
-    padding: 8px;
-  }
-
-  .brand-section img {
-    width: 120px;
-    height: 50px;
-  }
-
-  .buttons button {
-    font-size: 12px;
-    padding: 6px 10px;
-  }
-
-  .search input[type="text"] {
-    padding: 8px;
-    font-size: 14px;
-  }
-
-  .contact-form {
-    width: 98%;
-    margin: 5px;
-    padding: 8px;
-  }
-
-  .contact-form th,
-  .contact-form td {
-    padding: 4px;
-    font-size: 14px;
-  }
-
-  .assessment {
-    max-width: 98%;
-    padding: 8px;
-  }
-
-  .generateNumbersMainDiv {
-    padding: 8px;
-  }
-
-  .generateNumberQuesTb button {
-    width: 100%;
-  }
-
-  .card {
-    width: 80px;
-    height: 80px;
-    margin: 4px;
-    font-size: 1.2rem;
-  }
-
-  .letter {
-    font-size: 4rem;
-  }
-
-  .section-card {
-    padding: 15px;
-  }
-
-  .section-card h2 {
-    font-size: 18px;
-  }
-
-  button {
-    padding: 8px 16px;
-    font-size: 14px;
-  }
+  #mainpage { padding: 0 2%; }
+  .header { padding: 8px; }
+  .brand-section img { width: 120px; height: 50px; }
+  .buttons button { font-size: 12px; padding: 6px 10px; }
+  .search input[type="text"] { padding: 8px; font-size: 14px; }
+  .contact-form { width: 98%; margin: 5px; padding: 8px; }
+  .contact-form th, .contact-form td { padding: 4px; font-size: 14px; }
+  .assessment { max-width: 98%; padding: 8px; }
+  .generateNumbersMainDiv { padding: 8px; }
+  .generateNumberQuesTb button { width: 100%; }
+  .card { width: 80px; height: 80px; margin: 4px; font-size: 1.2rem; }
+  .letter { font-size: 4rem; }
+  .section-card { padding: 15px; }
+  .section-card h2 { font-size: 18px; }
+  button { padding: 8px 16px; font-size: 14px; }
 }
 
 /* Touch-friendly improvements */
 @media (hover: none) and (pointer: coarse) {
-  .topnav a,
-  .buttons button,
-  .section-card,
-  button {
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  .card {
-    min-width: 100px;
-    min-height: 100px;
-  }
+  .buttons button, .section-card, button { min-height: 44px; min-width: 44px; }
+  .card { min-width: 100px; min-height: 100px; }
 }
 
 /* Landscape orientation for mobile */
 @media screen and (max-width: 768px) and (orientation: landscape) {
-  .header {
-    flex-direction: row;
-    padding: 8px 15px;
-  }
-
-  .nav-right {
-    flex-direction: row;
-  }
-
-  .buttons {
-    margin-bottom: 0;
-    margin-right: 10px;
-  }
-
-  .search {
-    margin-top: 0;
-    width: auto;
-  }
+  .header { flex-direction: row; padding: 8px 15px; }
+  .nav-right { flex-direction: row; }
+  .buttons { margin-bottom: 0; margin-right: 10px; }
+  .search { margin-top: 0; width: auto; }
 }
+
+
+/* ==========================================================================
+   ANIMATIONS
+   ========================================================================== */
 
 /* Animated Logo */
 .brand-section img {
   width: 180px;
   height: 80px;
-  animation: bounce 1s infinite alternate; /* Add bouncing animation */
+  animation: bounce 1s infinite alternate; 
 }
 
 @keyframes bounce {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-10px);
-  }
+  from { transform: translateY(0); }
+  to { transform: translateY(-10px); }
 }
 
 /* Animated Search Icon */
 .search-icon img {
   width: 20px;
   height: 20px;
-  transition: transform 0.3s; /* Add smooth transition effect */
+  transition: transform 0.3s; 
 }
 
 .search-icon:hover img {
-  transform: scale(1.2); /* Increase size on hover */
+  transform: scale(1.2); 
 }
-
-
-/* Duplicate styles removed - using App.css definitions instead */

@@ -93,10 +93,12 @@ function AppContent() {
   ];
 
   const navigationOptions = [
-    { label: 'Home', icon: '🏠' },
-    { label: 'Reading', icon: '📚' },
-    { label: 'Games', icon: '🎮' },
-    { label: 'AI', icon: '🤖' }
+    { label: 'Home', value: 'Home', icon: '🏠' },
+    { label: 'Assessments', value: 'AssessmentFlow', icon: '📝' },
+    { label: 'Stories', value: 'Reading', icon: '📚' },
+    { label: 'Worksheets', value: 'Worksheets', icon: '🖨️' },
+    { label: 'Games', value: 'Games', icon: '🎮' },
+    { label: 'AI Help', value: 'AI', icon: '🤖' }
   ];
 
   useEffect(() => {
@@ -409,25 +411,28 @@ function AppContent() {
       )}
 
 
-      {/* Navigation Tabs - Conditionally shown for admin users */}
+      {/* Clean Horizontal Navigation */}
       {showStudentNav && (
-        <nav className="topnav">
-          {navigationOptions.map((option) => (
-            <button
-              key={option.label}
-              className={`nav-item ${activeSection === option.label ? 'active' : ''}`}
-              onClick={() => {
-                if (option.label === 'Games') {
-                  setSelectedGame(null);
-                }
-                handleNavigationClick(option.label);
-              }}
-              title={option.label}
-            >
-              <span className="nav-icon">{option.icon}</span>
-            </button>
-          ))}
-        </nav>
+        <div className="student-nav-wrapper">
+          <nav className="flat-topnav">
+            {navigationOptions.map((option) => (
+              <button
+                key={option.value}
+                className={`nav-item ${activeSection === option.value ? 'active' : ''}`}
+                onClick={() => {
+                  if (option.value === 'Games') {
+                    setSelectedGame(null);
+                  }
+                  handleNavigationClick(option.value);
+                }}
+                title={option.label}
+              >
+                <span className="nav-icon">{option.icon}</span>
+                <span className="nav-text">{option.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
       )}
 
       {/* Info banner for admin users when student navigation is hidden */}
