@@ -3,7 +3,7 @@ const CONFIG = {
         GATEWAY_URL: 'http://localhost:9000',
         // All requests now go through gateway
         EVALUATION_BASE_URL: 'http://localhost:9000',
-        ADMIN_BASE_URL: 'http://localhost:9000/v1/admin/assessment',
+        ADMIN_BASE_URL: 'http://localhost:9000',
         ADMIN_QUESTIONS_URL: 'http://localhost:9000/v1/questions',
         AI_ASSESSMENT_BASE_URL: 'http://localhost:9000',
         ASSESSMENT_BASE_URL: 'http://localhost:9000',
@@ -12,7 +12,7 @@ const CONFIG = {
     staging: {
         GATEWAY_URL: 'http://localhost:9000',
         EVALUATION_BASE_URL: 'http://localhost:9000',
-        ADMIN_BASE_URL: 'http://localhost:9000/v1/admin/assessment',
+        ADMIN_BASE_URL: 'http://localhost:9000',
         ADMIN_QUESTIONS_URL: 'http://localhost:9000/v1/questions',
         AI_ASSESSMENT_BASE_URL: 'http://localhost:9000',
         ASSESSMENT_BASE_URL: 'http://localhost:9000',
@@ -21,7 +21,7 @@ const CONFIG = {
     production: {
         GATEWAY_URL: 'http://localhost:9000',
         EVALUATION_BASE_URL: 'http://localhost:9000',
-        ADMIN_BASE_URL: 'http://localhost:9000/v1/admin/assessment',
+        ADMIN_BASE_URL: 'http://localhost:9000',
         ADMIN_QUESTIONS_URL: 'http://localhost:9000/v1/questions',
         AI_ASSESSMENT_BASE_URL: 'http://localhost:9000',
         ASSESSMENT_BASE_URL: 'http://localhost:9000',

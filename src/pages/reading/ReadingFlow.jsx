@@ -30,7 +30,7 @@ export default function ReadingFlow() {
   const [voices, setVoices] = useState([]);
 
   const adminConfigURL = `${CONFIG.development.ADMIN_SUPPORT_BASE_URL}/admin-assessment/v1/app-config/subject-types`;
-  const listStoriesURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/list-story-names`;
+  const listStoriesURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/load`;
   const getStoryURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/with-story-id`;
 
   useEffect(() => {
