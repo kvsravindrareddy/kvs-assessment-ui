@@ -16,72 +16,100 @@ export default function ReadingFlow() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const [gradeData, setGradeData] = useState({});
-  const [expandedStories, setExpandedStories] = useState(false);
-  const [expandedGrade, setExpandedGrade] = useState(null);
-  const [expandedSubject, setExpandedSubject] = useState(null);
   const [stories, setStories] = useState({});
   const [storyDetails, setStoryDetails] = useState(null);
 
+  // Timeless Navigation States
+  const [selectedGrade, setSelectedGrade] = useState(orderedGrades[0]);
+  const [selectedSubject, setSelectedSubject] = useState(null);
+  const [isLoadingStories, setIsLoadingStories] = useState(false);
+
+  // Assessment States
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [score, setScore] = useState(0);
   const [completed, setCompleted] = useState(false);
-
   const [voices, setVoices] = useState([]);
 
-  const adminConfigURL = `${CONFIG.development.ADMIN_SUPPORT_BASE_URL}/admin-assessment/v1/app-config/subject-types`;
+  const adminConfigURL = `${CONFIG.development.ADMIN_BASE_URL}/admin-assessment/v1/app-config/subject-types`;
   const listStoriesURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/load`;
   const getStoryURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/with-story-id`;
 
+  // 1. Fetch Grade Config
   useEffect(() => {
     fetch(adminConfigURL)
       .then(res => res.json())
-      .then(data => setGradeData(data))
+      .then(data => {
+        setGradeData(data);
+        if (data[orderedGrades[0]] && data[orderedGrades[0]].length > 0) {
+          handleSelectSubject(orderedGrades[0], data[orderedGrades[0]][0]);
+        }
+      })
       .catch(err => console.error('Failed to load grades:', err));
-  }, []);
+  }, [adminConfigURL]);
 
-  // 🔊 Load available voices
+  // 2. Load TTS Voices
   useEffect(() => {
-    const loadVoices = () => {
-      const v = window.speechSynthesis.getVoices();
-      setVoices(v);
-    };
+    const loadVoices = () => setVoices(window.speechSynthesis.getVoices());
     loadVoices();
     window.speechSynthesis.onvoiceschanged = loadVoices;
-
-    return () => {
-      window.speechSynthesis.cancel(); // cleanup speech on unmount
-    };
+    return () => window.speechSynthesis.cancel();
   }, []);
+
+  // 3. Handle Navigation Selection
+  const handleSelectGrade = (grade) => {
+    setSelectedGrade(grade);
+    const subjectsForGrade = gradeData[grade] || [];
+    if (subjectsForGrade.length > 0) {
+      handleSelectSubject(grade, subjectsForGrade[0]);
+    } else {
+      setSelectedSubject(null);
+    }
+  };
 
   const handleSelectSubject = async (grade, subject) => {
     window.speechSynthesis.cancel();
-    const key = `${grade}-${subject}`;
-    setExpandedSubject(prev => (prev === key ? null : key));
+    setSelectedSubject(subject);
     setStoryDetails(null);
     setCompleted(false);
 
+    const key = `${grade}-${subject}`;
+    if (stories[key]) return; 
+
+    setIsLoadingStories(true);
     try {
-      const res = await axios.post(listStoriesURL, { category: grade, storyType: subject });
+      const token = localStorage.getItem('token');
+      const res = await axios.post(
+        listStoriesURL,
+        { category: grade, storyType: subject },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        }
+      );
       setStories(prev => ({ ...prev, [key]: res.data }));
     } catch (err) {
       console.error('Error fetching stories:', err);
+    } finally {
+      setIsLoadingStories(false);
     }
   };
 
   const fetchStoryDetails = async (storyId) => {
-    // Check if user can access stories
     if (!canPerformAction('story')) {
       setShowUpgradeModal(true);
       return;
     }
-
-    // Track usage
     trackUsage('story');
-
     window.speechSynthesis.cancel();
+    
     try {
-      const res = await axios.get(`${getStoryURL}?storyId=${storyId}`);
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${getStoryURL}?storyId=${storyId}`, {
+        headers: { 'Authorization': token ? `Bearer ${token}` : '' }
+      });
       setStoryDetails(res.data);
       setQuestionIndex(0);
       setSelectedAnswer(null);
@@ -99,8 +127,7 @@ export default function ReadingFlow() {
     let isCorrect = false;
 
     if (question.meta.answerType === 'MULTIPLE') {
-      isCorrect =
-        Array.isArray(selectedAnswer) &&
+      isCorrect = Array.isArray(selectedAnswer) &&
         correctAnswers.every(ans => selectedAnswer.includes(ans)) &&
         selectedAnswer.length === correctAnswers.length;
     } else {
@@ -117,31 +144,24 @@ export default function ReadingFlow() {
     }
   };
 
-  // 🗣 Detect language by Unicode range
   const detectLanguage = (text) => {
-    if (/[ఀ-౿]/.test(text)) return 'te-IN'; // Telugu
-    if (/[ऀ-ॿ]/.test(text)) return 'hi-IN'; // Hindi
-    if (/[஀-௿]/.test(text)) return 'ta-IN'; // Tamil
-    if (/[ഀ-ൿ]/.test(text)) return 'ml-IN'; // Malayalam
-    if (/[ಀ-೿]/.test(text)) return 'kn-IN'; // Kannada
-    return 'en-US'; // fallback English
+    if (/[ఀ-౿]/.test(text)) return 'te-IN';
+    if (/[ऀ-ॿ]/.test(text)) return 'hi-IN';
+    if (/[஀-௿]/.test(text)) return 'ta-IN';
+    if (/[ഀ-ൿ]/.test(text)) return 'ml-IN';
+    if (/[ಀ-೿]/.test(text)) return 'kn-IN';
+    return 'en-US';
   };
 
-  // 🔊 Play story + current Q + options
   const playAll = () => {
     if (!storyDetails) return;
     window.speechSynthesis.cancel();
-
     const queue = [];
     if (storyDetails.content) queue.push(storyDetails.content);
-
     const currentQ = storyDetails.questions?.[questionIndex];
     if (currentQ?.name) queue.push(currentQ.name);
-
     if (currentQ?.options) {
-      Object.entries(currentQ.options).forEach(([key, value]) => {
-        queue.push(`${key}: ${value}`);
-      });
+      Object.entries(currentQ.options).forEach(([key, value]) => queue.push(`${key}: ${value}`));
     }
 
     const speakNext = (i) => {
@@ -154,11 +174,9 @@ export default function ReadingFlow() {
       utt.onend = () => speakNext(i + 1);
       window.speechSynthesis.speak(utt);
     };
-
     speakNext(0);
   };
 
-  // 📄 Export story content + current question + options
   const exportPDF = () => {
     if (!storyDetails) return;
     const doc = new jsPDF();
@@ -173,25 +191,28 @@ export default function ReadingFlow() {
     y += lines.length * 7 + 10;
 
     const question = storyDetails.questions[questionIndex];
-    doc.setFontSize(16);
-    doc.text(`Question ${questionIndex + 1}`, 10, y);
-    y += 10;
+    if (question) {
+      doc.setFontSize(16);
+      doc.text(`Question ${questionIndex + 1}`, 10, y);
+      y += 10;
 
-    doc.setFontSize(12);
-    const qLines = doc.splitTextToSize(question.name, 180);
-    doc.text(qLines, 10, y);
-    y += qLines.length * 7 + 5;
+      doc.setFontSize(12);
+      const qLines = doc.splitTextToSize(question.name, 180);
+      doc.text(qLines, 10, y);
+      y += qLines.length * 7 + 5;
 
-    Object.entries(question.options).forEach(([key, value]) => {
-      const optLines = doc.splitTextToSize(`${key}: ${value}`, 180);
-      doc.text(optLines, 10, y);
-      y += optLines.length * 7 + 3;
-    });
+      if (question.options) {
+        Object.entries(question.options).forEach(([key, value]) => {
+          const optLines = doc.splitTextToSize(`${key}: ${value}`, 180);
+          doc.text(optLines, 10, y);
+          y += optLines.length * 7 + 3;
+        });
+      }
+    }
 
     doc.save(`Story_${storyDetails.title || 'Untitled'}_Q${questionIndex + 1}.pdf`);
   };
 
-  // 📄 Preview story + question PDF
   const previewPDF = () => {
     if (!storyDetails) return;
     const doc = new jsPDF();
@@ -206,160 +227,186 @@ export default function ReadingFlow() {
     y += lines.length * 7 + 10;
 
     const question = storyDetails.questions[questionIndex];
-    doc.setFontSize(16);
-    doc.text(`Question ${questionIndex + 1}`, 10, y);
-    y += 10;
+    if (question) {
+      doc.setFontSize(16);
+      doc.text(`Question ${questionIndex + 1}`, 10, y);
+      y += 10;
 
-    doc.setFontSize(12);
-    const qLines = doc.splitTextToSize(question.name, 180);
-    doc.text(qLines, 10, y);
-    y += qLines.length * 7 + 5;
+      doc.setFontSize(12);
+      const qLines = doc.splitTextToSize(question.name, 180);
+      doc.text(qLines, 10, y);
+      y += qLines.length * 7 + 5;
 
-    Object.entries(question.options).forEach(([key, value]) => {
-      const optLines = doc.splitTextToSize(`${key}: ${value}`, 180);
-      doc.text(optLines, 10, y);
-      y += optLines.length * 7 + 3;
-    });
+      if (question.options) {
+        Object.entries(question.options).forEach(([key, value]) => {
+          const optLines = doc.splitTextToSize(`${key}: ${value}`, 180);
+          doc.text(optLines, 10, y);
+          y += optLines.length * 7 + 3;
+        });
+      }
+    }
 
     const blob = doc.output('bloburl');
     window.open(blob);
   };
 
+  const currentStoriesKey = `${selectedGrade}-${selectedSubject}`;
+  const currentStories = stories[currentStoriesKey] || [];
+
   return (
-    <div className="reading-container">
-      {/* Usage Indicator */}
+    <div className="timeless-layout">
       {!storyDetails && <UsageIndicator type="story" />}
 
       {!storyDetails ? (
-        <div>
-          <h2
-            className="collapsible-header"
-            onClick={() => setExpandedStories(prev => !prev)}
-          >
-            📚 Stories {expandedStories ? '▲' : '▼'}
-          </h2>
-
-          {expandedStories && (
-            <div className="grade-list-container">
+        <div className="timeless-grid">
+          {/* LEFT NAVIGATION: Grades */}
+          <aside className="timeless-sidebar">
+            <h2 className="sidebar-title">Grade Levels</h2>
+            <nav className="grade-nav">
               {orderedGrades.map((grade) => (
-                <div key={grade} className="grade-card">
-                  <h3 onClick={() => setExpandedGrade(prev => prev === grade ? null : grade)}>
-                    {grade} {expandedGrade === grade ? '▲' : '▼'}
-                  </h3>
+                <button
+                  key={grade}
+                  className={`grade-nav-item ${selectedGrade === grade ? 'active' : ''}`}
+                  onClick={() => handleSelectGrade(grade)}
+                >
+                  <span className="grade-icon">📖</span> {grade.replace('_', ' ')}
+                </button>
+              ))}
+            </nav>
+          </aside>
 
-                  {expandedGrade === grade && gradeData[grade] && (
-                    <div className="dropdown-content">
-                      {gradeData[grade].map((subject) => {
-                        const key = `${grade}-${subject}`;
+          {/* MAIN CONTENT: Subjects & Story Cards */}
+          <main className="timeless-main">
+            <header className="main-header">
+              <h1 className="grade-title">Subjects for {selectedGrade.replace('_', ' ')}</h1>
+              
+              {gradeData[selectedGrade] && gradeData[selectedGrade].length > 0 && (
+                <div className="subject-pills">
+                  {gradeData[selectedGrade].map(subject => (
+                    <button
+                      key={subject}
+                      className={`subject-pill ${selectedSubject === subject ? 'active' : ''}`}
+                      onClick={() => handleSelectSubject(selectedGrade, subject)}
+                    >
+                      {subject}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </header>
+
+            <section className="cards-container">
+              {isLoadingStories ? (
+                <div className="loading-state">
+                  <div className="spinner"></div>
+                  <p>Synthesizing stories...</p>
+                </div>
+              ) : currentStories.length > 0 ? (
+                <div className="story-grid">
+                  {currentStories.map(story => (
+                    <div key={story.id} className="timeless-card" onClick={() => fetchStoryDetails(story.id)}>
+                      <div className="card-graphic">
+                         <span className="graphic-icon">✨</span>
+                      </div>
+                      <div className="card-content">
+                        <h4>{story.title}</h4>
+                        <p>{story.description || 'Embark on a new reading adventure.'}</p>
+                      </div>
+                      <div className="card-footer">
+                        <span>Read Story</span>
+                        <span className="arrow">→</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <span className="empty-icon">📭</span>
+                  <h3>No Stories Found</h3>
+                  <p>Check back later or try a different subject.</p>
+                </div>
+              )}
+            </section>
+          </main>
+        </div>
+      ) : (
+        <div className="focus-reading-mode">
+          <button className="back-btn" onClick={() => { window.speechSynthesis.cancel(); setStoryDetails(null); }}>
+            ← Back to Library
+          </button>
+          
+          <div className="reading-canvas">
+            <h2 className="reading-title">{storyDetails.title}</h2>
+            <div className="reading-content">{storyDetails.content}</div>
+
+            <div className="action-bar">
+              <button className="tool-btn" onClick={playAll}>🔊 Read Aloud</button>
+              <button className="tool-btn" onClick={exportPDF}>📄 Download PDF</button>
+              <button className="tool-btn" onClick={previewPDF}>🖨 Preview PDF</button>
+            </div>
+
+            <div className="assessment-section">
+              {completed ? (
+                <div className="assessment-done-card">
+                  <div className="done-icon">🏆</div>
+                  <h3>Assessment Complete</h3>
+                  <div className="score-display">
+                    <span className="score-number">{score}</span> / {storyDetails.questions.length}
+                  </div>
+                </div>
+              ) : (
+                storyDetails.questions && storyDetails.questions.length > 0 && (
+                  <div className="modern-question-box">
+                    <div className="question-header">
+                      <span className="q-badge">Question {questionIndex + 1} of {storyDetails.questions.length}</span>
+                    </div>
+                    <h3 className="q-text">{storyDetails.questions[questionIndex].name}</h3>
+
+                    <div className="modern-options">
+                      {Object.entries(storyDetails.questions[questionIndex].options).map(([key, value]) => {
+                        const isMultiple = storyDetails.questions[questionIndex].meta.answerType === 'MULTIPLE';
+                        const isChecked = isMultiple 
+                          ? Array.isArray(selectedAnswer) && selectedAnswer.includes(key)
+                          : selectedAnswer === key;
+
                         return (
-                          <div key={subject} className="subject-block">
-                            <a onClick={() => handleSelectSubject(grade, subject)}>
-                              {subject}
-                            </a>
-
-                            {expandedSubject === key && (
-                              <div className="story-list-inline">
-                                {stories[key] && stories[key].length > 0 ? (
-                                  stories[key].map(story => (
-                                    <div
-                                      key={story.id}
-                                      className="story-card"
-                                      onClick={() => fetchStoryDetails(story.id)}
-                                    >
-                                      <h4>{story.title}</h4>
-                                      <p>{story.description || 'Click to read'}</p>
-                                      <button className="read-btn">Read →</button>
-                                    </div>
-                                  ))
-                                ) : (
-                                  <p className="no-stories-msg">📭 No stories to show for this subject.</p>
-                                )}
-                              </div>
-                            )}
-                          </div>
+                          <label key={key} className={`modern-option-label ${isChecked ? 'selected' : ''}`}>
+                            <input
+                              type={isMultiple ? "checkbox" : "radio"}
+                              name="option"
+                              value={key}
+                              checked={isChecked}
+                              onChange={(e) => {
+                                if (isMultiple) {
+                                  if (e.target.checked) setSelectedAnswer(prev => Array.isArray(prev) ? [...prev, key] : [key]);
+                                  else setSelectedAnswer(prev => Array.isArray(prev) ? prev.filter(ans => ans !== key) : []);
+                                } else {
+                                  setSelectedAnswer(key);
+                                }
+                              }}
+                            />
+                            <div className="opt-indicator">{key}</div>
+                            <span className="opt-text">{value}</span>
+                          </label>
                         );
                       })}
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    <button
+                      onClick={submitAnswer}
+                      disabled={!selectedAnswer || (Array.isArray(selectedAnswer) && selectedAnswer.length === 0)}
+                      className="modern-submit-btn"
+                    >
+                      Confirm Answer
+                    </button>
+                  </div>
+                )
+              )}
             </div>
-          )}
-        </div>
-      ) : (
-        <div>
-          <h2>{storyDetails.title}</h2>
-          <p className="story-content">{storyDetails.content}</p>
-
-          <button className="play-btn" onClick={playAll}>🔊 Play</button>
-          <button onClick={exportPDF}>📄 Download PDF</button>
-          <button onClick={previewPDF}>🖨 Preview & Print</button>
-
-          {completed ? (
-            <div className="assessment-done">
-              <h3>Assessment Completed!</h3>
-              <p>Score: {score} / {storyDetails.questions.length}</p>
-              <button onClick={() => { window.speechSynthesis.cancel(); setStoryDetails(null); }}>Back to Stories</button>
-            </div>
-          ) : (
-            storyDetails.questions && storyDetails.questions.length > 0 && (
-              <div className="question-box">
-                <h3>
-                  Question {questionIndex + 1} of {storyDetails.questions.length}
-                </h3>
-
-                <p>{storyDetails.questions[questionIndex].name}</p>
-
-                <div className="options-list">
-                  {storyDetails.questions[questionIndex].meta.answerType === 'MULTIPLE' &&
-                    Object.entries(storyDetails.questions[questionIndex].options).map(([key, value]) => (
-                      <label key={key} className="option-label">
-                        <input
-                          type="checkbox"
-                          value={key}
-                          checked={Array.isArray(selectedAnswer) && selectedAnswer.includes(key)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedAnswer(prev => Array.isArray(prev) ? [...prev, key] : [key]);
-                            } else {
-                              setSelectedAnswer(prev => Array.isArray(prev) ? prev.filter(ans => ans !== key) : []);
-                            }
-                          }}
-                        />
-                        {key}: {value}
-                      </label>
-                    ))}
-
-                  {storyDetails.questions[questionIndex].meta.answerType === 'SINGLE' &&
-                    Object.entries(storyDetails.questions[questionIndex].options).map(([key, value]) => (
-                      <label key={key} className="option-label">
-                        <input
-                          type="radio"
-                          name="option"
-                          value={key}
-                          checked={selectedAnswer === key}
-                          onChange={() => setSelectedAnswer(key)}
-                        />
-                        {key}: {value}
-                      </label>
-                    ))}
-                </div>
-
-                <button
-                  onClick={submitAnswer}
-                  disabled={!selectedAnswer || (Array.isArray(selectedAnswer) && selectedAnswer.length === 0)}
-                  className="submit-btn"
-                >
-                  Submit Answer
-                </button>
-              </div>
-              
-            )
-          )}
+          </div>
         </div>
       )}
 
-      {/* Upgrade Modal */}
       {showUpgradeModal && (
         <UpgradePrompt
           message={getUpgradeMessage('story')}
