@@ -4,6 +4,7 @@ import jsPDF from 'jspdf';
 import CONFIG from '../../Config';
 import '../../css/AssessmentFlow.css';
 import { useSubscription } from '../../context/SubscriptionContext';
+import { useAuth } from '../../context/AuthContext'; // INDUSTRY STANDARD: Added AuthContext
 import UpgradePrompt from '../../components/UpgradePrompt';
 import UsageIndicator from '../../components/UsageIndicator';
 
@@ -13,7 +14,7 @@ const orderedGrades = [
 
 const STORIES_PER_PAGE = 16; 
 
-// 👇 Defined right here so ESLint knows exactly what it is!
+// Placed outside to prevent ESLint 'no-undef' errors
 const getSubjectIcon = (subjectName) => {
   const s = subjectName.toUpperCase();
   if (s.includes('MATH')) return '📐';
@@ -29,6 +30,7 @@ const getSubjectIcon = (subjectName) => {
 };
 
 export default function ReadingFlow() {
+  const { user } = useAuth(); // Safely extract the logged-in user
   const { canPerformAction, trackUsage, getUpgradeMessage } = useSubscription();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
@@ -49,9 +51,12 @@ export default function ReadingFlow() {
   const [completed, setCompleted] = useState(false);
   const [voices, setVoices] = useState([]);
 
+  // API Endpoints
   const adminConfigURL = `${CONFIG.development.ADMIN_BASE_URL}/admin-assessment/v1/app-config/subject-types`;
   const listStoriesURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/load`;
-  const getStoryURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/start`;
+  
+  // Now explicitly calling the tracking endpoint on the assessment service!
+  const startAssessmentURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/start`;
 
   useEffect(() => {
     fetch(adminConfigURL)
@@ -122,45 +127,80 @@ export default function ReadingFlow() {
       setShowUpgradeModal(true);
       return;
     }
-    trackUsage('story');
+    
     window.speechSynthesis.cancel();
     
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${getStoryURL}?storyId=${storyId}`, {
+      
+      // Determine the User ID. If no user is logged in, default to GUEST_USER
+      const currentUserId = user ? (user.id || user.email || 'GUEST_USER') : 'GUEST_USER';
+
+      // Pass BOTH the storyId and the userId to the backend session tracker
+      const requestUrl = `${startAssessmentURL}?storyId=${storyId}&userId=${encodeURIComponent(currentUserId)}`;
+
+      const res = await axios.get(requestUrl, {
         headers: { 'Authorization': token ? `Bearer ${token}` : '' }
       });
+      
+      trackUsage('story'); // Only track usage if the backend successfully allows them to start
+      
       setStoryDetails(res.data);
       setQuestionIndex(0);
       setSelectedAnswer(null);
       setScore(0);
       setCompleted(false);
+      
     } catch (err) {
       console.error('Error fetching story details:', err);
+      // If the backend blocks the user because they already completed it, alert them!
+      if (err.response && err.response.data && err.response.data.message) {
+        alert(`Could not start assessment: ${err.response.data.message}`);
+      } else {
+        alert('Assessment has already been completed by this user, or there was a network error.');
+      }
     }
   };
 
-  const submitAnswer = () => {
+  const submitAnswer = async () => {
     if (!storyDetails) return;
-    const question = storyDetails.questions[questionIndex];
-    const correctAnswers = question.correctAnswerKeys;
-    let isCorrect = false;
+    
+    const isLastQuestion = questionIndex === storyDetails.questions.length - 1;
+    const currentUserId = user ? (user.id || user.email || 'GUEST_USER') : 'GUEST_USER';
+    const answersList = Array.isArray(selectedAnswer) ? selectedAnswer : [selectedAnswer];
 
-    if (question.meta.answerType === 'MULTIPLE') {
-      isCorrect = Array.isArray(selectedAnswer) &&
-        correctAnswers.every(ans => selectedAnswer.includes(ans)) &&
-        selectedAnswer.length === correctAnswers.length;
-    } else {
-      isCorrect = correctAnswers.includes(selectedAnswer);
-    }
+    try {
+      const token = localStorage.getItem('token');
+      const submitURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/submit-answer`;
+      
+      const payload = {
+        userId: currentUserId,
+        storyId: storyDetails.storyId,
+        questionIndex: storyDetails.questions[questionIndex].sequenceNumber || questionIndex,
+        userAnswer: answersList,
+        lastQuestion: isLastQuestion
+      };
 
-    if (isCorrect) setScore(prev => prev + 1);
+      const res = await axios.post(submitURL, payload, {
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '' 
+        }
+      });
 
-    if (questionIndex < storyDetails.questions.length - 1) {
-      setQuestionIndex(prev => prev + 1);
-      setSelectedAnswer(null);
-    } else {
-      setCompleted(true);
+      // Update the score with the mathematically secure score evaluated by the Java backend
+      setScore(res.data.currentScore);
+
+      if (!isLastQuestion) {
+        setQuestionIndex(prev => prev + 1);
+        setSelectedAnswer(null);
+      } else {
+        setCompleted(true);
+      }
+      
+    } catch (err) {
+      console.error("Failed to submit answer:", err);
+      alert("Error saving answer. Please check your connection.");
     }
   };
 
@@ -317,7 +357,6 @@ export default function ReadingFlow() {
                 </div>
               ) : displayedStories.length > 0 ? (
                 <>
-                  {/* Smaller Card Grid */}
                   <div className="story-grid small-cards">
                     {displayedStories.map(story => (
                       <div key={story.id} className="timeless-card" onClick={() => fetchStoryDetails(story.id)}>
@@ -335,7 +374,6 @@ export default function ReadingFlow() {
                     ))}
                   </div>
 
-                  {/* Pagination Controls */}
                   {totalPages > 1 && (
                     <div className="pagination-controls">
                       <button 
