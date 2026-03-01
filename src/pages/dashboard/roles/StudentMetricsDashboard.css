@@ -10,7 +10,15 @@
 .dashboard-header p { color: #64748b; margin-top: 8px; }
 
 /* Continue Learning Section */
-.section-title { font-size: 20px; font-weight: 700; margin: 32px 0 16px; display: flex; align-items: center; gap: 8px; }
+.section-title { 
+  font-size: 20px; 
+  font-weight: 700; 
+  margin: 32px 0 16px; 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  color: #1e293b;
+}
 .resume-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
 .resume-card {
   background: white; border-radius: 16px; padding: 20px;

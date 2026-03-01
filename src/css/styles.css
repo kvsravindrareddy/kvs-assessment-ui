@@ -57,7 +57,7 @@
   border-radius: 8px;
   
   color: #334155 !important; 
-  font-size: 13px; /* Slightly smaller text since it sits below */
+  font-size: 13px;
   font-weight: 700; 
   font-family: inherit;
   cursor: pointer;
@@ -66,11 +66,12 @@
 }
 
 .nav-icon {
-  font-size: 22px; /* Keeps the icon prominent */
+  font-size: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1; 
+  background: transparent !important;
 }
 
 .nav-text {
@@ -78,7 +79,7 @@
   display: flex;
   align-items: center;
   line-height: 1;
-  /* Removed the Y-transform since it is no longer side-by-side */
+  background: transparent !important;
 }
 
 /* --- SIMPLE HOVER STATE --- */

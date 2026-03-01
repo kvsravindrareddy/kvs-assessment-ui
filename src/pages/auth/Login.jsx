@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { Link } from 'react-router-dom';
 import '../../css/Auth.css';
 
 const Login = ({ onClose, onSwitchToSignup, isAdmin = false }) => {
@@ -28,7 +29,7 @@ const Login = ({ onClose, onSwitchToSignup, isAdmin = false }) => {
       console.log('Login form submitted:', credentials.username, isAdmin ? 'Admin' : 'User');
       await login(credentials, isAdmin);
       alert(`${isAdmin ? 'Admin' : 'User'} login successful!`);
-      onClose();
+      if (onClose) onClose();
     } catch (err) {
       console.error('Login component error:', err);
       const errorMessage = err.message || err.response?.data?.message || err.response?.data || 'Login failed. Please check your credentials.';
@@ -66,7 +67,14 @@ const Login = ({ onClose, onSwitchToSignup, isAdmin = false }) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label htmlFor="password">Password</label>
+              {!isAdmin && (
+                <Link to="/forgot-password" onClick={onClose} style={{ fontSize: '13px', color: '#007bff', textDecoration: 'none' }}>
+                  Forgot Password?
+                </Link>
+              )}
+            </div>
             <input
               type="password"
               id="password"

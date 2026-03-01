@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import SuperAdminDashboard from './roles/SuperAdminDashboard';
 import TeacherDashboard from './roles/TeacherDashboard';
@@ -8,12 +9,15 @@ import CounselorDashboard from './roles/CounselorDashboard';
 import ContentCreatorDashboard from './roles/ContentCreatorDashboard';
 import './UnifiedDashboard.css';
 
-const UnifiedDashboard = () => {
+const UnifiedDashboard = ({ children }) => {
   const { user, activeRole, switchRole, getAccessibleRoles, ROLES } = useAuth();
   const [showRoleSwitcher, setShowRoleSwitcher] = useState(false);
   const accessibleRoles = getAccessibleRoles();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Role-specific dashboard components
+  const isProfileView = location.pathname === '/profile';
+
   const dashboardComponents = {
     [ROLES.SUPER_ADMIN]: SuperAdminDashboard,
     [ROLES.DISTRICT_ADMIN]: SuperAdminDashboard,
@@ -83,13 +87,29 @@ const UnifiedDashboard = () => {
       <div className="dashboard-header">
         <div className="dashboard-header-left">
           <h1 className="dashboard-title">
-            <span className="dashboard-icon">📊</span>
-            Dashboard
+            <span className="dashboard-icon">{isProfileView ? '👤' : '📊'}</span>
+            {isProfileView ? 'My Profile' : 'Dashboard'}
           </h1>
-          <p className="dashboard-subtitle">Welcome back, {user.firstName}!</p>
+          <p className="dashboard-subtitle">
+            {isProfileView ? 'Manage your account settings and security' : `Welcome back, ${user.firstName}!`}
+          </p>
         </div>
 
         <div className="dashboard-header-right">
+          
+          {/* UPDATED: Changed to Home and fixed UI alignment */}
+          {isProfileView ? (
+            <button className="profile-action-button" onClick={() => navigate('/')} title="Back to Home">
+              <span className="profile-icon">🏠</span>
+              <span className="profile-text">Home</span>
+            </button>
+          ) : (
+            <button className="profile-action-button" onClick={() => navigate('/profile')} title="View Profile & Settings">
+              <span className="profile-icon">👤</span>
+              <span className="profile-text">My Profile</span>
+            </button>
+          )}
+
           {accessibleRoles.length > 1 && (
             <div className="role-switcher-container">
               <button
@@ -141,7 +161,7 @@ const UnifiedDashboard = () => {
       </div>
 
       <div className="dashboard-content">
-        <DashboardComponent />
+        {children ? children : <DashboardComponent />}
       </div>
     </div>
   );

@@ -4,6 +4,9 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 // Auth
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
+import UserProfile from './pages/auth/UserProfile';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 
 // 🎮 NEW GAMES IMPORTS
 import MathBalance from './pages/games/MathBalance';
@@ -27,16 +30,13 @@ import SubjectSelection from './pages/SubjectSelection';
 import AssessmentConfig from './pages/AssessmentConfig';
 import AnswerKey from './pages/AnswerKey';
 
-// Protected Route
+// Protected Route & Dashboard
 import ProtectedRoute from './components/ProtectedRoute';
+import UnifiedDashboard from './pages/dashboard/UnifiedDashboard'; // <-- 1. Imported this
 
 // Old App Content (existing features)
 import App from './App';
 
-/**
- * Application Router Configuration
- * Combines new admin dashboard with existing app features
- */
 export const router = createBrowserRouter([
   {
     path: '/landing',
@@ -49,6 +49,25 @@ export const router = createBrowserRouter([
   {
     path: '/signup',
     element: <Signup />
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPassword />
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPassword />
+  },
+  {
+    path: '/profile',
+    element: (
+      <ProtectedRoute>
+        {/* 2. WRAPPED UserProfile inside UnifiedDashboard so navigation stays visible! */}
+        <UnifiedDashboard>
+          <UserProfile />
+        </UnifiedDashboard>
+      </ProtectedRoute>
+    )
   },
   {
     path: '/admin',

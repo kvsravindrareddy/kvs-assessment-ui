@@ -271,3 +271,49 @@
     min-width: auto;
   }
 }
+
+/* Container adjustment to hold both the profile button and role switcher */
+.dashboard-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Slightly reduced gap to give more room to the topnav */
+  flex-wrap: wrap; /* Prevents items from overflowing the container */
+  justify-content: flex-end;
+}
+
+/* Profile Button Styling - NOW MATCHES YOUR EXISTING DASHBOARD GRADIENT */
+.profile-action-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white; /* Proper white text to match the theme */
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  white-space: nowrap; /* Prevents text from breaking and causing overlaps */
+  flex-shrink: 0; /* Keeps the button shape intact */
+}
+
+.profile-action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+}
+
+.profile-icon {
+  font-size: 20px;
+}
+
+@media (max-width: 640px) {
+  .profile-text {
+    display: none; /* Hide text on mobile, keep just the icon to save space */
+  }
+  .profile-action-button {
+    padding: 10px 14px;
+  }
+}
