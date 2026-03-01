@@ -1,0 +1,49 @@
+.metrics-dashboard-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  color: #1e293b;
+}
+
+.dashboard-header h1 { margin: 0; font-size: 28px; color: #0f172a; }
+.dashboard-header p { color: #64748b; margin-top: 8px; }
+
+/* Continue Learning Section */
+.section-title { font-size: 20px; font-weight: 700; margin: 32px 0 16px; display: flex; align-items: center; gap: 8px; }
+.resume-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.resume-card {
+  background: white; border-radius: 16px; padding: 20px;
+  border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.resume-tag { background: #e0e7ff; color: #4338ca; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; width: fit-content; margin-bottom: 12px; }
+.resume-card h3 { margin: 0 0 16px 0; font-size: 16px; color: #1e293b; }
+.progress-container { margin-bottom: 16px; }
+.progress-text { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 6px; }
+.progress-bar-bg { height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: #3b82f6; border-radius: 4px; transition: width 0.3s; }
+.resume-btn { background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+.resume-btn:hover { background: #2563eb; }
+
+/* Metrics Grid */
+.metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.metric-card {
+  background: white; border-radius: 16px; padding: 20px;
+  border: 1px solid #e2e8f0; text-align: center;
+}
+.metric-card h4 { margin: 0; color: #64748b; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+.metric-value { font-size: 32px; font-weight: 800; color: #0f172a; margin: 12px 0 4px; }
+.metric-subtext { font-size: 13px; color: #10b981; font-weight: 600; }
+
+/* Time Tabs */
+.time-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 8px; }
+.time-tab { padding: 8px 16px; border-radius: 20px; border: 1px solid #cbd5e1; background: transparent; color: #475569; cursor: pointer; font-weight: 600; }
+.time-tab.active { background: #0f172a; color: white; border-color: #0f172a; }
+
+/* Completed List */
+.completed-list { display: flex; flex-direction: column; gap: 12px; }
+.completed-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
+.completed-info h4 { margin: 0 0 4px; font-size: 15px; }
+.completed-info p { margin: 0; font-size: 13px; color: #64748b; }
+.completed-score { font-size: 18px; font-weight: 700; color: #10b981; background: #d1fae5; padding: 6px 16px; border-radius: 20px; }
