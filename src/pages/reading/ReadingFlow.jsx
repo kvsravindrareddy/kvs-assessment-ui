@@ -4,7 +4,7 @@ import jsPDF from 'jspdf';
 import CONFIG from '../../Config';
 import '../../css/AssessmentFlow.css';
 import { useSubscription } from '../../context/SubscriptionContext';
-import { useAuth } from '../../context/AuthContext'; // INDUSTRY STANDARD: Added AuthContext
+import { useAuth } from '../../context/AuthContext';
 import UpgradePrompt from '../../components/UpgradePrompt';
 import UsageIndicator from '../../components/UsageIndicator';
 
@@ -14,7 +14,6 @@ const orderedGrades = [
 
 const STORIES_PER_PAGE = 16; 
 
-// Placed outside to prevent ESLint 'no-undef' errors
 const getSubjectIcon = (subjectName) => {
   const s = subjectName.toUpperCase();
   if (s.includes('MATH')) return '📐';
@@ -30,7 +29,7 @@ const getSubjectIcon = (subjectName) => {
 };
 
 export default function ReadingFlow() {
-  const { user } = useAuth(); // Safely extract the logged-in user
+  const { user } = useAuth(); 
   const { canPerformAction, trackUsage, getUpgradeMessage } = useSubscription();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
@@ -54,9 +53,8 @@ export default function ReadingFlow() {
   // API Endpoints
   const adminConfigURL = `${CONFIG.development.ADMIN_BASE_URL}/admin-assessment/v1/app-config/subject-types`;
   const listStoriesURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/load`;
-  
-  // Now explicitly calling the tracking endpoint on the assessment service!
   const startAssessmentURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/start`;
+  const submitAnswerURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/submit-answer`;
 
   useEffect(() => {
     fetch(adminConfigURL)
@@ -132,33 +130,30 @@ export default function ReadingFlow() {
     
     try {
       const token = localStorage.getItem('token');
-      
-      // Determine the User ID. If no user is logged in, default to GUEST_USER
       const currentUserId = user ? (user.id || user.email || 'GUEST_USER') : 'GUEST_USER';
-
-      // Pass BOTH the storyId and the userId to the backend session tracker
       const requestUrl = `${startAssessmentURL}?storyId=${storyId}&userId=${encodeURIComponent(currentUserId)}`;
 
       const res = await axios.get(requestUrl, {
         headers: { 'Authorization': token ? `Bearer ${token}` : '' }
       });
       
-      trackUsage('story'); // Only track usage if the backend successfully allows them to start
+      trackUsage('story'); 
       
-      setStoryDetails(res.data);
-      setQuestionIndex(0);
+      const backendData = res.data;
+      setStoryDetails(backendData);
+      
+      // 🔥 RESUME MAGIC: Jump to the saved question index instead of 0!
+      setQuestionIndex(backendData.resumeQuestionIndex || 0);
+      
+      // 🔥 RESUME MAGIC: Restore the saved score!
+      setScore(backendData.currentScore || 0);
+      
       setSelectedAnswer(null);
-      setScore(0);
       setCompleted(false);
       
     } catch (err) {
       console.error('Error fetching story details:', err);
-      // If the backend blocks the user because they already completed it, alert them!
-      if (err.response && err.response.data && err.response.data.message) {
-        alert(`Could not start assessment: ${err.response.data.message}`);
-      } else {
-        alert('Assessment has already been completed by this user, or there was a network error.');
-      }
+      alert('Could not start assessment. Please try again.');
     }
   };
 
@@ -171,24 +166,23 @@ export default function ReadingFlow() {
 
     try {
       const token = localStorage.getItem('token');
-      const submitURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/submit-answer`;
       
       const payload = {
         userId: currentUserId,
-        storyId: storyDetails.storyId,
+        storyId: storyDetails.storyId, // Explicitly mapped to 'storyId'
         questionIndex: storyDetails.questions[questionIndex].sequenceNumber || questionIndex,
         userAnswer: answersList,
         lastQuestion: isLastQuestion
       };
 
-      const res = await axios.post(submitURL, payload, {
+      const res = await axios.post(submitAnswerURL, payload, {
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': token ? `Bearer ${token}` : '' 
         }
       });
 
-      // Update the score with the mathematically secure score evaluated by the Java backend
+      // Update the score with the secure score evaluated by the Java backend
       setScore(res.data.currentScore);
 
       if (!isLastQuestion) {
@@ -441,7 +435,7 @@ export default function ReadingFlow() {
 
                     <div className="modern-options">
                       {Object.entries(storyDetails.questions[questionIndex].options).map(([key, value]) => {
-                        const isMultiple = storyDetails.questions[questionIndex].meta.answerType === 'MULTIPLE';
+                        const isMultiple = storyDetails.questions[questionIndex].meta?.answerType === 'MULTIPLE';
                         const isChecked = isMultiple 
                           ? Array.isArray(selectedAnswer) && selectedAnswer.includes(key)
                           : selectedAnswer === key;
