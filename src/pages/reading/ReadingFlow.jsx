@@ -7,6 +7,7 @@ import { useSubscription } from '../../context/SubscriptionContext';
 import { useAuth } from '../../context/AuthContext';
 import UpgradePrompt from '../../components/UpgradePrompt';
 import UsageIndicator from '../../components/UsageIndicator';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const orderedGrades = [
   'PRE_K', 'KINDERGARTEN', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'
@@ -30,6 +31,8 @@ const getSubjectIcon = (subjectName) => {
 
 export default function ReadingFlow() {
   const { user } = useAuth(); 
+  const location = useLocation();
+  const navigate = useNavigate();
   const { canPerformAction, trackUsage, getUpgradeMessage } = useSubscription();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
@@ -37,20 +40,17 @@ export default function ReadingFlow() {
   const [stories, setStories] = useState({});
   const [storyDetails, setStoryDetails] = useState(null);
 
-  // Timeless Navigation & Pagination States
   const [selectedGrade, setSelectedGrade] = useState(orderedGrades[0]);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [isLoadingStories, setIsLoadingStories] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Assessment States
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [score, setScore] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [voices, setVoices] = useState([]);
 
-  // API Endpoints
   const adminConfigURL = `${CONFIG.development.ADMIN_BASE_URL}/admin-assessment/v1/app-config/subject-types`;
   const listStoriesURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/load`;
   const startAssessmentURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/start`;
@@ -142,10 +142,7 @@ export default function ReadingFlow() {
       const backendData = res.data;
       setStoryDetails(backendData);
       
-      // 🔥 RESUME MAGIC: Jump to the saved question index instead of 0!
       setQuestionIndex(backendData.resumeQuestionIndex || 0);
-      
-      // 🔥 RESUME MAGIC: Restore the saved score!
       setScore(backendData.currentScore || 0);
       
       setSelectedAnswer(null);
@@ -156,6 +153,17 @@ export default function ReadingFlow() {
       alert('Could not start assessment. Please try again.');
     }
   };
+
+  // 🔥 URL READER EFFECT: This grabs the storyId from the URL and clicks "Start" for you!
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const urlStoryId = params.get('storyId');
+    
+    if (urlStoryId && !storyDetails) {
+      fetchStoryDetails(urlStoryId);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
 
   const submitAnswer = async () => {
     if (!storyDetails) return;
@@ -169,7 +177,7 @@ export default function ReadingFlow() {
       
       const payload = {
         userId: currentUserId,
-        storyId: storyDetails.storyId, // Explicitly mapped to 'storyId'
+        storyId: storyDetails.storyId, 
         questionIndex: storyDetails.questions[questionIndex].sequenceNumber || questionIndex,
         userAnswer: answersList,
         lastQuestion: isLastQuestion
@@ -182,7 +190,6 @@ export default function ReadingFlow() {
         }
       });
 
-      // Update the score with the secure score evaluated by the Java backend
       setScore(res.data.currentScore);
 
       if (!isLastQuestion) {
@@ -292,7 +299,6 @@ export default function ReadingFlow() {
     window.open(blob);
   };
 
-  // Pagination Logic
   const currentStoriesKey = `${selectedGrade}-${selectedSubject}`;
   const currentStories = stories[currentStoriesKey] || [];
   const totalPages = Math.ceil(currentStories.length / STORIES_PER_PAGE);
@@ -402,7 +408,11 @@ export default function ReadingFlow() {
         </div>
       ) : (
         <div className="focus-reading-mode">
-          <button className="back-btn" onClick={() => { window.speechSynthesis.cancel(); setStoryDetails(null); }}>
+          <button className="back-btn" onClick={() => { 
+              window.speechSynthesis.cancel(); 
+              setStoryDetails(null); 
+              navigate('/reading');
+          }}>
             ← Back to Library
           </button>
           

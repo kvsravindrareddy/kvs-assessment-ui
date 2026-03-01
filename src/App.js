@@ -23,12 +23,23 @@ import Signup from './pages/auth/Signup';
 import UnifiedDashboard from './pages/dashboard/UnifiedDashboard';
 import PricingPage from './pages/subscription/PricingPage';
 import UsageIndicator from './components/UsageIndicator';
-
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function AppContent() {
   const [activeSection, setActiveSection] = useState('Home');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.includes('/reading')) setActiveSection('Reading');
+    else if (path.includes('/dashboard')) setActiveSection('Dashboard');
+    else if (path.includes('/games')) setActiveSection('Games');
+    else if (path === '/' && activeSection !== 'Home') setActiveSection('Home');
+  }, [location.pathname]);
+
   const [expandedSection, setExpandedSection] = useState(null);
-  const [location, setLocation] = useState({ latitude: null, longitude: null });
+  const [locationState, setLocationState] = useState({ latitude: null, longitude: null });
   const [gradeData, setGradeData] = useState({});
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
@@ -92,6 +103,7 @@ function AppContent() {
     { name: 'Assessment Flow', category: 'Assessment', description: 'Grade-level assessments', icon: '🎯', keywords: ['test', 'grade', 'assessment', 'exam', 'practice'], navigateTo: 'Assessment Flow', gameId: null }
   ];
 
+  // Dynamically build the navigation array
   const navigationOptions = [
     { label: 'Home', value: 'Home', icon: '🏠' },
     { label: 'Assessments', value: 'AssessmentFlow', icon: '📝' },
@@ -101,8 +113,12 @@ function AppContent() {
     { label: 'AI Help', value: 'AI', icon: '🤖' }
   ];
 
+  if (user) {
+    navigationOptions.push({ label: 'Dashboard', value: 'Dashboard', icon: '📊' });
+  }
+
   useEffect(() => {
-    getLocation(setLocation, user); 
+    getLocation(setLocationState, user); 
   }, [user]);
 
   const handleSubjectClick = (grade, subject) => {
@@ -113,6 +129,10 @@ function AppContent() {
 
   const handleNavigationClick = (option) => {
     setActiveSection(option);
+    if (option === 'Dashboard') navigate('/dashboard');
+    else if (option === 'Reading') navigate('/reading');
+    else if (option === 'Games') navigate('/games');
+    else if (option === 'Home') navigate('/');
   };
 
   const toggleSection = (section) => {
@@ -141,7 +161,6 @@ function AppContent() {
   };
 
   const handleSearchResultClick = (feature) => {
-    // If it's a game with a specific gameId, set it
     if (feature.gameId) {
       setSelectedGame(feature.gameId);
     } else {
@@ -156,7 +175,6 @@ function AppContent() {
 
   return (
     <div id="mainpage" className={activeSection === 'Home' ? 'home' : ''}>
-      {/* Header */}
       <div className="header">
         <div className="brand-section">
           <div className="logo-container">
@@ -178,7 +196,6 @@ function AppContent() {
             </button>
           </div>
 
-          {/* Student Navigation Toggle for Admin Users */}
           {isAdminUser && (
             <button
               className={`icon-button nav-toggle-button ${showStudentNav ? 'enabled' : 'disabled'}`}
@@ -189,7 +206,6 @@ function AppContent() {
             </button>
           )}
 
-          {/* Search Icon Button */}
           <button
             className="icon-button search-button"
             onClick={() => setShowSearchModal(!showSearchModal)}
@@ -198,7 +214,6 @@ function AppContent() {
             🔍
           </button>
 
-          {/* Profile Icon Button with Dropdown */}
           <div className="profile-container">
             <button
               className="icon-button profile-button"
@@ -226,6 +241,7 @@ function AppContent() {
                         className="profile-menu-item"
                         onClick={() => {
                           setActiveSection('Dashboard');
+                          navigate('/dashboard');
                           setShowProfileMenu(false);
                         }}
                       >
@@ -304,7 +320,6 @@ function AppContent() {
           </div>
         </div>
 
-        {/* Search Modal */}
         {showSearchModal && (
           <>
             <div
@@ -397,7 +412,6 @@ function AppContent() {
         )}
       </div>
 
-      {/* Guest Mode Banner */}
       {isGuestUser && (
         <div className="guest-mode-banner">
           <div className="guest-banner-content">
@@ -410,8 +424,6 @@ function AppContent() {
         </div>
       )}
 
-
-      {/* Clean Horizontal Navigation */}
       {showStudentNav && (
         <div className="student-nav-wrapper">
           <nav className="flat-topnav">
@@ -435,7 +447,6 @@ function AppContent() {
         </div>
       )}
 
-      {/* Info banner for admin users when student navigation is hidden */}
       {isAdminUser && !showStudentNav && activeSection === 'Home' && (
         <div className="admin-nav-info-banner">
           <span className="info-icon">ℹ️</span>
@@ -443,7 +454,6 @@ function AppContent() {
         </div>
       )}
 
-      {/* Modern Home Page (conditionally for admin users) */}
       {activeSection === 'Home' && showStudentNav && (
         <ModernHomePage
           onNavigate={handleNavigationClick}
@@ -452,7 +462,6 @@ function AppContent() {
         />
       )}
 
-      {/* Dynamic Section Components */}
       {activeSection === 'Dashboard' && <UnifiedDashboard />}
       {activeSection === 'Pricing' && <PricingPage />}
       {activeSection === 'AI' && <AIHub audioEnabled={audioEnabled} />}
@@ -461,26 +470,27 @@ function AppContent() {
       {activeSection === 'Subscribe' && <Subscribe />}
       {activeSection === 'Contact' && <Contactus />}
       {activeSection === 'About Us' && <AboutUs />}
-      {/* Dynamically show AssessmentFlow with selected values */}
       {activeSection === 'AssessmentFlow' && (
         <AssessmentFlow preSelectedCategory={selectedGrade} preSelectedType={selectedSubject} audioEnabled={audioEnabled} />
       )}
       {activeSection === 'Reading' && <ReadingFlow audioEnabled={audioEnabled} />}
       {activeSection === 'Games' && <GamesHub preSelectedGame={selectedGame} audioEnabled={audioEnabled} />}
 
-
-      {/* Footer */}
       <div style={{ clear: 'both' }}>
         <Footer onNavigate={handleNavigationClick} />
       </div>
 
-      {/* Authentication Modals */}
       {showLogin && (
         <Login
           onClose={() => setShowLogin(false)}
           onSwitchToSignup={() => {
             setShowLogin(false);
             setShowSignup(true);
+          }}
+          onLoginSuccess={() => {
+            setShowLogin(false);
+            setActiveSection('Dashboard');
+            navigate('/dashboard');
           }}
         />
       )}
