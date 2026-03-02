@@ -29,14 +29,20 @@ import GradeSelection from './pages/GradeSelection';
 import SubjectSelection from './pages/SubjectSelection';
 import AssessmentConfig from './pages/AssessmentConfig';
 import AnswerKey from './pages/AnswerKey';
+import AssessmentsHub from './pages/assessments/AssessmentsHub'; // <-- Added Import
 
 // Protected Route & Dashboard
 import ProtectedRoute from './components/ProtectedRoute';
-import UnifiedDashboard from './pages/dashboard/UnifiedDashboard'; // <-- 1. Imported this
+import UnifiedDashboard from './pages/dashboard/UnifiedDashboard'; 
+import SpeedMathChallenge from './pages/assessments/SpeedMathChallenge';
 
 // Old App Content (existing features)
 import App from './App';
 
+/**
+ * Application Router Configuration
+ * Combines new admin dashboard with existing app features
+ */
 export const router = createBrowserRouter([
   {
     path: '/landing',
@@ -62,9 +68,19 @@ export const router = createBrowserRouter([
     path: '/profile',
     element: (
       <ProtectedRoute>
-        {/* 2. WRAPPED UserProfile inside UnifiedDashboard so navigation stays visible! */}
+        {/* WRAPPED UserProfile inside UnifiedDashboard so navigation stays visible! */}
         <UnifiedDashboard>
           <UserProfile />
+        </UnifiedDashboard>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/assessments/speed-math',
+    element: (
+      <ProtectedRoute>
+        <UnifiedDashboard>
+          <SpeedMathChallenge />
         </UnifiedDashboard>
       </ProtectedRoute>
     )

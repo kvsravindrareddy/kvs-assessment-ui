@@ -17,9 +17,12 @@ const StudentDashboard = () => {
           <button className="action-card" onClick={() => navigate('/games')}>
             <span className="action-icon">🎮</span><span>Play Games</span>
           </button>
-          <button className="action-card" onClick={() => navigate('/select-grade')}>
-            <span className="action-icon">📝</span><span>Take Assessment</span>
+          
+          {/* UPDATED: Now points to the new Assessment Hub! */}
+          <button className="action-card" onClick={() => navigate('/assessments')}>
+            <span className="action-icon">📝</span><span>Assessments</span>
           </button>
+          
           <button className="action-card" onClick={() => navigate('/ai-hub')}>
             <span className="action-icon">🤖</span><span>AI Learning</span>
           </button>

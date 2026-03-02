@@ -25,6 +25,9 @@ import PricingPage from './pages/subscription/PricingPage';
 import UsageIndicator from './components/UsageIndicator';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+// NEW: Import the beautiful Assessments Hub
+import AssessmentsHub from './pages/assessments/AssessmentsHub';
+
 function AppContent() {
   const [activeSection, setActiveSection] = useState('Home');
   const location = useLocation();
@@ -35,6 +38,8 @@ function AppContent() {
     if (path.includes('/reading')) setActiveSection('Reading');
     else if (path.includes('/dashboard')) setActiveSection('Dashboard');
     else if (path.includes('/games')) setActiveSection('Games');
+    // NEW: Tells the nav bar to highlight Assessments when on this URL
+    else if (path.includes('/assessments')) setActiveSection('AssessmentsHub'); 
     else if (path === '/' && activeSection !== 'Home') setActiveSection('Home');
   }, [location.pathname]);
 
@@ -56,7 +61,6 @@ function AppContent() {
   const { user, logout, isAdmin } = useAuth();
   const { subscriptionTier, SUBSCRIPTION_TIERS, getRemainingUsage } = useSubscription();
 
-  // Determine if user is an admin/teacher/super user
   const isAdminUser = user && (
     user.role === 'SUPER_ADMIN' ||
     user.role === 'DISTRICT_ADMIN' ||
@@ -68,19 +72,16 @@ function AppContent() {
     user.role === 'SUPPORT_STAFF'
   );
 
-  // State for showing/hiding student navigation for admin users
   const [showStudentNav, setShowStudentNav] = useState(!isAdminUser);
 
-  // Check if user is guest or free tier
   const isGuestUser = !user;
   const isFreeTier = subscriptionTier === SUBSCRIPTION_TIERS.GUEST ||
                      subscriptionTier === SUBSCRIPTION_TIERS.STUDENT_FREE ||
                      subscriptionTier === SUBSCRIPTION_TIERS.TEACHER_FREE;
 
   const prekOptions = ['Alphabets', 'Numbers', 'Shapes', 'Colors'];
-  const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money', 'Assessment Flow'];
+  const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money'];
 
-  // All searchable features
   const allFeatures = [
     { name: 'Alphabets', category: 'Pre-K', description: 'Learn ABC with words and emojis', icon: '🔤', keywords: ['abc', 'letters', 'alphabet', 'a-z'], navigateTo: 'Alphabets', gameId: null },
     { name: 'Numbers', category: 'Pre-K', description: 'Learn numbers 1-1000 with voice', icon: '🔢', keywords: ['count', 'counting', 'numbers', 'digits', '123'], navigateTo: 'Numbers', gameId: null },
@@ -100,13 +101,13 @@ function AppContent() {
     { name: 'Generate Numbers', category: 'Math', description: 'Number generation tool', icon: '🔢', keywords: ['generate', 'random', 'numbers'], navigateTo: 'Generate Numbers', gameId: null },
     { name: 'Word Problems', category: 'Math', description: 'Math word problems', icon: '📝', keywords: ['word', 'problems', 'story', 'math'], navigateTo: 'Word Problems', gameId: null },
     { name: 'Counting Money', category: 'Math', description: 'Learn to count money', icon: '💰', keywords: ['money', 'coins', 'dollars', 'cents', 'currency'], navigateTo: 'Counting Money', gameId: null },
-    { name: 'Assessment Flow', category: 'Assessment', description: 'Grade-level assessments', icon: '🎯', keywords: ['test', 'grade', 'assessment', 'exam', 'practice'], navigateTo: 'Assessment Flow', gameId: null }
+    { name: 'Assessment Flow', category: 'Assessment', description: 'Grade-level assessments', icon: '🎯', keywords: ['test', 'grade', 'assessment', 'exam', 'practice'], navigateTo: 'AssessmentsHub', gameId: null }
   ];
 
-  // Dynamically build the navigation array
+  // CHANGED: The "Assessments" button now triggers "AssessmentsHub"
   const navigationOptions = [
     { label: 'Home', value: 'Home', icon: '🏠' },
-    { label: 'Assessments', value: 'AssessmentFlow', icon: '📝' },
+    { label: 'Assessments', value: 'AssessmentsHub', icon: '📝' },
     { label: 'Stories', value: 'Reading', icon: '📚' },
     { label: 'Worksheets', value: 'Worksheets', icon: '🖨️' },
     { label: 'Games', value: 'Games', icon: '🎮' },
@@ -132,6 +133,7 @@ function AppContent() {
     if (option === 'Dashboard') navigate('/dashboard');
     else if (option === 'Reading') navigate('/reading');
     else if (option === 'Games') navigate('/games');
+    else if (option === 'AssessmentsHub') navigate('/assessments'); // NEW: Navigates to correct URL
     else if (option === 'Home') navigate('/');
   };
 
@@ -461,6 +463,9 @@ function AppContent() {
           onSubjectClick={handleSubjectClick}
         />
       )}
+
+      {/* NEW: Renders the beautiful Assessments Hub when clicked */}
+      {activeSection === 'AssessmentsHub' && <AssessmentsHub />}
 
       {activeSection === 'Dashboard' && <UnifiedDashboard />}
       {activeSection === 'Pricing' && <PricingPage />}
