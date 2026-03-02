@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import CONFIG from '../../Config';
-import '../../css/AssessmentFlow.css';
 
 export default function SpeedMathChallenge() {
     const navigate = useNavigate();
@@ -17,22 +16,51 @@ export default function SpeedMathChallenge() {
     const [score, setScore] = useState(0);
     const [completed, setCompleted] = useState(false);
 
-    // Configuration for starting a NEW test
     const [setupMode, setSetupMode] = useState(false);
     const [mathType, setMathType] = useState('ADDITION');
     const [complexity, setComplexity] = useState('EASY');
 
-    const typeCards = [
-        { id: 'ADDITION', icon: '➕', label: 'Addition', desc: 'Find the sum', color: '#ef4444', bg: '#fef2f2' },
-        { id: 'SUBTRACTION', icon: '➖', label: 'Subtraction', desc: 'Find the difference', color: '#3b82f6', bg: '#eff6ff' },
-        { id: 'MULTIPLICATION', icon: '✖️', label: 'Multiplication', desc: 'Find the product', color: '#10b981', bg: '#ecfdf5' },
-        { id: 'DIVISION', icon: '➗', label: 'Division', desc: 'Find the quotient', color: '#f59e0b', bg: '#fffbeb' }
+    // 28 Math Challenge Options with varying "weights" to create a realistic, responsive cloud/universe
+    const mathNodes = [
+        // Level 3 Size (Main Core)
+        { id: 'ADDITION', label: '➕ Addition', weight: 3, color: '#ef4444' },
+        { id: 'SUBTRACTION', label: '➖ Subtraction', weight: 3, color: '#3b82f6' },
+        { id: 'MULTIPLICATION', label: '✖️ Multiplication', weight: 3, color: '#10b981' },
+        { id: 'DIVISION', label: '➗ Division', weight: 3, color: '#f59e0b' },
+        { id: 'MIXED_OPERATIONS', label: '🔀 Mixed Ops', weight: 3, color: '#8b5cf6' },
+        { id: 'ALGEBRA_LINEAR', label: '𝑥 Algebra', weight: 3, color: '#f43f5e' },
+        
+        // Level 2 Size (Intermediate)
+        { id: 'PERCENTAGE', label: '📈 Percentage', weight: 2, color: '#ec4899' },
+        { id: 'FRACTION_ADDITION', label: '½ Frac Add', weight: 2, color: '#14b8a6' },
+        { id: 'FRACTION_MULTIPLICATION', label: '¾ Frac Mult', weight: 2, color: '#06b6d4' },
+        { id: 'DECIMALS', label: '0.5 Decimals', weight: 2, color: '#f97316' },
+        { id: 'RATIO_PROPORTION', label: 'a:b Ratio', weight: 2, color: '#84cc16' },
+        { id: 'MODULUS', label: '% Modulus', weight: 2, color: '#6366f1' },
+        { id: 'SQUARE_ROOT', label: '√ Sq Root', weight: 2, color: '#d946ef' },
+        { id: 'EXPONENTIATION', label: 'x² Exponents', weight: 2, color: '#eab308' },
+        { id: 'MEAN_MEDIAN_MODE', label: 'x̄ Mean/Med', weight: 2, color: '#2dd4bf' },
+        { id: 'PROBABILITY', label: '🎲 Probability', weight: 2, color: '#fb923c' },
+        { id: 'GEOMETRY_AREA', label: '⬜ Area', weight: 2, color: '#a3e635' },
+        { id: 'GEOMETRY_PERIMETER', label: '📏 Perimeter', weight: 2, color: '#c084fc' },
+
+        // Level 1 Size (Advanced / Niche)
+        { id: 'CUBE_ROOT', label: '∛ Cube Root', weight: 1, color: '#fca5a5' },
+        { id: 'FACTORIAL', label: 'n! Factorial', weight: 1, color: '#93c5fd' },
+        { id: 'LOGARITHM', label: 'log(x) Log', weight: 1, color: '#6ee7b7' },
+        { id: 'GCD_LCM', label: 'LCM / GCD', weight: 1, color: '#fcd34d' },
+        { id: 'PRIME_COMPOSITE', label: 'Prime / Comp', weight: 1, color: '#c4b5fd' },
+        { id: 'EVEN_ODD', label: 'Even / Odd', weight: 1, color: '#fca5a5' },
+        { id: 'ROMAN_NUMERALS', label: 'XIV Roman', weight: 1, color: '#67e8f9' },
+        { id: 'BINARY_CONVERSION', label: '0101 Binary', weight: 1, color: '#fdba74' },
+        { id: 'TRIGONOMETRIC', label: 'sin(θ) Trig', weight: 1, color: '#d8b4fe' }
     ];
 
     const difficultyCards = [
-        { id: 'EASY', label: 'Easy', icon: '🟢', desc: 'Single digits' },
-        { id: 'MEDIUM', label: 'Medium', icon: '🟡', desc: 'Double digits' },
-        { id: 'HARD', label: 'Hard', icon: '🔴', desc: 'Triple digits' }
+        { id: 'EASY', label: 'Easy (Lvl 1)', color: '#22c55e' },
+        { id: 'MEDIUM', label: 'Medium (Lvl 2)', color: '#eab308' },
+        { id: 'HARD', label: 'Hard (Lvl 3)', color: '#ef4444' },
+        { id: 'EXTREME', label: 'Extreme (Lvl 4)', color: '#7f1d1d' }
     ];
 
     useEffect(() => {
@@ -54,7 +82,6 @@ export default function SpeedMathChallenge() {
                     setSetupMode(true);
                 }
             } catch (err) {
-                console.error("Error fetching session, starting fresh.", err);
                 setSetupMode(true);
             } finally {
                 setLoading(false);
@@ -70,12 +97,7 @@ export default function SpeedMathChallenge() {
             const token = localStorage.getItem('token');
             const userId = user?.username || 'GUEST';
             const res = await axios.get(`${CONFIG.development.GATEWAY_URL}/api/assessment/allrandomquestions`, {
-                params: {
-                    userId: userId,
-                    numberOfQuestions: 10,
-                    type: mathType,
-                    complexity: complexity
-                },
+                params: { userId: userId, numberOfQuestions: 10, type: mathType, complexity: complexity },
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -86,7 +108,7 @@ export default function SpeedMathChallenge() {
             setSetupMode(false);
             setCompleted(false);
         } catch (err) {
-            alert("Failed to generate questions. Please try again.");
+            alert("Failed to generate questions. Please ensure the backend is running and up to date!");
         } finally {
             setLoading(false);
         }
@@ -96,22 +118,17 @@ export default function SpeedMathChallenge() {
         if (!selectedAnswer) return;
 
         const currentQuestion = questions[currentIndex];
-        
-        // FIX: Force both values to be Numbers to guarantee a perfect match!
-        const isCorrect = Number(selectedAnswer) === Number(currentQuestion.answer.correct);
-        const newScore = isCorrect ? score + 1 : score;
-
-        const updatedQuestion = {
-            ...currentQuestion,
-            answer: { ...currentQuestion.answer, selected: selectedAnswer, status: isCorrect ? 'CORRECT' : 'INCORRECT' }
-        };
-
         const isLastQuestion = currentIndex === questions.length - 1;
         const nextStatus = isLastQuestion ? 'COMPLETED' : 'IN_PROGRESS';
 
+        const updatedQuestion = {
+            ...currentQuestion,
+            answer: { ...currentQuestion.answer, selected: selectedAnswer }
+        };
+
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`${CONFIG.development.GATEWAY_URL}/api/assessment/submitrandomquestion`, {
+            const res = await axios.post(`${CONFIG.development.GATEWAY_URL}/api/assessment/submitrandomquestion`, {
                 userId: user?.username || 'GUEST',
                 email: user?.email,
                 assessmentId: session.assessmentId,
@@ -122,7 +139,10 @@ export default function SpeedMathChallenge() {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            setScore(newScore);
+            if (res.data && res.data.score !== undefined) {
+                setScore(res.data.score);
+            }
+
             setSelectedAnswer('');
 
             if (isLastQuestion) {
@@ -135,141 +155,173 @@ export default function SpeedMathChallenge() {
         }
     };
 
-    if (loading) return <div className="timeless-layout"><div className="spinner"></div></div>;
+    if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}><div className="spinner"></div></div>;
+
+    // Helper to calculate responsive padding and font size for bubbles
+    const getBubbleStyle = (weight, isSelected, color) => {
+        const baseStyle = {
+            cursor: 'pointer',
+            borderRadius: '50px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold',
+            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            border: `2px solid ${color}`,
+            background: isSelected ? color : 'rgba(255, 255, 255, 0.05)',
+            color: isSelected ? '#ffffff' : color,
+            boxShadow: isSelected ? `0 0 20px ${color}99, inset 0 0 10px rgba(255,255,255,0.5)` : 'none',
+            transform: isSelected ? 'scale(1.1) translateY(-5px)' : 'scale(1)'
+        };
+
+        if (weight === 3) return { ...baseStyle, fontSize: '1.1rem', padding: '16px 28px' };
+        if (weight === 2) return { ...baseStyle, fontSize: '0.95rem', padding: '12px 20px' };
+        return { ...baseStyle, fontSize: '0.85rem', padding: '8px 16px' };
+    };
 
     return (
-        <div className="timeless-layout">
-            <div className="focus-reading-mode">
-                <button className="back-btn" onClick={() => navigate('/assessments')} style={{ marginBottom: '20px' }}>
-                    ← Back to Assessment Hub
-                </button>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px', fontFamily: 'system-ui, sans-serif' }}>
+            <button onClick={() => navigate('/assessments')} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <span>←</span> Back to Hub
+            </button>
 
-                <div className="reading-canvas" style={{ maxWidth: '800px' }}>
-                    <h2 className="reading-title" style={{ textAlign: 'center', marginBottom: '30px' }}>⚡ Speed Math Challenge</h2>
+            {setupMode ? (
+                <div style={{ background: '#ffffff', borderRadius: '24px', padding: '30px 20px', boxShadow: '0 10px 40px rgba(0,0,0,0.08)' }}>
+                    <h2 style={{ textAlign: 'center', fontSize: '2.2rem', color: '#1e293b', margin: '0 0 5px 0', fontWeight: '800' }}>The Math Universe 🌍</h2>
+                    <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '30px', fontSize: '1.1rem' }}>Select a constellation to begin your challenge.</p>
 
-                    {setupMode ? (
-                        <div className="assessment-section">
-                            <h3 style={{ color: '#1e293b', marginBottom: '15px' }}>1. Select Operation</h3>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '30px' }}>
-                                {typeCards.map(type => (
-                                    <div 
-                                        key={type.id}
-                                        onClick={() => setMathType(type.id)}
-                                        style={{
-                                            border: `2px solid ${mathType === type.id ? type.color : '#e2e8f0'}`,
-                                            backgroundColor: mathType === type.id ? type.bg : '#ffffff',
-                                            borderRadius: '16px', padding: '20px 15px', cursor: 'pointer',
-                                            textAlign: 'center', transition: 'all 0.2s ease',
-                                            boxShadow: mathType === type.id ? `0 4px 12px ${type.color}33` : 'none',
-                                            transform: mathType === type.id ? 'translateY(-2px)' : 'none'
-                                        }}
-                                    >
-                                        <div style={{ fontSize: '2rem', marginBottom: '10px' }}>{type.icon}</div>
-                                        <div style={{ fontWeight: 'bold', color: '#1e293b', fontSize: '1.1rem' }}>{type.label}</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '5px' }}>{type.desc}</div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <h3 style={{ color: '#1e293b', marginBottom: '15px' }}>2. Select Difficulty</h3>
-                            <div style={{ display: 'flex', gap: '15px', marginBottom: '40px', flexWrap: 'wrap' }}>
-                                {difficultyCards.map(diff => (
-                                    <div 
-                                        key={diff.id}
-                                        onClick={() => setComplexity(diff.id)}
-                                        style={{
-                                            flex: 1, minWidth: '120px',
-                                            border: `2px solid ${complexity === diff.id ? '#3b82f6' : '#e2e8f0'}`,
-                                            backgroundColor: complexity === diff.id ? '#eff6ff' : '#ffffff',
-                                            borderRadius: '12px', padding: '15px', cursor: 'pointer',
-                                            textAlign: 'center', transition: 'all 0.2s ease'
-                                        }}
-                                    >
-                                        <div style={{ fontSize: '1.5rem', marginBottom: '5px' }}>{diff.icon}</div>
-                                        <div style={{ fontWeight: 'bold', color: '#1e293b' }}>{diff.label}</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{diff.desc}</div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <button 
-                                className="modern-submit-btn" 
-                                onClick={startNewAssessment}
-                                style={{ width: '100%', padding: '16px', fontSize: '1.2rem', borderRadius: '12px', background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' }}
+                    {/* RESPONSIVE MATH UNIVERSE CLOUD */}
+                    <div style={{ 
+                        background: 'radial-gradient(circle at center, #1e293b 0%, #0f172a 100%)', 
+                        borderRadius: '24px', padding: '40px 20px', marginBottom: '40px',
+                        display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: '12px',
+                        boxShadow: 'inset 0 0 40px rgba(0,0,0,0.5)'
+                    }}>
+                        {mathNodes.map(node => (
+                            <div 
+                                key={node.id}
+                                onClick={() => setMathType(node.id)}
+                                style={getBubbleStyle(node.weight, mathType === node.id, node.color)}
+                                onMouseEnter={(e) => {
+                                    if(mathType !== node.id) {
+                                        e.target.style.background = `${node.color}22`;
+                                        e.target.style.transform = 'scale(1.05)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if(mathType !== node.id) {
+                                        e.target.style.background = 'rgba(255, 255, 255, 0.05)';
+                                        e.target.style.transform = 'scale(1)';
+                                    }
+                                }}
                             >
-                                Start Timer & Begin Challenge 🚀
-                            </button>
-                        </div>
-                    ) : completed ? (
-                        <div className="assessment-done-card" style={{ padding: '40px 20px', textAlign: 'center' }}>
-                            <div className="done-icon" style={{ fontSize: '4rem', marginBottom: '20px' }}>🏆</div>
-                            <h3 style={{ fontSize: '2rem', color: '#1e293b', marginBottom: '10px' }}>Challenge Complete!</h3>
-                            <p style={{ color: '#64748b', fontSize: '1.1rem', marginBottom: '20px' }}>Great job exercising your brain.</p>
-                            
-                            <div className="score-display" style={{ display: 'inline-block', background: '#f8fafc', padding: '20px 40px', borderRadius: '20px', marginBottom: '30px' }}>
-                                <span className="score-number" style={{ fontSize: '3rem', color: '#3b82f6', fontWeight: '900' }}>{score}</span> 
-                                <span style={{ fontSize: '1.5rem', color: '#94a3b8', margin: '0 10px' }}>/</span> 
-                                <span style={{ fontSize: '2rem', color: '#64748b', fontWeight: 'bold' }}>{questions.length}</span>
+                                {node.label}
                             </div>
-                            
-                            <br/>
-                            <button className="modern-submit-btn" onClick={() => setSetupMode(true)} style={{ padding: '12px 30px', borderRadius: '10px' }}>
-                                Play Again 🔄
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="assessment-section">
-                            <div className="modern-question-box" style={{ padding: '40px' }}>
-                                <div className="question-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
-                                    <span className="q-badge" style={{ fontSize: '1.1rem', padding: '8px 16px' }}>Question {currentIndex + 1} of {questions.length}</span>
-                                    <span className="q-badge" style={{ background: '#ecfdf5', color: '#059669', fontSize: '1.1rem', padding: '8px 16px', border: '1px solid #a7f3d0' }}>
-                                        Score: 🎯 {score}
-                                    </span>
-                                </div>
-                                
-                                <div style={{ 
-                                    background: '#f8fafc', padding: '40px 20px', borderRadius: '20px', 
-                                    textAlign: 'center', marginBottom: '30px', border: '2px dashed #e2e8f0' 
-                                }}>
-                                    <h3 className="q-text" style={{ fontSize: '3.5rem', margin: '0', color: '#0f172a', fontWeight: '900', letterSpacing: '2px' }}>
-                                        {questions[currentIndex]?.name}
-                                    </h3>
-                                </div>
+                        ))}
+                    </div>
 
-                                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
-                                    <input 
-                                        type="number" 
-                                        style={{ 
-                                            width: '100%', maxWidth: '300px', fontSize: '2rem', textAlign: 'center', 
-                                            padding: '15px', borderRadius: '16px', border: '3px solid #cbd5e1', 
-                                            outline: 'none', color: '#1e293b', fontWeight: 'bold', transition: 'border-color 0.2s'
-                                        }}
-                                        placeholder="="
-                                        value={selectedAnswer}
-                                        onChange={(e) => setSelectedAnswer(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && submitAnswer()}
-                                        onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                                        onBlur={(e) => e.target.style.borderColor = '#cbd5e1'}
-                                        autoFocus
-                                    />
-                                </div>
-
-                                <button 
-                                    className="modern-submit-btn" 
-                                    onClick={submitAnswer}
-                                    disabled={!selectedAnswer}
-                                    style={{ 
-                                        width: '100%', padding: '18px', fontSize: '1.2rem', borderRadius: '16px',
-                                        opacity: !selectedAnswer ? 0.5 : 1, transition: 'all 0.2s'
-                                    }}
-                                >
-                                    Submit Answer
-                                </button>
+                    {/* DIFFICULTY CHIPS */}
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap', marginBottom: '40px' }}>
+                        {difficultyCards.map(diff => (
+                            <div 
+                                key={diff.id} onClick={() => setComplexity(diff.id)}
+                                style={{
+                                    padding: '12px 24px', borderRadius: '30px', cursor: 'pointer', fontWeight: 'bold',
+                                    background: complexity === diff.id ? diff.color : '#f8fafc',
+                                    color: complexity === diff.id ? '#ffffff' : '#475569',
+                                    transition: 'all 0.2s', border: `2px solid ${complexity === diff.id ? diff.color : '#e2e8f0'}`,
+                                    boxShadow: complexity === diff.id ? `0 4px 15px ${diff.color}66` : 'none',
+                                    transform: complexity === diff.id ? 'translateY(-2px)' : 'none'
+                                }}
+                            >
+                                {diff.label}
                             </div>
-                        </div>
-                    )}
+                        ))}
+                    </div>
+
+                    <button 
+                        onClick={startNewAssessment}
+                        style={{ width: '100%', maxWidth: '400px', margin: '0 auto', display: 'block', padding: '20px', fontSize: '1.3rem', fontWeight: 'bold', borderRadius: '50px', background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 10px 25px rgba(37, 99, 235, 0.4)', transition: 'transform 0.2s' }}
+                        onMouseEnter={(e) => e.target.style.transform = 'translateY(-3px)'}
+                        onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                    >
+                        Launch Challenge 🚀
+                    </button>
                 </div>
-            </div>
+            ) : completed ? (
+                <div style={{ textAlign: 'center', background: '#ffffff', padding: '60px 20px', borderRadius: '24px', boxShadow: '0 10px 40px rgba(0,0,0,0.08)' }}>
+                    <div style={{ fontSize: '6rem', marginBottom: '10px', animation: 'bounce 2s infinite' }}>🏆</div>
+                    <h2 style={{ fontSize: '2.8rem', color: '#1e293b', margin: '0 0 10px 0', fontWeight: '900' }}>Sector Conquered!</h2>
+                    <p style={{ color: '#64748b', fontSize: '1.2rem' }}>You successfully completed the <b>{mathNodes.find(n => n.id === mathType)?.label || mathType}</b> challenge.</p>
+                    
+                    <div style={{ background: '#f8fafc', padding: '30px 60px', borderRadius: '30px', display: 'inline-block', margin: '40px 0', border: '2px solid #e2e8f0' }}>
+                        <span style={{ fontSize: '5rem', color: '#3b82f6', fontWeight: '900', lineHeight: '1' }}>{score}</span> 
+                        <span style={{ fontSize: '2.5rem', color: '#cbd5e1', margin: '0 20px' }}>/</span> 
+                        <span style={{ fontSize: '3rem', color: '#64748b', fontWeight: 'bold', lineHeight: '1' }}>{questions.length}</span>
+                    </div>
+                    <br/>
+                    <button onClick={() => setSetupMode(true)} style={{ padding: '16px 40px', fontSize: '1.2rem', fontWeight: 'bold', borderRadius: '50px', background: '#0f172a', color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px rgba(15,23,42,0.3)' }}>
+                        Explore Another Sector 🌍
+                    </button>
+                </div>
+            ) : (
+                <div style={{ background: '#ffffff', borderRadius: '24px', padding: '40px 20px', boxShadow: '0 10px 40px rgba(0,0,0,0.08)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap', gap: '15px' }}>
+                        <div style={{ background: '#f1f5f9', padding: '10px 24px', borderRadius: '30px', fontWeight: 'bold', color: '#475569', fontSize: '1.1rem', border: '1px solid #e2e8f0' }}>
+                            {mathNodes.find(n => n.id === mathType)?.label || mathType}
+                        </div>
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            <span style={{ background: '#eff6ff', color: '#2563eb', padding: '10px 24px', borderRadius: '30px', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                Q: {currentIndex + 1} / {questions.length}
+                            </span>
+                            <span style={{ background: '#ecfdf5', color: '#059669', padding: '10px 24px', borderRadius: '30px', fontWeight: 'bold', fontSize: '1.1rem', boxShadow: '0 0 0 2px #a7f3d0' }}>
+                                Score: {score}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div style={{ background: '#f8fafc', padding: '80px 20px', borderRadius: '30px', textAlign: 'center', marginBottom: '40px', border: '3px dashed #e2e8f0' }}>
+                        <h3 style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', margin: '0', color: '#0f172a', fontWeight: '900', letterSpacing: '2px' }}>
+                            {questions[currentIndex]?.name}
+                        </h3>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px' }}>
+                        <input 
+                            type="text" 
+                            inputMode="decimal"
+                            autoComplete="off"
+                            style={{ 
+                                width: '100%', maxWidth: '400px', fontSize: '2.5rem', textAlign: 'center', 
+                                padding: '20px', borderRadius: '24px', border: '4px solid #cbd5e1', 
+                                outline: 'none', color: '#1e293b', fontWeight: '900', transition: 'all 0.2s',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.05)'
+                            }}
+                            placeholder="="
+                            value={selectedAnswer}
+                            onChange={(e) => setSelectedAnswer(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && submitAnswer()}
+                            onFocus={(e) => { e.target.style.borderColor = '#3b82f6'; e.target.style.boxShadow = '0 10px 30px rgba(59,130,246,0.15)'; }}
+                            onBlur={(e) => { e.target.style.borderColor = '#cbd5e1'; e.target.style.boxShadow = '0 10px 30px rgba(0,0,0,0.05)'; }}
+                            autoFocus
+                        />
+                    </div>
+
+                    <button 
+                        onClick={submitAnswer}
+                        disabled={!selectedAnswer}
+                        style={{ 
+                            width: '100%', maxWidth: '400px', margin: '0 auto', display: 'block',
+                            padding: '20px', fontSize: '1.4rem', fontWeight: 'bold', borderRadius: '50px',
+                            background: '#0f172a', color: 'white', border: 'none', cursor: 'pointer',
+                            opacity: !selectedAnswer ? 0.5 : 1, transition: 'all 0.2s',
+                            boxShadow: !selectedAnswer ? 'none' : '0 10px 25px rgba(15,23,42,0.3)'
+                        }}
+                    >
+                        Submit Target 🎯
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
