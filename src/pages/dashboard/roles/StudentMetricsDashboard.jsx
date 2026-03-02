@@ -36,6 +36,8 @@ export default function StudentMetricsDashboard() {
   const handleResume = (session) => {
     if (session.assessmentType === 'STORY') {
       navigate(`/reading?storyId=${session.assessmentId}`);
+    } else if (session.assessmentType === 'MATH_CHALLENGE') {
+      navigate(`/assessments/speed-math`); // Routes to our new Math Universe!
     } else {
       navigate(`/${session.assessmentType.toLowerCase()}?id=${session.assessmentId}`);
     }
@@ -43,6 +45,29 @@ export default function StudentMetricsDashboard() {
 
   return (
     <div className="metrics-dashboard-container">
+      
+      {/* 🌟 NEW: Star Rating & Motivation Banner 🌟 */}
+      {data.allTime && (
+        <div className="rating-banner">
+            <div className="rating-text-section">
+                <h2 className="rating-title">
+                    Current Rank: <span className="rating-stars">{data.allTime.rating}</span>
+                </h2>
+                <p className="rating-message">
+                    {data.allTime.motivationalMessage}
+                </p>
+            </div>
+            <div className="rating-accuracy-box">
+                <div className="accuracy-value">
+                    {data.allTime.accuracyPercentage}%
+                </div>
+                <div className="accuracy-label">
+                    Overall Accuracy
+                </div>
+            </div>
+        </div>
+      )}
+
       {/* 1. Continue Learning */}
       {data.continueLearning.length > 0 && (
         <section>
@@ -53,7 +78,7 @@ export default function StudentMetricsDashboard() {
               return (
                 <div key={session.sessionId} className="resume-card">
                   <div>
-                    <div className="resume-tag">{session.assessmentType}</div>
+                    <div className="resume-tag">{session.assessmentType.replace('_', ' ')}</div>
                     <h3>{session.assessmentName}</h3>
                     <div className="progress-container">
                       <div className="progress-text">
@@ -113,7 +138,7 @@ export default function StudentMetricsDashboard() {
               <div key={session.sessionId} className="completed-item">
                 <div className="completed-info">
                   <h4>{session.assessmentName}</h4>
-                  <p>{session.assessmentType} • {new Date(session.updatedAt).toLocaleDateString()}</p>
+                  <p>{session.assessmentType.replace('_', ' ')} • {new Date(session.updatedAt).toLocaleDateString()}</p>
                 </div>
                 <div className="completed-score">
                   {session.score} / {session.totalQuestions}

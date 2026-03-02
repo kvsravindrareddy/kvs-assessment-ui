@@ -16,21 +16,21 @@ export default function SpeedMathChallenge() {
     const [score, setScore] = useState(0);
     const [completed, setCompleted] = useState(false);
 
-    const [setupMode, setSetupMode] = useState(false);
+    const [setupMode, setSetupMode] = useState(true); // ALWAYS true initially to show the globe!
     const [mathType, setMathType] = useState('ADDITION');
     const [complexity, setComplexity] = useState('EASY');
+    
+    // NEW: Store the active session but don't force the user into it
+    const [activeSavedSession, setActiveSavedSession] = useState(null);
 
     // 28 Math Challenge Options with varying "weights" to create a realistic, responsive cloud/universe
     const mathNodes = [
-        // Level 3 Size (Main Core)
         { id: 'ADDITION', label: '➕ Addition', weight: 3, color: '#ef4444' },
         { id: 'SUBTRACTION', label: '➖ Subtraction', weight: 3, color: '#3b82f6' },
         { id: 'MULTIPLICATION', label: '✖️ Multiplication', weight: 3, color: '#10b981' },
         { id: 'DIVISION', label: '➗ Division', weight: 3, color: '#f59e0b' },
         { id: 'MIXED_OPERATIONS', label: '🔀 Mixed Ops', weight: 3, color: '#8b5cf6' },
         { id: 'ALGEBRA_LINEAR', label: '𝑥 Algebra', weight: 3, color: '#f43f5e' },
-        
-        // Level 2 Size (Intermediate)
         { id: 'PERCENTAGE', label: '📈 Percentage', weight: 2, color: '#ec4899' },
         { id: 'FRACTION_ADDITION', label: '½ Frac Add', weight: 2, color: '#14b8a6' },
         { id: 'FRACTION_MULTIPLICATION', label: '¾ Frac Mult', weight: 2, color: '#06b6d4' },
@@ -43,8 +43,6 @@ export default function SpeedMathChallenge() {
         { id: 'PROBABILITY', label: '🎲 Probability', weight: 2, color: '#fb923c' },
         { id: 'GEOMETRY_AREA', label: '⬜ Area', weight: 2, color: '#a3e635' },
         { id: 'GEOMETRY_PERIMETER', label: '📏 Perimeter', weight: 2, color: '#c084fc' },
-
-        // Level 1 Size (Advanced / Niche)
         { id: 'CUBE_ROOT', label: '∛ Cube Root', weight: 1, color: '#fca5a5' },
         { id: 'FACTORIAL', label: 'n! Factorial', weight: 1, color: '#93c5fd' },
         { id: 'LOGARITHM', label: 'log(x) Log', weight: 1, color: '#6ee7b7' },
@@ -57,10 +55,10 @@ export default function SpeedMathChallenge() {
     ];
 
     const difficultyCards = [
-        { id: 'EASY', label: 'Easy (Lvl 1)', color: '#22c55e' },
-        { id: 'MEDIUM', label: 'Medium (Lvl 2)', color: '#eab308' },
-        { id: 'HARD', label: 'Hard (Lvl 3)', color: '#ef4444' },
-        { id: 'EXTREME', label: 'Extreme (Lvl 4)', color: '#7f1d1d' }
+        { id: 'EASY', label: 'Easy', color: '#22c55e' },
+        { id: 'MEDIUM', label: 'Medium', color: '#eab308' },
+        { id: 'HARD', label: 'Hard', color: '#ef4444' },
+        { id: 'EXTREME', label: 'Extreme', color: '#7f1d1d' }
     ];
 
     useEffect(() => {
@@ -73,16 +71,11 @@ export default function SpeedMathChallenge() {
                 });
 
                 if (res.data && res.data.status === 'IN_PROGRESS' && res.data.assessmentData) {
-                    const savedData = JSON.parse(res.data.assessmentData);
-                    setSession(res.data);
-                    setQuestions(savedData.randomMathQuestions);
-                    setCurrentIndex(res.data.resumeQuestionIndex);
-                    setScore(res.data.score);
-                } else {
-                    setSetupMode(true);
+                    // Just save it to state so we can show a banner, don't auto-start it!
+                    setActiveSavedSession(res.data);
                 }
             } catch (err) {
-                setSetupMode(true);
+                console.error("No active session found.");
             } finally {
                 setLoading(false);
             }
@@ -90,6 +83,18 @@ export default function SpeedMathChallenge() {
 
         if (user) fetchActiveSession();
     }, [user]);
+
+    // NEW: Function to manually resume the saved session when they click the banner button
+    const handleResumeSavedSession = () => {
+        if (!activeSavedSession) return;
+        const savedData = JSON.parse(activeSavedSession.assessmentData);
+        setSession(activeSavedSession);
+        setQuestions(savedData.randomMathQuestions);
+        setCurrentIndex(activeSavedSession.resumeQuestionIndex);
+        setScore(activeSavedSession.score);
+        setSetupMode(false);
+        setCompleted(false);
+    };
 
     const startNewAssessment = async () => {
         setLoading(true);
@@ -107,6 +112,7 @@ export default function SpeedMathChallenge() {
             setScore(0);
             setSetupMode(false);
             setCompleted(false);
+            setActiveSavedSession(null); // Clear the banner once they start a new one
         } catch (err) {
             alert("Failed to generate questions. Please ensure the backend is running and up to date!");
         } finally {
@@ -155,9 +161,37 @@ export default function SpeedMathChallenge() {
         }
     };
 
+    const endAssessment = async () => {
+        if (!window.confirm("Are you sure you want to end this challenge early? Your current score will be saved.")) return;
+        
+        try {
+            const token = localStorage.getItem('token');
+            const currentQuestion = questions[currentIndex];
+            
+            const updatedQuestion = {
+                ...currentQuestion,
+                answer: { ...currentQuestion.answer, selected: '' }
+            };
+
+            await axios.post(`${CONFIG.development.GATEWAY_URL}/api/assessment/submitrandomquestion`, {
+                userId: user?.username || 'GUEST',
+                email: user?.email,
+                assessmentId: session.assessmentId,
+                assessmentType: 'MATH_CHALLENGE',
+                assessmentStatus: 'COMPLETED',
+                currentQuestion: updatedQuestion
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            setCompleted(true);
+        } catch (err) {
+            alert("Failed to end assessment.");
+        }
+    };
+
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}><div className="spinner"></div></div>;
 
-    // Helper to calculate responsive padding and font size for bubbles
     const getBubbleStyle = (weight, isSelected, color) => {
         const baseStyle = {
             cursor: 'pointer',
@@ -187,10 +221,23 @@ export default function SpeedMathChallenge() {
 
             {setupMode ? (
                 <div style={{ background: '#ffffff', borderRadius: '24px', padding: '30px 20px', boxShadow: '0 10px 40px rgba(0,0,0,0.08)' }}>
+                    
+                    {/* NEW: Display Banner if they have an active session! */}
+                    {activeSavedSession && (
+                        <div style={{ background: '#eff6ff', border: '2px solid #bfdbfe', borderRadius: '16px', padding: '20px', marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+                            <div>
+                                <h3 style={{ margin: '0 0 5px 0', color: '#1e293b', fontSize: '1.2rem' }}>⚡ Active Challenge Detected</h3>
+                                <p style={{ margin: 0, color: '#64748b' }}>You were in the middle of a <b>{activeSavedSession.assessmentName}</b> challenge.</p>
+                            </div>
+                            <button onClick={handleResumeSavedSession} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)', transition: 'transform 0.2s' }} onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'} onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}>
+                                Resume Challenge →
+                            </button>
+                        </div>
+                    )}
+
                     <h2 style={{ textAlign: 'center', fontSize: '2.2rem', color: '#1e293b', margin: '0 0 5px 0', fontWeight: '800' }}>The Math Universe 🌍</h2>
                     <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '30px', fontSize: '1.1rem' }}>Select a constellation to begin your challenge.</p>
 
-                    {/* RESPONSIVE MATH UNIVERSE CLOUD */}
                     <div style={{ 
                         background: 'radial-gradient(circle at center, #1e293b 0%, #0f172a 100%)', 
                         borderRadius: '24px', padding: '40px 20px', marginBottom: '40px',
@@ -220,7 +267,6 @@ export default function SpeedMathChallenge() {
                         ))}
                     </div>
 
-                    {/* DIFFICULTY CHIPS */}
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap', marginBottom: '40px' }}>
                         {difficultyCards.map(diff => (
                             <div 
@@ -307,19 +353,33 @@ export default function SpeedMathChallenge() {
                         />
                     </div>
 
-                    <button 
-                        onClick={submitAnswer}
-                        disabled={!selectedAnswer}
-                        style={{ 
-                            width: '100%', maxWidth: '400px', margin: '0 auto', display: 'block',
-                            padding: '20px', fontSize: '1.4rem', fontWeight: 'bold', borderRadius: '50px',
-                            background: '#0f172a', color: 'white', border: 'none', cursor: 'pointer',
-                            opacity: !selectedAnswer ? 0.5 : 1, transition: 'all 0.2s',
-                            boxShadow: !selectedAnswer ? 'none' : '0 10px 25px rgba(15,23,42,0.3)'
-                        }}
-                    >
-                        Submit Target 🎯
-                    </button>
+                    <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', maxWidth: '400px', margin: '0 auto' }}>
+                        <button 
+                            onClick={submitAnswer}
+                            disabled={!selectedAnswer}
+                            style={{ 
+                                flex: 2, padding: '20px', fontSize: '1.3rem', fontWeight: 'bold', borderRadius: '50px',
+                                background: '#0f172a', color: 'white', border: 'none', cursor: 'pointer',
+                                opacity: !selectedAnswer ? 0.5 : 1, transition: 'all 0.2s',
+                                boxShadow: !selectedAnswer ? 'none' : '0 10px 25px rgba(15,23,42,0.3)'
+                            }}
+                        >
+                            Submit 🎯
+                        </button>
+
+                        <button 
+                            onClick={endAssessment}
+                            style={{ 
+                                flex: 1, padding: '20px', fontSize: '1.1rem', fontWeight: 'bold', borderRadius: '50px',
+                                background: '#fee2e2', color: '#ef4444', border: '2px solid #fca5a5', cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => e.target.style.background = '#fecaca'}
+                            onMouseLeave={(e) => e.target.style.background = '#fee2e2'}
+                        >
+                            End 🛑
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

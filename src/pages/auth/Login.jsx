@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom'; // Added Navigate import
 import '../../css/Auth.css';
 
 const Login = ({ onClose, onSwitchToSignup, isAdmin = false }) => {
+  const { login, user } = useAuth(); // Extracted 'user' to check login status
   const [credentials, setCredentials] = useState({
     username: '',
     password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+
+  // PREVENT LOGIN PAGE ACCESS: Redirect to dashboard if already logged in!
+  // (We check !onClose so we don't accidentally close modals)
+  if (user && !onClose) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleChange = (e) => {
     setCredentials({
@@ -28,7 +34,7 @@ const Login = ({ onClose, onSwitchToSignup, isAdmin = false }) => {
     try {
       console.log('Login form submitted:', credentials.username, isAdmin ? 'Admin' : 'User');
       await login(credentials, isAdmin);
-      alert(`${isAdmin ? 'Admin' : 'User'} login successful!`);
+      // REMOVED: alert(`${isAdmin ? 'Admin' : 'User'} login successful!`);
       if (onClose) onClose();
     } catch (err) {
       console.error('Login component error:', err);
