@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import CONFIG from '../../Config';
 
@@ -18,14 +18,21 @@ const getSubjectIcon = (subjectName) => {
 };
 
 export default function SubjectAssessments() {
-  const { user } = useAuth(); 
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const resumeAssessmentId = searchParams.get('resumeId');
 
   const currentUserId = user ? (user.id || user.email || 'GUEST_USER') : 'GUEST_USER';
 
   const [gradeData, setGradeData] = useState({});
   const [selectedGrade, setSelectedGrade] = useState(orderedGrades[6]); // Defaults to V
   const [selectedSubject, setSelectedSubject] = useState(null);
+  const [showConfigDialog, setShowConfigDialog] = useState(false);
+
+  // Assessment configuration
+  const [numberOfQuestions, setNumberOfQuestions] = useState(10);
+  const [complexity, setComplexity] = useState('SIMPLE');
 
   const [assessmentId, setAssessmentId] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(null);
@@ -36,10 +43,11 @@ export default function SubjectAssessments() {
   const [score, setScore] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const adminConfigURL = `${CONFIG.development.ADMIN_BASE_URL}/admin-assessment/v1/app-config/subject-types`;
-  const loadAssessmentURL = `${CONFIG.development.GATEWAY_URL}/v1/assessment/questions/load`; 
-  const startAssessmentURL = `${CONFIG.development.GATEWAY_URL}/v1/assessment/questions/start`; 
+  const loadAssessmentURL = `${CONFIG.development.GATEWAY_URL}/v1/assessment/questions/load`;
+  const startAssessmentURL = `${CONFIG.development.GATEWAY_URL}/v1/assessment/questions/start`;
   const submitAnswerURL = `${CONFIG.development.GATEWAY_URL}/v1/assessment/questions/submit-answer`;
 
   useEffect(() => {
@@ -49,41 +57,114 @@ export default function SubjectAssessments() {
       .catch(err => console.error('Failed to load grades:', err));
   }, [adminConfigURL]);
 
-  const startAssessment = async () => {
-    if (!selectedGrade || !selectedSubject) return;
+  // Handle resume on mount
+  useEffect(() => {
+    if (resumeAssessmentId) {
+      resumeAssessment(resumeAssessmentId);
+    }
+  }, [resumeAssessmentId]);
+
+  const resumeAssessment = async (assId) => {
     setLoading(true);
-    
     try {
       const token = localStorage.getItem('token');
-      
-      // Step 1: LOAD the assessment
+
+      // Fetch session info from dashboard API to get lastAttemptedIndex and score
+      const dashboardURL = `${CONFIG.development.GATEWAY_URL}/v1/assessment/dashboard/student?userId=${encodeURIComponent(currentUserId)}`;
+      const dashboardRes = await axios.get(dashboardURL, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      // Find the session in continueLearning
+      const session = dashboardRes.data.continueLearning?.find(s => s.assessmentId === assId);
+
+      if (!session) {
+        setErrorMessage('Assessment session not found. Please start a new assessment.');
+        setLoading(false);
+        return;
+      }
+
+      // Resume from next question after lastAttemptedIndex
+      const nextQuestionIndex = (session.lastAttemptedIndex || 0) + 1;
+
+      // Fetch the next question
+      const res = await axios.post(startAssessmentURL, {
+        userId: currentUserId,
+        email: user?.email || '',
+        assessmentId: assId,
+        questionIndex: nextQuestionIndex
+      }, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      // Extract question data
+      const questionData = res.data?.question?.question || res.data;
+
+      setAssessmentId(assId);
+      setTotalQuestions(session.totalQuestions);
+      setCurrentQuestion(questionData);
+      setQuestionIndex(nextQuestionIndex);
+      setScore(session.score || 0);
+      setSelectedAnswer('');
+      setCompleted(false);
+
+    } catch (err) {
+      console.error('Error resuming assessment:', err);
+      setErrorMessage('Unable to resume assessment. Please start a new one.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openConfigDialog = () => {
+    if (!selectedGrade || !selectedSubject) return;
+    setShowConfigDialog(true);
+    setErrorMessage(''); // Clear any previous errors
+    // Reset configuration
+    setNumberOfQuestions(10);
+    setComplexity('SIMPLE');
+  };
+
+  const startAssessment = async () => {
+    if (!selectedGrade || !selectedSubject) return;
+
+    setLoading(true);
+    setErrorMessage('');
+    setShowConfigDialog(false);
+
+    try {
+      const token = localStorage.getItem('token');
+
+      // Step 1: LOAD the assessment with user-selected configuration
       const loadRes = await axios.post(loadAssessmentURL, {
         userId: currentUserId,
         email: user?.email || '',
         category: selectedGrade,
-        type: selectedSubject, // 🌟 FIXED: Changed 'subjectType' to 'type' to match LoadAssessmentRequest.java
-        complexity: 'SIMPLE',
-        numberOfQuestions: 10
+        type: selectedSubject,
+        complexity: complexity,
+        numberOfQuestions: numberOfQuestions
       }, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       const newAssessmentId = loadRes.data.assessmentId;
-      const totalQs = loadRes.data.numberOfQuestions || 10;
-      
+      const totalQs = loadRes.data.numberOfQuestions || numberOfQuestions;
+
       setAssessmentId(newAssessmentId);
       setTotalQuestions(totalQs);
-      
+
       // Step 2: START by fetching Question #1
       await fetchQuestion(newAssessmentId, 1);
-      
+
       setScore(0);
       setSelectedAnswer('');
       setCompleted(false);
 
     } catch (err) {
       console.error('Error starting subject assessment:', err);
-      alert('Could not load questions. Ensure the Admin has loaded questions for this Subject & Grade.');
+      const errorMsg = err.response?.data?.message || 'Could not load questions. Ensure the Admin has loaded questions for this Subject & Grade.';
+      setErrorMessage(errorMsg);
+      setShowConfigDialog(true); // Stay on config dialog to show error
     } finally {
       setLoading(false);
     }
@@ -99,8 +180,12 @@ export default function SubjectAssessments() {
       }, {
           headers: { 'Authorization': `Bearer ${token}` }
       });
-      
-      setCurrentQuestion(res.data);
+
+      // Extract the nested question object: res.data.question.question
+      const questionData = res.data?.question?.question || res.data;
+      console.log('Question data:', questionData);
+
+      setCurrentQuestion(questionData);
       setQuestionIndex(index);
   };
 
@@ -138,7 +223,8 @@ export default function SubjectAssessments() {
           setCompleted(true);
       }
     } catch (err) {
-      alert("Failed to submit answer.");
+      console.error("Failed to submit answer:", err);
+      setErrorMessage("Failed to submit answer. Please try again.");
     }
   };
 
@@ -160,13 +246,26 @@ export default function SubjectAssessments() {
     }
   };
 
+  // Show loading while resuming
+  if (loading && resumeAssessmentId) {
+    return (
+      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ background: '#ffffff', borderRadius: '24px', padding: '60px 20px', boxShadow: '0 10px 40px rgba(0,0,0,0.08)', textAlign: 'center' }}>
+          <div style={{ fontSize: '4rem', marginBottom: '20px' }}>⏳</div>
+          <h2 style={{ fontSize: '1.8rem', color: '#1e293b', margin: '0 0 10px 0' }}>Resuming Your Assessment...</h2>
+          <p style={{ color: '#64748b', fontSize: '1rem' }}>Getting your progress ready</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px', fontFamily: 'system-ui, sans-serif' }}>
         <button onClick={() => navigate('/assessments')} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '5px' }}>
             <span>←</span> Back to Hub
         </button>
 
-      {!assessmentId ? (
+      {!assessmentId && !showConfigDialog ? (
         <div style={{ background: '#ffffff', borderRadius: '24px', padding: '30px 20px', boxShadow: '0 10px 40px rgba(0,0,0,0.08)' }}>
             <h2 style={{ textAlign: 'center', fontSize: '2.2rem', color: '#1e293b', margin: '0 0 5px 0', fontWeight: '800' }}>Subject Assessments 📚</h2>
             <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '30px', fontSize: '1.1rem' }}>Select your Grade and Subject to begin.</p>
@@ -204,10 +303,81 @@ export default function SubjectAssessments() {
                 </div>
             )}
 
-            <button 
-                onClick={startAssessment}
+            <button
+                onClick={openConfigDialog}
                 disabled={loading || !selectedSubject}
                 style={{ width: '100%', maxWidth: '400px', margin: '0 auto', display: 'block', padding: '20px', fontSize: '1.3rem', fontWeight: 'bold', borderRadius: '50px', background: !selectedSubject ? '#cbd5e1' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', cursor: !selectedSubject ? 'not-allowed' : 'pointer', boxShadow: !selectedSubject ? 'none' : '0 10px 25px rgba(16, 185, 129, 0.4)' }}
+            >
+                Configure Assessment ⚙️
+            </button>
+        </div>
+
+      ) : showConfigDialog ? (
+        <div style={{ background: '#ffffff', borderRadius: '24px', padding: '40px 30px', boxShadow: '0 10px 40px rgba(0,0,0,0.08)', maxWidth: '700px', margin: '0 auto' }}>
+            <button onClick={() => setShowConfigDialog(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <span>←</span> Back
+            </button>
+
+            <h2 style={{ textAlign: 'center', fontSize: '2rem', color: '#1e293b', margin: '0 0 10px 0', fontWeight: '800' }}>Configure Your Assessment ⚙️</h2>
+            <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '40px', fontSize: '1rem' }}>
+                {getSubjectIcon(selectedSubject)} {selectedSubject} - Grade {selectedGrade.replace('_', ' ')}
+            </p>
+
+            {/* Error Message */}
+            {errorMessage && (
+                <div style={{ background: '#fef2f2', border: '2px solid #fca5a5', borderRadius: '12px', padding: '16px 20px', marginBottom: '30px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+                    <div>
+                        <div style={{ fontWeight: 'bold', color: '#dc2626', marginBottom: '4px' }}>Unable to Load Assessment</div>
+                        <div style={{ color: '#991b1b', fontSize: '0.95rem' }}>{errorMessage}</div>
+                    </div>
+                </div>
+            )}
+
+            {/* Number of Questions */}
+            <div style={{ marginBottom: '30px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold', color: '#1e293b', marginBottom: '12px', fontSize: '1.1rem' }}>
+                    📊 Number of Questions
+                </label>
+                <select
+                    value={numberOfQuestions}
+                    onChange={(e) => setNumberOfQuestions(parseInt(e.target.value))}
+                    style={{ width: '100%', padding: '15px 20px', fontSize: '1.1rem', borderRadius: '12px', border: '2px solid #e2e8f0', background: 'white', cursor: 'pointer', fontWeight: '600', color: '#475569' }}
+                >
+                    <option value={5}>5 Questions</option>
+                    <option value={10}>10 Questions</option>
+                    <option value={15}>15 Questions</option>
+                    <option value={20}>20 Questions</option>
+                    <option value={25}>25 Questions</option>
+                    <option value={30}>30 Questions</option>
+                </select>
+            </div>
+
+            {/* Complexity Level */}
+            <div style={{ marginBottom: '40px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold', color: '#1e293b', marginBottom: '12px', fontSize: '1.1rem' }}>
+                    🎯 Difficulty Level
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                    {['SIMPLE', 'MEDIUM', 'COMPLEX'].map(level => (
+                        <button
+                            key={level}
+                            onClick={() => setComplexity(level)}
+                            style={{ padding: '18px', borderRadius: '12px', border: `2px solid ${complexity === level ? '#10b981' : '#e2e8f0'}`, background: complexity === level ? '#ecfdf5' : 'white', cursor: 'pointer', fontWeight: 'bold', color: complexity === level ? '#065f46' : '#475569', fontSize: '1rem', transition: 'all 0.2s' }}
+                        >
+                            {level === 'SIMPLE' && '😊 Easy'}
+                            {level === 'MEDIUM' && '🤔 Medium'}
+                            {level === 'COMPLEX' && '🧠 Hard'}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Start Button */}
+            <button
+                onClick={startAssessment}
+                disabled={loading}
+                style={{ width: '100%', padding: '20px', fontSize: '1.3rem', fontWeight: 'bold', borderRadius: '50px', background: loading ? '#cbd5e1' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', boxShadow: loading ? 'none' : '0 10px 25px rgba(16, 185, 129, 0.4)', marginTop: '20px' }}
             >
                 {loading ? 'Generating Test...' : 'Start Assessment 🚀'}
             </button>
@@ -247,6 +417,15 @@ export default function SubjectAssessments() {
             <h3 style={{ fontSize: '1.6rem', color: '#0f172a', marginBottom: '30px', lineHeight: '1.5' }}>
                 {currentQuestion.name}
             </h3>
+
+            {/* Error Message during assessment */}
+            {errorMessage && (
+                <div style={{ background: '#fef2f2', border: '2px solid #fca5a5', borderRadius: '12px', padding: '12px 16px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+                    <div style={{ color: '#dc2626', fontSize: '0.95rem', fontWeight: '600' }}>{errorMessage}</div>
+                    <button onClick={() => setErrorMessage('')} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '1.2rem', padding: '0 8px' }}>×</button>
+                </div>
+            )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '40px' }}>
                 {Object.entries(currentQuestion.options || {}).map(([key, value]) => {
