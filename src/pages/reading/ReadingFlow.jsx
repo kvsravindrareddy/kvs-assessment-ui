@@ -154,7 +154,6 @@ export default function ReadingFlow() {
     }
   };
 
-  // 🔥 URL READER EFFECT: This grabs the storyId from the URL and clicks "Start" for you!
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const urlStoryId = params.get('storyId');
@@ -238,66 +237,140 @@ export default function ReadingFlow() {
     speakNext(0);
   };
 
-  const exportPDF = () => {
+  // 🌟 NEW: Advanced PDF Generation with Borders, Logos, and Page Numbers
+  const generatePDF = (preview = false) => {
     if (!storyDetails) return;
+    
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 15;
+    const contentWidth = pageWidth - (margin * 2);
+    
+    // We start rendering content BELOW the header (which is approx 35px tall)
+    let y = 45; 
+    
+    // --- 1. RENDER MAIN CONTENT (Title + Story + Questions) ---
+    
+    // Title & Grade (Grade formatted nicely)
+    const formattedGrade = selectedGrade.replace('_', ' ');
     doc.setFontSize(18);
-    doc.text(storyDetails.title || 'Story', 10, 20);
+    doc.setTextColor(15, 23, 42); // Dark Slate
+    doc.setFont(undefined, 'bold');
+    
+    // Split title if it's too long
+    const titleLines = doc.splitTextToSize(`Grade ${formattedGrade} - ${storyDetails.title || 'Reading Comprehension'}`, contentWidth);
+    doc.text(titleLines, margin, y);
+    y += (titleLines.length * 8) + 5;
+    
+    // Story Content
     doc.setFontSize(12);
-    let y = 30;
-    const lines = doc.splitTextToSize(storyDetails.content || '', 180);
-    doc.text(lines, 10, y);
-    y += lines.length * 7 + 10;
-    const question = storyDetails.questions[questionIndex];
-    if (question) {
-      doc.setFontSize(16);
-      doc.text(`Question ${questionIndex + 1}`, 10, y);
-      y += 10;
-      doc.setFontSize(12);
-      const qLines = doc.splitTextToSize(question.name, 180);
-      doc.text(qLines, 10, y);
-      y += qLines.length * 7 + 5;
-      if (question.options) {
-        Object.entries(question.options).forEach(([key, value]) => {
-          const optLines = doc.splitTextToSize(`${key}: ${value}`, 180);
-          doc.text(optLines, 10, y);
-          y += optLines.length * 7 + 3;
-        });
+    doc.setTextColor(51, 65, 85); // Lighter Slate
+    doc.setFont(undefined, 'normal');
+    const contentLines = doc.splitTextToSize(storyDetails.content || '', contentWidth);
+    
+    contentLines.forEach(line => {
+      // Check for page overflow (leaving space for bottom border and footer)
+      if (y > pageHeight - 30) { 
+        doc.addPage();
+        y = 45; // Reset to top of page, right below header
       }
+      doc.text(line, margin, y);
+      y += 7;
+    });
+    
+    y += 10;
+    
+    // Questions
+    if (storyDetails.questions && storyDetails.questions.length > 0) {
+        if (y > pageHeight - 40) {
+            doc.addPage();
+            y = 45;
+        }
+        
+        doc.setFontSize(16);
+        doc.setTextColor(15, 23, 42);
+        doc.setFont(undefined, 'bold');
+        doc.text("Assessment Questions", margin, y);
+        y += 12;
+        
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(51, 65, 85);
+        
+        storyDetails.questions.forEach((q, index) => {
+            if (y > pageHeight - 30) {
+                doc.addPage();
+                y = 45;
+            }
+            
+            // Question text
+            const qLines = doc.splitTextToSize(`${index + 1}. ${q.name}`, contentWidth);
+            doc.text(qLines, margin, y);
+            y += qLines.length * 7;
+            
+            // Options
+            if (q.options) {
+                Object.entries(q.options).forEach(([key, value]) => {
+                    if (y > pageHeight - 25) {
+                        doc.addPage();
+                        y = 45;
+                    }
+                    const optLines = doc.splitTextToSize(`    ${key}) ${value}`, contentWidth);
+                    doc.text(optLines, margin, y);
+                    y += optLines.length * 7;
+                });
+            }
+            y += 6; // Spacing between questions
+        });
     }
-    doc.save(`Story_${storyDetails.title || 'Untitled'}_Q${questionIndex + 1}.pdf`);
+
+    // --- 2. LOOP THROUGH ALL GENERATED PAGES TO ADD HEADER, BORDER, & FOOTER ---
+    const totalPages = doc.internal.getNumberOfPages();
+    
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        
+        // A. Draw Outer Page Border
+        doc.setDrawColor(203, 213, 225); // Slate-300
+        doc.setLineWidth(0.5);
+        doc.rect(margin / 2, margin / 2, pageWidth - margin, pageHeight - margin);
+        
+        // B. Draw GoStudyLab Logo Header
+        // Light blue background pill box
+        doc.setFillColor(239, 246, 255); // Blue-50
+        doc.roundedRect(margin, margin, 52, 12, 3, 3, 'F');
+        
+        // Logo Text inside pill box
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(37, 99, 235); // Blue-600
+        doc.text('GoStudyLab', margin + 8, margin + 8);
+        
+        // Header Divider Line
+        doc.setDrawColor(226, 232, 240); // Slate-200
+        doc.setLineWidth(0.5);
+        doc.line(margin, margin + 18, pageWidth - margin, margin + 18);
+        
+        // C. Draw Footer (Page N of M)
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(100, 116, 139); // Slate-500
+        doc.text(`Page ${i} of ${totalPages}`, pageWidth / 2, pageHeight - (margin / 2) - 4, { align: 'center' });
+    }
+
+    // --- 3. EXPORT ---
+    if (preview) {
+        const blob = doc.output('bloburl');
+        window.open(blob);
+    } else {
+        const safeTitle = (storyDetails.title || 'Worksheet').replace(/[^a-zA-Z0-9]/g, '_');
+        doc.save(`GoStudyLab_${safeTitle}.pdf`);
+    }
   };
 
-  const previewPDF = () => {
-    if (!storyDetails) return;
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text(storyDetails.title || 'Story', 10, 20);
-    doc.setFontSize(12);
-    let y = 30;
-    const lines = doc.splitTextToSize(storyDetails.content || '', 180);
-    doc.text(lines, 10, y);
-    y += lines.length * 7 + 10;
-    const question = storyDetails.questions[questionIndex];
-    if (question) {
-      doc.setFontSize(16);
-      doc.text(`Question ${questionIndex + 1}`, 10, y);
-      y += 10;
-      doc.setFontSize(12);
-      const qLines = doc.splitTextToSize(question.name, 180);
-      doc.text(qLines, 10, y);
-      y += qLines.length * 7 + 5;
-      if (question.options) {
-        Object.entries(question.options).forEach(([key, value]) => {
-          const optLines = doc.splitTextToSize(`${key}: ${value}`, 180);
-          doc.text(optLines, 10, y);
-          y += optLines.length * 7 + 3;
-        });
-      }
-    }
-    const blob = doc.output('bloburl');
-    window.open(blob);
-  };
+  const exportPDF = () => generatePDF(false);
+  const previewPDF = () => generatePDF(true);
 
   const currentStoriesKey = `${selectedGrade}-${selectedSubject}`;
   const currentStories = stories[currentStoriesKey] || [];
