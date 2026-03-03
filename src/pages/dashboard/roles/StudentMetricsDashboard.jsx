@@ -108,13 +108,19 @@ export default function StudentMetricsDashboard() {
         <div className="rating-banner">
             <div className="rating-text-section">
                 <h2 className="rating-title">
-                    Current Rank: <span className="rating-stars">{data.allTime.rating}</span>
+                    {data.allTime.rating} <span style={{ fontSize: '1rem', fontWeight: '600', opacity: 0.8 }}>Rank</span>
                 </h2>
                 <p className="rating-message">{data.allTime.motivationalMessage}</p>
             </div>
-            <div className="rating-accuracy-box">
-                <div className="accuracy-value">{data.allTime.accuracyPercentage}%</div>
-                <div className="accuracy-label">Overall Accuracy</div>
+            <div style={{ display: 'flex', gap: '20px' }}>
+                <div className="rating-accuracy-box">
+                    <div className="accuracy-value">{data.allTime.accuracyPercentage}%</div>
+                    <div className="accuracy-label">Accuracy</div>
+                </div>
+                <div className="rating-accuracy-box">
+                    <div className="accuracy-value">{data.allTime.totalScore}</div>
+                    <div className="accuracy-label">Total Score</div>
+                </div>
             </div>
         </div>
       )}
@@ -156,96 +162,95 @@ export default function StudentMetricsDashboard() {
       )}
 
       <section>
-        <h2 className="section-title">📊 Your Performance</h2>
-        <div className="time-tabs">
-          {['today', 'thisWeek', 'thisMonth', 'allTime'].map(tab => (
-            <button key={tab} className={`time-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-              {tab.replace('this', '').replace(/([A-Z])/g, ' $1').trim().replace(/^./, str => str.toUpperCase())}
-            </button>
-          ))}
-        </div>
-
-        <div className="metrics-grid">
-          <div className="metric-card">
-            <h4>Assessments Done</h4>
-            <div className="metric-value">{currentMetrics?.assessmentsCompleted || 0}</div>
-          </div>
-          <div className="metric-card">
-            <h4>Total Score</h4>
-            <div className="metric-value">{currentMetrics?.totalScore || 0}</div>
-          </div>
-          <div className="metric-card">
-            <h4>Accuracy</h4>
-            <div className="metric-value">{currentMetrics?.accuracyPercentage || 0}%</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
+          <h2 className="section-title" style={{ margin: 0 }}>📊 Your Performance</h2>
+          <div className="time-tabs" style={{ margin: 0 }}>
+            {['today', 'thisWeek', 'thisMonth', 'allTime'].map(tab => (
+              <button key={tab} className={`time-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
+                {tab.replace('this', '').replace(/([A-Z])/g, ' $1').trim().replace(/^./, str => str.toUpperCase())}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* 🌟 THIS BLOCK WILL ALWAYS RENDER NOW! */}
-        <div style={{ marginTop: '30px', background: '#f8fafc', padding: '24px', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
-            <h3 style={{ fontSize: '1.3rem', color: '#1e293b', marginTop: '0', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                🏆 Your Exploration Results
-            </h3>
-            
-            {Object.keys(categoryScores).length > 0 ? (
-                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                    {Object.entries(categoryScores).map(([subject, score]) => {
-                        const cat = getCategoryDisplay(subject);
-                        return (
-                            <div key={subject} style={{ background: 'white', border: `2px solid ${cat.border}`, padding: '15px 25px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '15px', flex: '1', minWidth: '220px', boxShadow: `0 4px 15px ${cat.bg}88` }}>
-                                <div style={{ background: cat.bg, padding: '10px', borderRadius: '50%', fontSize: '1.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '50px', width: '50px' }}>
-                                    {cat.icon}
-                                </div>
-                                <div>
-                                    <div style={{ color: '#64748b', fontWeight: 'bold', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{cat.label}</div>
-                                    <div style={{ color: '#0f172a', fontSize: '1.8rem', fontWeight: '900', lineHeight: '1.2' }}>
-                                        {score} <span style={{fontSize: '1rem', color: '#94a3b8', fontWeight: '600'}}>points</span>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            ) : (
-                <div style={{ color: '#64748b', fontStyle: 'italic', padding: '20px', background: 'white', borderRadius: '12px', textAlign: 'center', border: '1px dashed #cbd5e1' }}>
-                    No points collected yet. Start a Math Universe challenge to see your breakdown!
-                </div>
-            )}
-        </div>
-      </section>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '24px' }}>
+          {/* Quick Stats */}
+          <div style={{ background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-around' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Tests</div>
+              <div style={{ fontSize: '2rem', fontWeight: '800', color: '#0f172a' }}>{currentMetrics?.assessmentsCompleted || 0}</div>
+            </div>
+            <div style={{ width: '1px', background: '#e2e8f0' }}></div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Score</div>
+              <div style={{ fontSize: '2rem', fontWeight: '800', color: '#10b981' }}>{currentMetrics?.totalScore || 0}</div>
+            </div>
+            <div style={{ width: '1px', background: '#e2e8f0' }}></div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Accuracy</div>
+              <div style={{ fontSize: '2rem', fontWeight: '800', color: '#3b82f6' }}>{currentMetrics?.accuracyPercentage || 0}%</div>
+            </div>
+          </div>
 
-      <section>
-        <h2 className="section-title">🏆 Recently Completed ({activeTab.replace('this', '').replace(/([A-Z])/g, ' $1').trim()})</h2>
-        {filteredCompletedItems.length > 0 ? (
-            <div className="completed-list">
-                {filteredCompletedItems.map(session => {
-                const stars = getSessionRating(session.score, session.totalQuestions);
-                const category = getCategoryDisplay(session.assessmentType); 
-                return (
-                    <div key={session.sessionId} className="completed-item">
-                    <div className="completed-info">
-                        <h4 style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '0 0 8px' }}>
-                            {session.assessmentName} 
-                            <span style={{ fontSize: '0.9rem', letterSpacing: '2px', background: 'rgba(251, 191, 36, 0.1)', padding: '2px 8px', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.3)' }}>{stars}</span>
-                        </h4>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ background: category.bg, color: category.color, padding: '3px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', border: `1px solid ${category.border}`, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <span>{category.icon}</span> {category.label}
-                            </span>
-                            <span style={{ color: '#94a3b8', fontSize: '13px' }}>•</span>
-                            <span style={{ color: '#64748b', fontSize: '13px' }}>{new Date(session.updatedAt).toLocaleDateString()}</span>
-                        </div>
+          {/* Subject Breakdown - Only if there are scores */}
+          {Object.keys(categoryScores).length > 0 && (
+            <div style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#64748b', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🏆 Top Subjects</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {Object.entries(categoryScores).slice(0, 3).map(([subject, score]) => {
+                  const cat = getCategoryDisplay(subject);
+                  return (
+                    <div key={subject} style={{ background: 'white', borderRadius: '10px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '12px', border: `1px solid ${cat.border}` }}>
+                      <div style={{ background: cat.bg, padding: '6px', borderRadius: '8px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', width: '32px' }}>
+                        {cat.icon}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ color: '#475569', fontWeight: '600', fontSize: '0.85rem' }}>{cat.label}</div>
+                      </div>
+                      <div style={{ color: cat.color, fontSize: '1.3rem', fontWeight: '800' }}>{score}</div>
                     </div>
-                    <div className="completed-score">{session.score} / {session.totalQuestions}</div>
-                    </div>
-                );
+                  );
                 })}
+              </div>
             </div>
-        ) : (
-            <div style={{ padding: '30px', textAlign: 'center', background: '#f8fafc', borderRadius: '16px', border: '1px dashed #cbd5e1', color: '#64748b' }}>
-                No completed assessments for this period. Time to start exploring!
-            </div>
-        )}
+          )}
+        </div>
       </section>
+
+      {filteredCompletedItems.length > 0 && (
+        <section>
+          <h2 className="section-title">🏆 Recently Completed</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
+              {filteredCompletedItems.slice(0, 6).map(session => {
+              const stars = getSessionRating(session.score, session.totalQuestions);
+              const category = getCategoryDisplay(session.assessmentType);
+              const accuracy = session.totalQuestions > 0 ? Math.round((session.score / session.totalQuestions) * 100) : 0;
+              return (
+                  <div key={session.sessionId} style={{ background: 'white', borderRadius: '12px', padding: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '0.95rem', fontWeight: '700', color: '#1e293b', marginBottom: '4px', lineHeight: '1.3' }}>{session.assessmentName}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{new Date(session.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+                      </div>
+                      <div style={{ background: category.bg, color: category.color, padding: '4px 8px', borderRadius: '8px', fontSize: '1rem', border: `1px solid ${category.border}` }}>
+                        {category.icon}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ fontSize: '1.5rem', fontWeight: '800', color: accuracy >= 80 ? '#10b981' : accuracy >= 60 ? '#f59e0b' : '#64748b' }}>{session.score}</div>
+                        <div style={{ fontSize: '0.9rem', color: '#94a3b8' }}>/ {session.totalQuestions}</div>
+                      </div>
+                      <div style={{ fontSize: '0.85rem', background: accuracy >= 80 ? '#d1fae5' : accuracy >= 60 ? '#fef3c7' : '#f1f5f9', color: accuracy >= 80 ? '#065f46' : accuracy >= 60 ? '#92400e' : '#475569', padding: '4px 12px', borderRadius: '20px', fontWeight: '700' }}>
+                        {accuracy}%
+                      </div>
+                    </div>
+                  </div>
+              );
+              })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
