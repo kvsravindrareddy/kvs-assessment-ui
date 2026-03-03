@@ -87,6 +87,16 @@ export const router = createBrowserRouter([
     )
   },
   {
+    path: '/assessments/subject-assessments',
+    element: (
+      <ProtectedRoute>
+        <UnifiedDashboard>
+          <SubjectAssessments />
+        </UnifiedDashboard>
+      </ProtectedRoute>
+    )
+  },
+  {
     path: '/admin',
     element: (
       <ProtectedRoute requiredRole={['ADMIN', 'SUPER_ADMIN']}>

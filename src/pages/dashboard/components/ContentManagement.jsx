@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { getConfig } from '../../../Config';
 import axios from 'axios';
@@ -36,12 +36,8 @@ const ContentManagement = () => {
     loading: true
   });
 
-  // Load statistics on mount
-  useEffect(() => {
-    loadStatistics();
-  }, []);
-
-  const loadStatistics = async () => {
+  // 🌟 FIX: Wrapped in useCallback to satisfy React's exhaustive-deps linter
+  const loadStatistics = useCallback(async () => {
     try {
       const [questionsRes, storiesRes] = await Promise.all([
         axios.get(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/listallquestions`),
@@ -57,7 +53,12 @@ const ContentManagement = () => {
       console.error('Error loading statistics:', error);
       setStatistics(prev => ({ ...prev, loading: false }));
     }
-  };
+  }, [config.ADMIN_BASE_URL]);
+
+  // Load statistics on mount
+  useEffect(() => {
+    loadStatistics();
+  }, [loadStatistics]);
 
   const handleLoadQuestions = async (e) => {
     e.preventDefault();

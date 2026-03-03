@@ -60,7 +60,7 @@ export default function AssessmentsHub() {
             description: 'Comprehensive tests across various subjects including Science, English, and more.',
             icon: '📚',
             gradient: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
-            path: '/select-grade'
+            path: '/assessments/subject-assessments'
         }
     ];
 
