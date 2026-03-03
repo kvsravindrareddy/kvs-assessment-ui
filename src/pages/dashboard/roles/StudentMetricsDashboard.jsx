@@ -11,21 +11,21 @@ export default function StudentMetricsDashboard() {
   const [data, setData] = useState(null);
   const [activeTab, setActiveTab] = useState('today');
 
+  const fetchDashboard = async () => {
+    try {
+      const userId = user ? (user.id || user.email || 'GUEST_USER') : 'GUEST_USER';
+      const url = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/dashboard/student?userId=${encodeURIComponent(userId)}`;
+      
+      const res = await axios.get(url, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      setData(res.data);
+    } catch (err) {
+      console.error("Failed to load student dashboard metrics", err);
+    }
+  };
+
   useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const userId = user ? (user.id || user.email || 'GUEST_USER') : 'GUEST_USER';
-        // Note: Hits Port 9000 API Gateway routing to your Spring Boot endpoint
-        const url = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/dashboard/student?userId=${encodeURIComponent(userId)}`;
-        
-        const res = await axios.get(url, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-        setData(res.data);
-      } catch (err) {
-        console.error("Failed to load student dashboard metrics", err);
-      }
-    };
     fetchDashboard();
   }, [user]);
 
@@ -37,16 +37,60 @@ export default function StudentMetricsDashboard() {
     if (session.assessmentType === 'STORY') {
       navigate(`/reading?storyId=${session.assessmentId}`);
     } else if (session.assessmentType === 'MATH_CHALLENGE') {
-      navigate(`/assessments/speed-math`); // Routes to our new Math Universe!
+      navigate(`/assessments/speed-math`); 
     } else {
       navigate(`/${session.assessmentType.toLowerCase()}?id=${session.assessmentId}`);
     }
   };
 
+  const handleEndSession = async (session) => {
+    if (!window.confirm(`Are you sure you want to end "${session.assessmentName}"? Your score will be saved as is.`)) return;
+    
+    try {
+        await axios.post(`${CONFIG.development.GATEWAY_URL}/api/assessment/end-session`, null, {
+            params: {
+                userId: session.userId, 
+                assessmentId: session.assessmentId,
+                assessmentType: session.assessmentType
+            },
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        
+        fetchDashboard();
+    } catch (err) {
+        alert("Failed to end session. Please check your connection.");
+    }
+  };
+
+  const getSessionRating = (score, total) => {
+    if (!total || total === 0) return '⭐';
+    const accuracy = (score / total) * 100;
+    
+    if (accuracy >= 95) return '⭐⭐⭐⭐⭐';
+    if (accuracy >= 80) return '⭐⭐⭐⭐';
+    if (accuracy >= 60) return '⭐⭐⭐';
+    if (accuracy >= 40) return '⭐⭐';
+    return '⭐';
+  };
+
+  // 🌟 NEW: Beautiful category formatter with icons!
+  const getCategoryDisplay = (type) => {
+    if (!type) return { label: 'Assessment', icon: '📝', color: '#64748b', bg: '#f1f5f9' };
+    
+    const t = type.toUpperCase();
+    if (t === 'STORY') return { label: 'Story Reading', icon: '📖', color: '#0ea5e9', bg: '#e0f2fe' };
+    if (t === 'MATH_CHALLENGE') return { label: 'Speed Math', icon: '⚡', color: '#f59e0b', bg: '#fef3c7' };
+    if (t === 'MATH') return { label: 'Grade Mathematics', icon: '📐', color: '#10b981', bg: '#d1fae5' };
+    if (t === 'SCIENCE') return { label: 'Grade Science', icon: '🔬', color: '#8b5cf6', bg: '#ede9fe' };
+    if (t === 'ENGLISH') return { label: 'Grade English', icon: '📝', color: '#f43f5e', bg: '#ffe4e6' };
+    
+    // Default fallback
+    return { label: type.replace(/_/g, ' '), icon: '📚', color: '#475569', bg: '#e2e8f0' };
+  };
+
   return (
     <div className="metrics-dashboard-container">
       
-      {/* 🌟 NEW: Star Rating & Motivation Banner 🌟 */}
       {data.allTime && (
         <div className="rating-banner">
             <div className="rating-text-section">
@@ -68,17 +112,26 @@ export default function StudentMetricsDashboard() {
         </div>
       )}
 
-      {/* 1. Continue Learning */}
       {data.continueLearning.length > 0 && (
         <section>
           <h2 className="section-title">🚀 Start Where You Left Off</h2>
           <div className="resume-grid">
             {data.continueLearning.map(session => {
               const progress = session.totalQuestions > 0 ? (session.lastAttemptedIndex / session.totalQuestions) * 100 : 0;
+              const category = getCategoryDisplay(session.assessmentType); // Get formatted category
+
               return (
                 <div key={session.sessionId} className="resume-card">
                   <div>
-                    <div className="resume-tag">{session.assessmentType.replace('_', ' ')}</div>
+                    {/* 🌟 APPLIED: Beautiful category tag for active sessions */}
+                    <div style={{ 
+                        background: category.bg, color: category.color, padding: '4px 12px', 
+                        borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', width: 'fit-content', 
+                        marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '5px' 
+                    }}>
+                        <span>{category.icon}</span> {category.label}
+                    </div>
+
                     <h3>{session.assessmentName}</h3>
                     <div className="progress-container">
                       <div className="progress-text">
@@ -90,7 +143,18 @@ export default function StudentMetricsDashboard() {
                       </div>
                     </div>
                   </div>
-                  <button className="resume-btn" onClick={() => handleResume(session)}>Resume Now →</button>
+                  
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                    <button className="resume-btn" onClick={() => handleResume(session)} style={{ flex: 2 }}>Resume →</button>
+                    <button 
+                        onClick={() => handleEndSession(session)} 
+                        style={{ flex: 1, background: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5', padding: '10px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: '0.2s' }}
+                        onMouseEnter={(e) => e.target.style.background = '#fecaca'}
+                        onMouseLeave={(e) => e.target.style.background = '#fee2e2'}
+                    >
+                        End 🛑
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -98,7 +162,6 @@ export default function StudentMetricsDashboard() {
         </section>
       )}
 
-      {/* 2. Performance Metrics */}
       <section>
         <h2 className="section-title">📊 Your Performance</h2>
         <div className="time-tabs">
@@ -129,22 +192,43 @@ export default function StudentMetricsDashboard() {
         </div>
       </section>
 
-      {/* 3. Recently Completed */}
       {data.recentlyCompleted.length > 0 && (
         <section>
           <h2 className="section-title">🏆 Recently Completed</h2>
           <div className="completed-list">
-            {data.recentlyCompleted.map(session => (
-              <div key={session.sessionId} className="completed-item">
-                <div className="completed-info">
-                  <h4>{session.assessmentName}</h4>
-                  <p>{session.assessmentType.replace('_', ' ')} • {new Date(session.updatedAt).toLocaleDateString()}</p>
+            {data.recentlyCompleted.map(session => {
+              const stars = getSessionRating(session.score, session.totalQuestions);
+              const category = getCategoryDisplay(session.assessmentType); // Get formatted category
+              
+              return (
+                <div key={session.sessionId} className="completed-item">
+                  <div className="completed-info">
+                    <h4 style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '0 0 8px' }}>
+                        {session.assessmentName} 
+                        <span style={{ fontSize: '0.9rem', letterSpacing: '2px', background: 'rgba(251, 191, 36, 0.1)', padding: '2px 8px', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
+                            {stars}
+                        </span>
+                    </h4>
+                    
+                    {/* 🌟 APPLIED: Beautiful category pill in the completed list */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ 
+                            background: '#f1f5f9', color: '#475569', padding: '3px 10px', 
+                            borderRadius: '12px', fontSize: '12px', fontWeight: 'bold',
+                            border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '4px'
+                        }}>
+                            <span>{category.icon}</span> {category.label}
+                        </span>
+                        <span style={{ color: '#94a3b8', fontSize: '13px' }}>•</span>
+                        <span style={{ color: '#64748b', fontSize: '13px' }}>{new Date(session.updatedAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  <div className="completed-score">
+                    {session.score} / {session.totalQuestions}
+                  </div>
                 </div>
-                <div className="completed-score">
-                  {session.score} / {session.totalQuestions}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}

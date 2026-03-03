@@ -16,14 +16,12 @@ export default function SpeedMathChallenge() {
     const [score, setScore] = useState(0);
     const [completed, setCompleted] = useState(false);
 
-    const [setupMode, setSetupMode] = useState(true); // ALWAYS true initially to show the globe!
+    const [setupMode, setSetupMode] = useState(true); 
     const [mathType, setMathType] = useState('ADDITION');
     const [complexity, setComplexity] = useState('EASY');
     
-    // NEW: Store the active session but don't force the user into it
     const [activeSavedSession, setActiveSavedSession] = useState(null);
 
-    // 28 Math Challenge Options with varying "weights" to create a realistic, responsive cloud/universe
     const mathNodes = [
         { id: 'ADDITION', label: '➕ Addition', weight: 3, color: '#ef4444' },
         { id: 'SUBTRACTION', label: '➖ Subtraction', weight: 3, color: '#3b82f6' },
@@ -55,10 +53,10 @@ export default function SpeedMathChallenge() {
     ];
 
     const difficultyCards = [
-        { id: 'EASY', label: 'Easy', color: '#22c55e' },
-        { id: 'MEDIUM', label: 'Medium', color: '#eab308' },
-        { id: 'HARD', label: 'Hard', color: '#ef4444' },
-        { id: 'EXTREME', label: 'Extreme', color: '#7f1d1d' }
+        { id: 'EASY', label: 'Easy (Lvl 1)', color: '#22c55e' },
+        { id: 'MEDIUM', label: 'Medium (Lvl 2)', color: '#eab308' },
+        { id: 'HARD', label: 'Hard (Lvl 3)', color: '#ef4444' },
+        { id: 'EXTREME', label: 'Extreme (Lvl 4)', color: '#7f1d1d' }
     ];
 
     useEffect(() => {
@@ -71,7 +69,6 @@ export default function SpeedMathChallenge() {
                 });
 
                 if (res.data && res.data.status === 'IN_PROGRESS' && res.data.assessmentData) {
-                    // Just save it to state so we can show a banner, don't auto-start it!
                     setActiveSavedSession(res.data);
                 }
             } catch (err) {
@@ -84,16 +81,28 @@ export default function SpeedMathChallenge() {
         if (user) fetchActiveSession();
     }, [user]);
 
-    // NEW: Function to manually resume the saved session when they click the banner button
+    // 🌟 RESUME BUG FIX: Safely handles bounds checking and exact state restoration
     const handleResumeSavedSession = () => {
         if (!activeSavedSession) return;
         const savedData = JSON.parse(activeSavedSession.assessmentData);
         setSession(activeSavedSession);
         setQuestions(savedData.randomMathQuestions);
-        setCurrentIndex(activeSavedSession.resumeQuestionIndex);
+        
+        const qIndex = activeSavedSession.resumeQuestionIndex;
+        if (qIndex >= savedData.randomMathQuestions.length) {
+            setCurrentIndex(savedData.randomMathQuestions.length - 1);
+            setCompleted(true);
+        } else {
+            setCurrentIndex(qIndex);
+        }
+        
         setScore(activeSavedSession.score);
+        
+        if (savedData.randomMathQuestions && savedData.randomMathQuestions.length > 0) {
+            setMathType(savedData.randomMathQuestions[0].type.toUpperCase());
+        }
+
         setSetupMode(false);
-        setCompleted(false);
     };
 
     const startNewAssessment = async () => {
@@ -112,7 +121,7 @@ export default function SpeedMathChallenge() {
             setScore(0);
             setSetupMode(false);
             setCompleted(false);
-            setActiveSavedSession(null); // Clear the banner once they start a new one
+            setActiveSavedSession(null); 
         } catch (err) {
             alert("Failed to generate questions. Please ensure the backend is running and up to date!");
         } finally {
@@ -120,8 +129,16 @@ export default function SpeedMathChallenge() {
         }
     };
 
+    // 🌟 INPUT VALIDATION FIX: Strictly blocks alphabets, allows numbers, decimals, and minus signs
+    const handleInputChange = (e) => {
+        const val = e.target.value;
+        if (/^-?\d*\.?\d*$/.test(val) || val === '') {
+            setSelectedAnswer(val);
+        }
+    };
+
     const submitAnswer = async () => {
-        if (!selectedAnswer) return;
+        if (!selectedAnswer || !questions || !questions[currentIndex]) return;
 
         const currentQuestion = questions[currentIndex];
         const isLastQuestion = currentIndex === questions.length - 1;
@@ -161,26 +178,20 @@ export default function SpeedMathChallenge() {
         }
     };
 
+    // 🌟 END API FIX: Safely calls the universal end-session endpoint!
     const endAssessment = async () => {
         if (!window.confirm("Are you sure you want to end this challenge early? Your current score will be saved.")) return;
         
         try {
             const token = localStorage.getItem('token');
-            const currentQuestion = questions[currentIndex];
+            const userId = user?.username || 'GUEST';
             
-            const updatedQuestion = {
-                ...currentQuestion,
-                answer: { ...currentQuestion.answer, selected: '' }
-            };
-
-            await axios.post(`${CONFIG.development.GATEWAY_URL}/api/assessment/submitrandomquestion`, {
-                userId: user?.username || 'GUEST',
-                email: user?.email,
-                assessmentId: session.assessmentId,
-                assessmentType: 'MATH_CHALLENGE',
-                assessmentStatus: 'COMPLETED',
-                currentQuestion: updatedQuestion
-            }, {
+            await axios.post(`${CONFIG.development.GATEWAY_URL}/api/assessment/end-session`, null, {
+                params: {
+                    userId: userId,
+                    assessmentId: session.assessmentId,
+                    assessmentType: 'MATH_CHALLENGE'
+                },
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -222,7 +233,6 @@ export default function SpeedMathChallenge() {
             {setupMode ? (
                 <div style={{ background: '#ffffff', borderRadius: '24px', padding: '30px 20px', boxShadow: '0 10px 40px rgba(0,0,0,0.08)' }}>
                     
-                    {/* NEW: Display Banner if they have an active session! */}
                     {activeSavedSession && (
                         <div style={{ background: '#eff6ff', border: '2px solid #bfdbfe', borderRadius: '16px', padding: '20px', marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
                             <div>
@@ -306,7 +316,7 @@ export default function SpeedMathChallenge() {
                         <span style={{ fontSize: '3rem', color: '#64748b', fontWeight: 'bold', lineHeight: '1' }}>{questions.length}</span>
                     </div>
                     <br/>
-                    <button onClick={() => setSetupMode(true)} style={{ padding: '16px 40px', fontSize: '1.2rem', fontWeight: 'bold', borderRadius: '50px', background: '#0f172a', color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px rgba(15,23,42,0.3)' }}>
+                    <button onClick={() => { setSetupMode(true); setActiveSavedSession(null); }} style={{ padding: '16px 40px', fontSize: '1.2rem', fontWeight: 'bold', borderRadius: '50px', background: '#0f172a', color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px rgba(15,23,42,0.3)' }}>
                         Explore Another Sector 🌍
                     </button>
                 </div>
@@ -345,7 +355,7 @@ export default function SpeedMathChallenge() {
                             }}
                             placeholder="="
                             value={selectedAnswer}
-                            onChange={(e) => setSelectedAnswer(e.target.value)}
+                            onChange={handleInputChange}
                             onKeyPress={(e) => e.key === 'Enter' && submitAnswer()}
                             onFocus={(e) => { e.target.style.borderColor = '#3b82f6'; e.target.style.boxShadow = '0 10px 30px rgba(59,130,246,0.15)'; }}
                             onBlur={(e) => { e.target.style.borderColor = '#cbd5e1'; e.target.style.boxShadow = '0 10px 30px rgba(0,0,0,0.05)'; }}
