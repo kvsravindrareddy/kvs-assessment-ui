@@ -35,6 +35,7 @@ import AssessmentsHub from './pages/assessments/AssessmentsHub'; // <-- Added Im
 import ProtectedRoute from './components/ProtectedRoute';
 import UnifiedDashboard from './pages/dashboard/UnifiedDashboard'; 
 import SpeedMathChallenge from './pages/assessments/SpeedMathChallenge';
+import SubjectAssessments from './pages/assessments/SubjectAssessments';
 
 // Old App Content (existing features)
 import App from './App';

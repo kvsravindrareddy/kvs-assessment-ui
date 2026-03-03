@@ -44,8 +44,8 @@ const ContentManagement = () => {
   const loadStatistics = async () => {
     try {
       const [questionsRes, storiesRes] = await Promise.all([
-        axios.get(`${config.ADMIN_BASE_URL}/listallquestions`),
-        axios.get(`${config.ADMIN_BASE_URL}/listAllStories`)
+        axios.get(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/listallquestions`),
+        axios.get(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/listAllStories`)
       ]);
 
       setStatistics({
@@ -91,7 +91,7 @@ const ContentManagement = () => {
       };
 
       await axios.post(
-        `${config.ADMIN_BASE_URL}/loadquestions`,
+        `${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/loadquestions`,
         payload
       );
 
@@ -155,7 +155,7 @@ const ContentManagement = () => {
       };
 
       await axios.post(
-        `${config.ADMIN_BASE_URL}/loadstories`,
+        `${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/loadstories`,
         payload
       );
 
