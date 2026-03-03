@@ -52,7 +52,7 @@ export default function StudentMetricsDashboard() {
         });
         fetchDashboard(); 
     } catch (err) {
-        alert("Failed to end session. Please check your connection.");
+        alert("Failed to end session.");
     }
   };
 
@@ -94,17 +94,9 @@ export default function StudentMetricsDashboard() {
   };
 
   const filteredCompletedItems = getFilteredCompletedList();
-
-  // 🌟 FIX: Calculate Category Scores locally in React so it ALWAYS works, even if backend is missing data!
-  const categoryScores = { ...data.scoreBySubject }; 
-  if (Object.keys(categoryScores).length === 0 && data.recentlyCompleted) {
-      data.recentlyCompleted.forEach(session => {
-          if (!categoryScores[session.assessmentType]) {
-              categoryScores[session.assessmentType] = 0;
-          }
-          categoryScores[session.assessmentType] += session.score;
-      });
-  }
+  
+  // Clean fallback mapping
+  const categoryScores = data.scoreBySubject || {};
 
   return (
     <div className="metrics-dashboard-container">
@@ -115,17 +107,11 @@ export default function StudentMetricsDashboard() {
                 <h2 className="rating-title">
                     Current Rank: <span className="rating-stars">{data.allTime.rating}</span>
                 </h2>
-                <p className="rating-message">
-                    {data.allTime.motivationalMessage}
-                </p>
+                <p className="rating-message">{data.allTime.motivationalMessage}</p>
             </div>
             <div className="rating-accuracy-box">
-                <div className="accuracy-value">
-                    {data.allTime.accuracyPercentage}%
-                </div>
-                <div className="accuracy-label">
-                    Overall Accuracy
-                </div>
+                <div className="accuracy-value">{data.allTime.accuracyPercentage}%</div>
+                <div className="accuracy-label">Overall Accuracy</div>
             </div>
         </div>
       )}
@@ -141,15 +127,9 @@ export default function StudentMetricsDashboard() {
               return (
                 <div key={session.sessionId} className="resume-card">
                   <div>
-                    <div style={{ 
-                        background: category.bg, color: category.color, padding: '4px 12px', 
-                        borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', width: 'fit-content', 
-                        marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '5px',
-                        border: `1px solid ${category.border}`
-                    }}>
+                    <div style={{ background: category.bg, color: category.color, padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', width: 'fit-content', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '5px', border: `1px solid ${category.border}` }}>
                         <span>{category.icon}</span> {category.label}
                     </div>
-
                     <h3>{session.assessmentName}</h3>
                     <div className="progress-container">
                       <div className="progress-text">
@@ -161,17 +141,9 @@ export default function StudentMetricsDashboard() {
                       </div>
                     </div>
                   </div>
-                  
                   <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                     <button className="resume-btn" onClick={() => handleResume(session)} style={{ flex: 2 }}>Resume Challenge →</button>
-                    <button 
-                        onClick={() => handleEndSession(session)} 
-                        style={{ flex: 1, background: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5', padding: '10px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: '0.2s' }}
-                        onMouseEnter={(e) => e.target.style.background = '#fecaca'}
-                        onMouseLeave={(e) => e.target.style.background = '#fee2e2'}
-                    >
-                        End 🛑
-                    </button>
+                    <button onClick={() => handleEndSession(session)} style={{ flex: 1, background: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5', padding: '10px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: '0.2s' }}>End 🛑</button>
                   </div>
                 </div>
               );
@@ -184,11 +156,7 @@ export default function StudentMetricsDashboard() {
         <h2 className="section-title">📊 Your Performance</h2>
         <div className="time-tabs">
           {['today', 'thisWeek', 'thisMonth', 'allTime'].map(tab => (
-            <button 
-              key={tab} 
-              className={`time-tab ${activeTab === tab ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab)}
-            >
+            <button key={tab} className={`time-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
               {tab.replace('this', '').replace(/([A-Z])/g, ' $1').trim().replace(/^./, str => str.toUpperCase())}
             </button>
           ))}
@@ -209,22 +177,18 @@ export default function StudentMetricsDashboard() {
           </div>
         </div>
 
-        {/* 🌟 GUARANTEED TO SHOW: Universe Results Breakdown */}
-        {Object.keys(categoryScores).length > 0 && (
-            <div style={{ marginTop: '30px', background: '#f8fafc', padding: '24px', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
-                <h3 style={{ fontSize: '1.2rem', color: '#1e293b', marginTop: '0', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    🏆 Your Exploration Results
-                </h3>
+        {/* 🌟 THIS BLOCK WILL ALWAYS RENDER NOW! */}
+        <div style={{ marginTop: '30px', background: '#f8fafc', padding: '24px', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
+            <h3 style={{ fontSize: '1.3rem', color: '#1e293b', marginTop: '0', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                🏆 Your Exploration Results
+            </h3>
+            
+            {Object.keys(categoryScores).length > 0 ? (
                 <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
                     {Object.entries(categoryScores).map(([subject, score]) => {
                         const cat = getCategoryDisplay(subject);
                         return (
-                            <div key={subject} style={{ 
-                                background: 'white', border: `2px solid ${cat.border}`, 
-                                padding: '15px 25px', borderRadius: '16px', display: 'flex', 
-                                alignItems: 'center', gap: '15px', flex: '1', minWidth: '220px',
-                                boxShadow: `0 4px 15px ${cat.bg}88`
-                            }}>
+                            <div key={subject} style={{ background: 'white', border: `2px solid ${cat.border}`, padding: '15px 25px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '15px', flex: '1', minWidth: '220px', boxShadow: `0 4px 15px ${cat.bg}88` }}>
                                 <div style={{ background: cat.bg, padding: '10px', borderRadius: '50%', fontSize: '1.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '50px', width: '50px' }}>
                                     {cat.icon}
                                 </div>
@@ -238,8 +202,12 @@ export default function StudentMetricsDashboard() {
                         );
                     })}
                 </div>
-            </div>
-        )}
+            ) : (
+                <div style={{ color: '#64748b', fontStyle: 'italic', padding: '20px', background: 'white', borderRadius: '12px', textAlign: 'center', border: '1px dashed #cbd5e1' }}>
+                    No points collected yet. Start a Math Universe challenge to see your breakdown!
+                </div>
+            )}
+        </div>
       </section>
 
       <section>
@@ -249,32 +217,22 @@ export default function StudentMetricsDashboard() {
                 {filteredCompletedItems.map(session => {
                 const stars = getSessionRating(session.score, session.totalQuestions);
                 const category = getCategoryDisplay(session.assessmentType); 
-                
                 return (
                     <div key={session.sessionId} className="completed-item">
                     <div className="completed-info">
                         <h4 style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '0 0 8px' }}>
                             {session.assessmentName} 
-                            <span style={{ fontSize: '0.9rem', letterSpacing: '2px', background: 'rgba(251, 191, 36, 0.1)', padding: '2px 8px', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
-                                {stars}
-                            </span>
+                            <span style={{ fontSize: '0.9rem', letterSpacing: '2px', background: 'rgba(251, 191, 36, 0.1)', padding: '2px 8px', borderRadius: '10px', border: '1px solid rgba(251, 191, 36, 0.3)' }}>{stars}</span>
                         </h4>
-                        
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ 
-                                background: category.bg, color: category.color, padding: '3px 10px', 
-                                borderRadius: '12px', fontSize: '12px', fontWeight: 'bold',
-                                border: `1px solid ${category.border}`, display: 'flex', alignItems: 'center', gap: '4px'
-                            }}>
+                            <span style={{ background: category.bg, color: category.color, padding: '3px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', border: `1px solid ${category.border}`, display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <span>{category.icon}</span> {category.label}
                             </span>
                             <span style={{ color: '#94a3b8', fontSize: '13px' }}>•</span>
                             <span style={{ color: '#64748b', fontSize: '13px' }}>{new Date(session.updatedAt).toLocaleDateString()}</span>
                         </div>
                     </div>
-                    <div className="completed-score">
-                        {session.score} / {session.totalQuestions}
-                    </div>
+                    <div className="completed-score">{session.score} / {session.totalQuestions}</div>
                     </div>
                 );
                 })}

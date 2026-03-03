@@ -8,6 +8,9 @@ export default function SpeedMathChallenge() {
     const navigate = useNavigate();
     const { user } = useAuth();
     
+    // 🌟 FIX: Standardized the User ID to match the Dashboard perfectly!
+    const currentUserId = user ? (user.id || user.email || 'GUEST_USER') : 'GUEST_USER';
+    
     const [loading, setLoading] = useState(true);
     const [session, setSession] = useState(null);
     const [questions, setQuestions] = useState([]);
@@ -63,8 +66,7 @@ export default function SpeedMathChallenge() {
         const fetchActiveSession = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const userId = user?.username || 'GUEST';
-                const res = await axios.get(`${CONFIG.development.GATEWAY_URL}/api/assessment/random-math/session/${userId}`, {
+                const res = await axios.get(`${CONFIG.development.GATEWAY_URL}/api/assessment/random-math/session/${encodeURIComponent(currentUserId)}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
@@ -79,9 +81,8 @@ export default function SpeedMathChallenge() {
         };
 
         if (user) fetchActiveSession();
-    }, [user]);
+    }, [user, currentUserId]);
 
-    // 🌟 RESUME BUG FIX: Safely handles bounds checking and exact state restoration
     const handleResumeSavedSession = () => {
         if (!activeSavedSession) return;
         const savedData = JSON.parse(activeSavedSession.assessmentData);
@@ -109,9 +110,8 @@ export default function SpeedMathChallenge() {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const userId = user?.username || 'GUEST';
             const res = await axios.get(`${CONFIG.development.GATEWAY_URL}/api/assessment/allrandomquestions`, {
-                params: { userId: userId, numberOfQuestions: 10, type: mathType, complexity: complexity },
+                params: { userId: currentUserId, numberOfQuestions: 10, type: mathType, complexity: complexity },
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -129,7 +129,6 @@ export default function SpeedMathChallenge() {
         }
     };
 
-    // 🌟 INPUT VALIDATION FIX: Strictly blocks alphabets, allows numbers, decimals, and minus signs
     const handleInputChange = (e) => {
         const val = e.target.value;
         if (/^-?\d*\.?\d*$/.test(val) || val === '') {
@@ -152,7 +151,7 @@ export default function SpeedMathChallenge() {
         try {
             const token = localStorage.getItem('token');
             const res = await axios.post(`${CONFIG.development.GATEWAY_URL}/api/assessment/submitrandomquestion`, {
-                userId: user?.username || 'GUEST',
+                userId: currentUserId, // 🌟 NOW MATCHES DASHBOARD
                 email: user?.email,
                 assessmentId: session.assessmentId,
                 assessmentType: 'MATH_CHALLENGE',
@@ -178,17 +177,14 @@ export default function SpeedMathChallenge() {
         }
     };
 
-    // 🌟 END API FIX: Safely calls the universal end-session endpoint!
     const endAssessment = async () => {
         if (!window.confirm("Are you sure you want to end this challenge early? Your current score will be saved.")) return;
         
         try {
             const token = localStorage.getItem('token');
-            const userId = user?.username || 'GUEST';
-            
             await axios.post(`${CONFIG.development.GATEWAY_URL}/api/assessment/end-session`, null, {
                 params: {
-                    userId: userId,
+                    userId: currentUserId, // 🌟 NOW MATCHES DASHBOARD
                     assessmentId: session.assessmentId,
                     assessmentType: 'MATH_CHALLENGE'
                 },
