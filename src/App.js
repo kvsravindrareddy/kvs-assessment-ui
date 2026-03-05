@@ -23,6 +23,7 @@ import Signup from './pages/auth/Signup';
 import UnifiedDashboard from './pages/dashboard/UnifiedDashboard';
 import PricingPage from './pages/subscription/PricingPage';
 import UsageIndicator from './components/UsageIndicator';
+import ErrorReportButton from './components/ErrorReportButton';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 // NEW: Import the beautiful Assessments Hub
@@ -426,7 +427,7 @@ function AppContent() {
         </div>
       )}
 
-      {showStudentNav && (
+      {showStudentNav && activeSection !== 'Dashboard' && (
         <div className="student-nav-wrapper">
           <nav className="flat-topnav">
             {navigationOptions.map((option) => (
@@ -517,6 +518,9 @@ function AppContent() {
           isAdmin={true}
         />
       )}
+
+      {/* Floating Error Report Button - Always visible */}
+      <ErrorReportButton />
     </div>
   );
 }

@@ -51,8 +51,8 @@ export default function AssessmentsHub() {
             title: 'Math by Grade',
             description: 'Structured mathematics assessments tailored to your specific grade level.',
             icon: '📐',
-            gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-            path: '/select-subject/MATH' // We will wire this up to filter only math
+            gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+            path: '/assessments/math-by-grade'
         },
         {
             id: 'subject-assessment',
@@ -61,6 +61,14 @@ export default function AssessmentsHub() {
             icon: '📚',
             gradient: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
             path: '/assessments/subject-assessments'
+        },
+        {
+            id: 'challenge-arena',
+            title: '⚔️ Challenge Arena',
+            description: 'Compete with peers in timed skill challenges. Test your speed and accuracy!',
+            icon: '🏆',
+            gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            path: '/assessments/challenge-arena'
         }
     ];
 

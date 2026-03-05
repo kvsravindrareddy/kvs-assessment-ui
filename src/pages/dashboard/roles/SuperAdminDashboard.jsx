@@ -7,6 +7,9 @@ import UserApprovals from '../components/UserApprovals';
 import ContentManagement from '../components/ContentManagement';
 import SystemAnalytics from '../components/SystemAnalytics';
 import BulkRegistration from '../components/BulkRegistration';
+import SessionManagement from '../components/SessionManagement';
+import GradesManagement from '../components/GradesManagement';
+import IncidentManagement from '../components/IncidentManagement';
 import './SuperAdminDashboard.css';
 
 const SuperAdminDashboard = () => {
@@ -65,33 +68,43 @@ const SuperAdminDashboard = () => {
       </div>
 
       <nav className="sidebar-nav">
+        <div className="nav-section-title">📊 Dashboard</div>
         <button className={`nav-item ${activeSection === 'overview' ? 'active' : ''}`} onClick={() => setActiveSection('overview')}>
-          <span className="nav-icon">📊</span><span className="nav-label">Overview</span>
+          <span className="nav-icon">🏠</span><span className="nav-label">Overview</span>
+        </button>
+        <button className={`nav-item ${activeSection === 'analytics' ? 'active' : ''}`} onClick={() => setActiveSection('analytics')}>
+          <span className="nav-icon">📊</span><span className="nav-label">Analytics</span>
         </button>
 
-        <div className="nav-section-title">User Management</div>
+        <div className="nav-section-title">👥 Users</div>
         <button className={`nav-item ${activeSection === 'users' ? 'active' : ''}`} onClick={() => setActiveSection('users')}>
-          <span className="nav-icon">👥</span><span className="nav-label">Manage Users</span>
+          <span className="nav-icon">👤</span><span className="nav-label">Manage Users</span>
         </button>
         <button className={`nav-item ${activeSection === 'approvals' ? 'active' : ''}`} onClick={() => setActiveSection('approvals')}>
-          <span className="nav-icon">✅</span><span className="nav-label">User Approvals</span>
+          <span className="nav-icon">✔️</span><span className="nav-label">User Approvals</span>
           {statistics.pendingApprovals > 0 && <span className="nav-badge">{statistics.pendingApprovals}</span>}
         </button>
         <button className={`nav-item ${activeSection === 'bulk-registration' ? 'active' : ''}`} onClick={() => setActiveSection('bulk-registration')}>
-          <span className="nav-icon">📋</span><span className="nav-label">Bulk Registration</span>
+          <span className="nav-icon">📥</span><span className="nav-label">Bulk Registration</span>
         </button>
 
-        <div className="nav-section-title">Content Management</div>
+        <div className="nav-section-title">📚 Content</div>
         <button className={`nav-item ${activeSection === 'content' ? 'active' : ''}`} onClick={() => setActiveSection('content')}>
-          <span className="nav-icon">📝</span><span className="nav-label">Content Library</span>
+          <span className="nav-icon">📖</span><span className="nav-label">Content Library</span>
+        </button>
+        <button className={`nav-item ${activeSection === 'grades' ? 'active' : ''}`} onClick={() => setActiveSection('grades')}>
+          <span className="nav-icon">🎓</span><span className="nav-label">Grades</span>
         </button>
 
-        <div className="nav-section-title">System</div>
-        <button className={`nav-item ${activeSection === 'analytics' ? 'active' : ''}`} onClick={() => setActiveSection('analytics')}>
-          <span className="nav-icon">📈</span><span className="nav-label">Analytics</span>
+        <div className="nav-section-title">⚙️ System</div>
+        <button className={`nav-item ${activeSection === 'sessions' ? 'active' : ''}`} onClick={() => setActiveSection('sessions')}>
+          <span className="nav-icon">💻</span><span className="nav-label">Active Sessions</span>
+        </button>
+        <button className={`nav-item ${activeSection === 'incidents' ? 'active' : ''}`} onClick={() => setActiveSection('incidents')}>
+          <span className="nav-icon">🐛</span><span className="nav-label">Incident Reports</span>
         </button>
         <button className={`nav-item ${activeSection === 'settings' ? 'active' : ''}`} onClick={() => setActiveSection('settings')}>
-          <span className="nav-icon">⚙️</span><span className="nav-label">Settings</span>
+          <span className="nav-icon">🔧</span><span className="nav-label">Settings</span>
         </button>
       </nav>
     </div>
@@ -164,6 +177,9 @@ const SuperAdminDashboard = () => {
             {activeSection === 'approvals' && '✅ User Approvals'}
             {activeSection === 'bulk-registration' && '📋 Bulk User Registration'}
             {activeSection === 'content' && '📝 Content Management'}
+            {activeSection === 'grades' && '🎓 Grades Management'}
+            {activeSection === 'sessions' && '🔄 Active Sessions Management'}
+            {activeSection === 'incidents' && '🐛 Incident Reports & Tracking'}
             {activeSection === 'analytics' && '📈 Analytics & Reports'}
             {activeSection === 'settings' && '⚙️ System Settings'}
           </h1>
@@ -175,6 +191,9 @@ const SuperAdminDashboard = () => {
           {activeSection === 'approvals' && <UserApprovals />}
           {activeSection === 'bulk-registration' && <BulkRegistration />}
           {activeSection === 'content' && <ContentManagement />}
+          {activeSection === 'grades' && <GradesManagement />}
+          {activeSection === 'sessions' && <SessionManagement />}
+          {activeSection === 'incidents' && <IncidentManagement />}
           {activeSection === 'analytics' && <SystemAnalytics />}
           {activeSection === 'settings' && renderSettings()}
         </div>

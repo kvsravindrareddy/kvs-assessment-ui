@@ -1,14 +1,10 @@
 // src/pages/config/LoadGradeData.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import CONFIG from '../../Config';
-
-const orderedGrades = [
-  'PRE_K', 'KINDERGARTEN', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'
-];
-
-
+import { useGrades } from '../../hooks/useGrades';
 
 export default function LoadGradeData({ gradeData, setGradeData, onClick, expandedSection, onSubjectClick }) {
+  const { grades: orderedGrades, loading: gradesLoading } = useGrades();
   useEffect(() => {
     fetch(`${CONFIG.development.ADMIN_SUPPORT_BASE_URL}/admin-assessment/v1/app-config/subject-types`)
       .then((res) => res.json())

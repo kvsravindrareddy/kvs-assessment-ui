@@ -11,6 +11,8 @@ const ParentDashboard = () => {
   const [selectedChild, setSelectedChild] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [actionDashboard, setActionDashboard] = useState(null);
+  const [loadingActions, setLoadingActions] = useState(false);
   const [showAddChildModal, setShowAddChildModal] = useState(false);
   const [linkMethod, setLinkMethod] = useState('credentials'); // 'credentials' or 'verification'
   const [studentUsername, setStudentUsername] = useState('');
@@ -239,6 +241,227 @@ const ParentDashboard = () => {
       </div>
     </div>
   );
+
+  const loadActionDashboard = async () => {
+    if (!selectedChild) return;
+
+    try {
+      setLoadingActions(true);
+      const response = await axios.get(
+        `http://localhost:9000/v1/parent/action-dashboard/${user.id}/${selectedChild.id}?gradeCode=${selectedChild.gradeLevel || 'GRADE_1'}`
+      );
+      setActionDashboard(response.data);
+    } catch (error) {
+      console.error('Error loading action dashboard:', error);
+    } finally {
+      setLoadingActions(false);
+    }
+  };
+
+  const markActivityComplete = async (activityId, feedback = '') => {
+    try {
+      await axios.post('http://localhost:9000/v1/parent/action-dashboard/complete', {
+        parentId: user.id,
+        studentId: selectedChild.id,
+        activityId: activityId,
+        feedback: feedback
+      });
+      // Reload dashboard
+      loadActionDashboard();
+      alert('Activity marked as complete! Great job! 🎉');
+    } catch (error) {
+      console.error('Error marking activity complete:', error);
+      alert('Failed to mark activity complete');
+    }
+  };
+
+  const renderActionCenter = () => {
+    if (!selectedChild) return null;
+
+    if (loadingActions) {
+      return (
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Loading action dashboard...</p>
+        </div>
+      );
+    }
+
+    if (!actionDashboard) {
+      return (
+        <div className="empty-state">
+          <p>No action dashboard data available</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="action-center-content">
+        <div className="action-center-header">
+          <h2>Parent Action Center</h2>
+          <p>Quick activities to support {selectedChild.name}'s learning at home!</p>
+          <div className="action-stats">
+            <div className="action-stat">
+              <span className="stat-number">{actionDashboard.stats.thisWeekCompleted}</span>
+              <span className="stat-label">This Week</span>
+            </div>
+            <div className="action-stat">
+              <span className="stat-number">{actionDashboard.stats.thisMonthCompleted}</span>
+              <span className="stat-label">This Month</span>
+            </div>
+            <div className="action-stat">
+              <span className="stat-number">{actionDashboard.stats.totalCompleted}</span>
+              <span className="stat-label">All Time</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Today's 5-Minute Activity */}
+        {actionDashboard.dailyActivity && (
+          <div className="action-section daily-activity-section">
+            <div className="section-header">
+              <h3>⏰ Today's 5-Minute Activity</h3>
+              <span className="section-badge">Daily</span>
+            </div>
+            <div className={`activity-card ${actionDashboard.dailyActivity.isCompleted ? 'completed' : ''}`}>
+              <div className="activity-icon">🎯</div>
+              <div className="activity-content">
+                <h4>{actionDashboard.dailyActivity.title}</h4>
+                <p className="activity-description">{actionDashboard.dailyActivity.description}</p>
+                <div className="activity-details">
+                  <span className="activity-duration">⏱️ {actionDashboard.dailyActivity.durationMinutes} min</span>
+                  {actionDashboard.dailyActivity.materialsNeeded && (
+                    <span className="activity-materials">🛠️ {actionDashboard.dailyActivity.materialsNeeded}</span>
+                  )}
+                </div>
+                {actionDashboard.dailyActivity.instructions && (
+                  <div className="activity-instructions">
+                    <strong>How to do it:</strong>
+                    <p>{actionDashboard.dailyActivity.instructions}</p>
+                  </div>
+                )}
+                {!actionDashboard.dailyActivity.isCompleted ? (
+                  <button
+                    onClick={() => markActivityComplete(actionDashboard.dailyActivity.id)}
+                    className="btn-complete-activity"
+                  >
+                    ✓ Mark as Done
+                  </button>
+                ) : (
+                  <div className="completed-badge">✓ Completed!</div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Conversation Questions */}
+        {actionDashboard.conversationQuestions && actionDashboard.conversationQuestions.length > 0 && (
+          <div className="action-section">
+            <div className="section-header">
+              <h3>💬 Conversation Starters</h3>
+              <span className="section-badge">Weekly</span>
+            </div>
+            <div className="questions-grid">
+              {actionDashboard.conversationQuestions.map((question, idx) => (
+                <div key={idx} className={`question-card ${question.isCompleted ? 'completed' : ''}`}>
+                  <div className="question-number">{idx + 1}</div>
+                  <h4>{question.title}</h4>
+                  <p>{question.description}</p>
+                  {question.instructions && <p className="question-tip"><em>{question.instructions}</em></p>}
+                  {!question.isCompleted ? (
+                    <button
+                      onClick={() => markActivityComplete(question.id)}
+                      className="btn-complete-small"
+                    >
+                      Done
+                    </button>
+                  ) : (
+                    <span className="completed-check">✓</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Offline Games */}
+        {actionDashboard.offlineGames && actionDashboard.offlineGames.length > 0 && (
+          <div className="action-section">
+            <div className="section-header">
+              <h3>🎮 Offline Games</h3>
+              <span className="section-badge">No Screen Time!</span>
+            </div>
+            <div className="games-grid">
+              {actionDashboard.offlineGames.map((game, idx) => (
+                <div key={idx} className={`game-card ${game.isCompleted ? 'completed' : ''}`}>
+                  <div className="game-icon">🎲</div>
+                  <h4>{game.title}</h4>
+                  <p>{game.description}</p>
+                  <div className="game-meta">
+                    {game.durationMinutes && <span>⏱️ {game.durationMinutes} min</span>}
+                    {game.materialsNeeded && <span>🛠️ {game.materialsNeeded}</span>}
+                  </div>
+                  {game.instructions && (
+                    <details className="game-instructions">
+                      <summary>How to Play</summary>
+                      <p>{game.instructions}</p>
+                    </details>
+                  )}
+                  {!game.isCompleted ? (
+                    <button
+                      onClick={() => markActivityComplete(game.id)}
+                      className="btn-complete-small"
+                    >
+                      Played!
+                    </button>
+                  ) : (
+                    <span className="completed-check">✓</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Strength Prompts */}
+        {actionDashboard.strengthPrompts && actionDashboard.strengthPrompts.length > 0 && (
+          <div className="action-section strength-section">
+            <div className="section-header">
+              <h3>⭐ Celebrate Their Strengths</h3>
+              <span className="section-badge">Positive Reinforcement</span>
+            </div>
+            <div className="prompts-list">
+              {actionDashboard.strengthPrompts.map((prompt, idx) => (
+                <div key={idx} className={`prompt-card ${prompt.isCompleted ? 'completed' : ''}`}>
+                  <div className="prompt-icon">💪</div>
+                  <div className="prompt-content">
+                    <h4>{prompt.title}</h4>
+                    <p>{prompt.description}</p>
+                    {prompt.instructions && (
+                      <div className="prompt-example">
+                        <strong>Try saying:</strong> "{prompt.instructions}"
+                      </div>
+                    )}
+                  </div>
+                  {!prompt.isCompleted ? (
+                    <button
+                      onClick={() => markActivityComplete(prompt.id)}
+                      className="btn-complete-small"
+                    >
+                      Said it!
+                    </button>
+                  ) : (
+                    <span className="completed-check">✓</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderOverview = () => {
     if (!selectedChild) return null;
@@ -690,6 +913,15 @@ const ParentDashboard = () => {
             >
               💬 Messages
             </button>
+            <button
+              className={`tab-btn ${activeTab === 'actions' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('actions');
+                loadActionDashboard();
+              }}
+            >
+              🎯 Action Center
+            </button>
           </div>
 
           <div className="details-content">
@@ -697,6 +929,7 @@ const ParentDashboard = () => {
             {activeTab === 'progress' && renderProgress()}
             {activeTab === 'reports' && renderReports()}
             {activeTab === 'messages' && renderMessages()}
+            {activeTab === 'actions' && renderActionCenter()}
           </div>
         </div>
       )}

@@ -30,10 +30,13 @@ import SubjectSelection from './pages/SubjectSelection';
 import AssessmentConfig from './pages/AssessmentConfig';
 import AnswerKey from './pages/AnswerKey';
 import AssessmentsHub from './pages/assessments/AssessmentsHub'; // <-- Added Import
+import MathByGrade from './pages/assessments/MathByGrade'; // <-- Math By Grade Import
+import ChallengeArena from './pages/assessments/ChallengeArena'; // <-- Challenge Arena Import
+import LeaderboardView from './pages/assessments/LeaderboardView'; // <-- Leaderboard View Import
 
 // Protected Route & Dashboard
 import ProtectedRoute from './components/ProtectedRoute';
-import UnifiedDashboard from './pages/dashboard/UnifiedDashboard'; 
+import UnifiedDashboard from './pages/dashboard/UnifiedDashboard';
 import SpeedMathChallenge from './pages/assessments/SpeedMathChallenge';
 import SubjectAssessments from './pages/assessments/SubjectAssessments';
 
@@ -92,6 +95,30 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <UnifiedDashboard>
           <SubjectAssessments />
+        </UnifiedDashboard>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/assessments/math-by-grade',
+    element: (
+      <ProtectedRoute>
+        <UnifiedDashboard>
+          <MathByGrade />
+        </UnifiedDashboard>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/assessments/challenge-arena',
+    element: <ChallengeArena />
+  },
+  {
+    path: '/assessments/leaderboard',
+    element: (
+      <ProtectedRoute>
+        <UnifiedDashboard>
+          <LeaderboardView />
         </UnifiedDashboard>
       </ProtectedRoute>
     )

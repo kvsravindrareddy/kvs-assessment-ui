@@ -40,7 +40,7 @@ export default function StudentMetricsDashboard() {
       navigate(`/assessments/speed-math`);
     } else if (['MATH', 'SCIENCE', 'ENGLISH', 'SOCIAL_STUDIES', 'COMPUTER_SCIENCE', 'HINDI', 'SANSKRIT'].includes(session.assessmentType)) {
       // Subject-based assessments - navigate to subject assessments with resume data
-      navigate(`/assessments/subjects?resumeId=${session.assessmentId}`);
+      navigate(`/assessments/subject-assessments?resumeId=${session.assessmentId}`);
     } else {
       navigate(`/${session.assessmentType.toLowerCase()}?id=${session.assessmentId}`);
     }

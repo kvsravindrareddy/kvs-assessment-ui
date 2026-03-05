@@ -8,10 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import UpgradePrompt from '../../components/UpgradePrompt';
 import UsageIndicator from '../../components/UsageIndicator';
 import { useLocation, useNavigate } from 'react-router-dom';
-
-const orderedGrades = [
-  'PRE_K', 'KINDERGARTEN', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'
-];
+import { useGrades } from '../../hooks/useGrades';
 
 const STORIES_PER_PAGE = 16; 
 
@@ -30,17 +27,18 @@ const getSubjectIcon = (subjectName) => {
 };
 
 export default function ReadingFlow() {
-  const { user } = useAuth(); 
+  const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { canPerformAction, trackUsage, getUpgradeMessage } = useSubscription();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const { grades: orderedGrades, loading: gradesLoading } = useGrades();
 
   const [gradeData, setGradeData] = useState({});
   const [stories, setStories] = useState({});
   const [storyDetails, setStoryDetails] = useState(null);
 
-  const [selectedGrade, setSelectedGrade] = useState(orderedGrades[0]);
+  const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [isLoadingStories, setIsLoadingStories] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,12 +59,20 @@ export default function ReadingFlow() {
       .then(res => res.json())
       .then(data => {
         setGradeData(data);
-        if (data[orderedGrades[0]] && data[orderedGrades[0]].length > 0) {
-          handleSelectSubject(orderedGrades[0], data[orderedGrades[0]][0]);
-        }
       })
       .catch(err => console.error('Failed to load grades:', err));
   }, [adminConfigURL]);
+
+  // Set initial grade and subject when both grades and gradeData are loaded
+  useEffect(() => {
+    if (orderedGrades.length > 0 && !selectedGrade && Object.keys(gradeData).length > 0) {
+      const firstGrade = orderedGrades[0];
+      if (gradeData[firstGrade] && gradeData[firstGrade].length > 0) {
+        setSelectedGrade(firstGrade);
+        handleSelectSubject(firstGrade, gradeData[firstGrade][0]);
+      }
+    }
+  }, [orderedGrades, gradeData, selectedGrade]);
 
   useEffect(() => {
     const loadVoices = () => setVoices(window.speechSynthesis.getVoices());
@@ -253,7 +259,7 @@ export default function ReadingFlow() {
     // --- 1. RENDER MAIN CONTENT (Title + Story + Questions) ---
     
     // Title & Grade (Grade formatted nicely)
-    const formattedGrade = selectedGrade.replace('_', ' ');
+    const formattedGrade = selectedGrade ? selectedGrade.replace('_', ' ') : 'Unknown';
     doc.setFontSize(18);
     doc.setTextColor(15, 23, 42); // Dark Slate
     doc.setFont(undefined, 'bold');
@@ -378,6 +384,18 @@ export default function ReadingFlow() {
   const startIndex = (currentPage - 1) * STORIES_PER_PAGE;
   const displayedStories = currentStories.slice(startIndex, startIndex + STORIES_PER_PAGE);
 
+  // Show loading state while grades are loading
+  if (gradesLoading || orderedGrades.length === 0) {
+    return (
+      <div className="timeless-layout">
+        <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📚</div>
+          <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Loading stories...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="timeless-layout">
       {!storyDetails && <UsageIndicator type="story" />}
@@ -402,7 +420,7 @@ export default function ReadingFlow() {
           <main className="timeless-main">
             <header className="main-header">
               <div className="header-text-group">
-                <h1 className="grade-title">Explore {selectedGrade.replace('_', ' ')}</h1>
+                <h1 className="grade-title">Explore {selectedGrade ? selectedGrade.replace('_', ' ') : 'Grade Levels'}</h1>
                 <p className="grade-subtitle">Select a subject to discover new stories and challenges.</p>
               </div>
               
