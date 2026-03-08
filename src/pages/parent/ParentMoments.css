@@ -1,0 +1,362 @@
+.parent-moments-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    min-height: 100vh;
+}
+
+.moments-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px 20px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.moments-header h1 {
+    font-size: 2.5rem;
+    color: #1e40af;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+}
+
+.moments-header p {
+    font-size: 1.2rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.moments-filters {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 12px 30px;
+    border: 2px solid #e2e8f0;
+    background: white;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-color: #3b82f6;
+    color: white;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.moments-loading {
+    text-align: center;
+    padding: 60px 20px;
+    font-size: 1.3rem;
+    color: #64748b;
+}
+
+.no-moments {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.no-moments-icon {
+    font-size: 5rem;
+    display: block;
+    margin-bottom: 20px;
+}
+
+.no-moments h3 {
+    font-size: 1.8rem;
+    color: #1e293b;
+    margin: 0 0 10px 0;
+}
+
+.no-moments p {
+    font-size: 1.1rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.moments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 25px;
+    padding-bottom: 40px;
+}
+
+.moment-card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid var(--moment-color);
+    transition: all 0.3s ease;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.moment-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.moment-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.moment-icon {
+    font-size: 3rem;
+    line-height: 1;
+}
+
+.moment-meta {
+    flex: 1;
+}
+
+.moment-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 5px 0;
+}
+
+.moment-time {
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+.shared-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.moment-student {
+    margin-bottom: 12px;
+}
+
+.student-name {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    color: #1e40af;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.moment-description {
+    font-size: 1.05rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0 0 15px 0;
+}
+
+.moment-value {
+    margin-bottom: 20px;
+}
+
+.value-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.share-actions {
+    border-top: 2px solid #f1f5f9;
+    padding-top: 20px;
+}
+
+.share-label {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin: 0 0 12px 0;
+    font-weight: 600;
+}
+
+.share-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.share-btn {
+    flex: 1;
+    min-width: 60px;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.share-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.share-btn.whatsapp {
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    color: white;
+}
+
+.share-btn.facebook {
+    background: linear-gradient(135deg, #1877f2 0%, #0c63d4 100%);
+    color: white;
+}
+
+.share-btn.twitter {
+    background: linear-gradient(135deg, #1da1f2 0%, #0d8bd9 100%);
+    color: white;
+}
+
+.share-btn.instagram {
+    background: linear-gradient(135deg, #f58529 0%, #dd2a7b 50%, #8134af 100%);
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .moments-grid {
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .parent-moments-container {
+        padding: 15px;
+    }
+
+    .moments-header h1 {
+        font-size: 2rem;
+    }
+
+    .moments-header p {
+        font-size: 1rem;
+    }
+
+    .moments-filters {
+        gap: 10px;
+    }
+
+    .filter-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    .moments-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .moment-card {
+        padding: 20px;
+    }
+
+    .moment-icon {
+        font-size: 2.5rem;
+    }
+
+    .moment-title {
+        font-size: 1.1rem;
+    }
+
+    .shared-badge {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+    }
+
+    .share-buttons {
+        gap: 10px;
+    }
+
+    .share-btn {
+        min-width: 50px;
+        padding: 10px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .moments-header {
+        padding: 20px 15px;
+        margin-bottom: 25px;
+    }
+
+    .moments-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .moments-filters {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filter-btn {
+        width: 100%;
+    }
+
+    .moment-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .shared-badge {
+        position: static;
+        display: inline-block;
+        margin-top: 10px;
+    }
+
+    .share-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .share-btn {
+        flex: none;
+    }
+}

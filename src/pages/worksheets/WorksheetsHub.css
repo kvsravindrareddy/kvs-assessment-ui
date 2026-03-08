@@ -1,0 +1,344 @@
+.worksheets-hub {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.worksheets-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.worksheets-header h1 {
+    font-size: 2.5rem;
+    color: #0f172a;
+    margin-bottom: 10px;
+}
+
+.worksheets-header p {
+    font-size: 1.2rem;
+    color: #64748b;
+}
+
+.worksheets-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 40px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.worksheet-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 20px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 120px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.worksheet-tab:hover {
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.worksheet-tab.active {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border-color: #3b82f6;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+}
+
+.worksheet-tab.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+.worksheet-tab.disabled:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: #e2e8f0;
+}
+
+.tab-icon {
+    font-size: 1.8rem;
+}
+
+.tab-name {
+    font-weight: 600;
+}
+
+.worksheet-content {
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.worksheet-generator h2 {
+    font-size: 1.8rem;
+    color: #0f172a;
+    margin-bottom: 10px;
+}
+
+.worksheet-generator .description {
+    color: #64748b;
+    margin-bottom: 30px;
+    font-size: 1.05rem;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.form-group input[type="number"],
+.form-group select {
+    width: 100%;
+    max-width: 300px;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-group input[type="number"]:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input[type="range"] {
+    width: 100%;
+    max-width: 300px;
+    height: 8px;
+    border-radius: 4px;
+    background: #e2e8f0;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.form-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3b82f6;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.form-group input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3b82f6;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 6px;
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.generate-btn {
+    margin-top: 30px;
+    padding: 16px 40px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+}
+
+.generate-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.generate-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.generate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Coming Soon Section */
+.coming-soon-content {
+    text-align: center;
+    padding: 60px 40px;
+}
+
+.coming-soon-animation {
+    margin-bottom: 30px;
+}
+
+.coming-soon-icon {
+    font-size: 5rem;
+    display: inline-block;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+.coming-soon-content h2 {
+    color: #3b82f6;
+    margin-bottom: 20px;
+    font-size: 2rem;
+}
+
+.coming-soon-content .description {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+.coming-soon-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    list-style: none;
+    padding: 0;
+    margin: 30px 0;
+    text-align: left;
+}
+
+.coming-soon-list li {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 15px 20px;
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #334155;
+    transition: all 0.3s;
+}
+
+.coming-soon-list li:hover {
+    border-color: #3b82f6;
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.coming-soon-note {
+    margin-top: 30px;
+    font-size: 1.1rem;
+    color: #64748b;
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .worksheets-hub {
+        padding: 20px 15px;
+    }
+
+    .worksheets-header h1 {
+        font-size: 2rem;
+    }
+
+    .worksheets-tabs {
+        flex-wrap: nowrap;
+        overflow-x: scroll;
+    }
+
+    .worksheet-tab {
+        min-width: 100px;
+        padding: 12px 16px;
+    }
+
+    .tab-icon {
+        font-size: 1.5rem;
+    }
+
+    .tab-name {
+        font-size: 0.8rem;
+    }
+
+    .worksheet-content {
+        padding: 25px 20px;
+    }
+
+    .worksheet-generator h2 {
+        font-size: 1.5rem;
+    }
+
+    .form-group input[type="number"],
+    .form-group select,
+    .form-group input[type="range"] {
+        max-width: 100%;
+    }
+
+    .generate-btn {
+        width: 100%;
+        padding: 14px 20px;
+    }
+
+    .coming-soon-content {
+        padding: 40px 20px;
+    }
+
+    .coming-soon-icon {
+        font-size: 3.5rem;
+    }
+
+    .coming-soon-content h2 {
+        font-size: 1.6rem;
+    }
+
+    .coming-soon-list {
+        grid-template-columns: 1fr;
+    }
+}

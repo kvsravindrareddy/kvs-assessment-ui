@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LandingPage.css';
+import kivoLogo from '../../assets/kivo.png';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -62,7 +63,7 @@ const LandingPage = () => {
       school: 'Lincoln Elementary, California',
       avatar: null,
       rating: 5,
-      text: 'GoStudyLab has transformed my classroom! The AI-powered assessments save me hours of grading time, and my students love the interactive games. Highly recommended for any teacher looking to modernize their teaching.'
+      text: 'KiVO Learning has transformed my classroom! The AI-powered assessments save me hours of grading time, and my students love the interactive games. Highly recommended for any teacher looking to modernize their teaching.'
     },
     {
       name: 'Michael Chen',
@@ -70,7 +71,7 @@ const LandingPage = () => {
       school: 'Riverside Academy, New York',
       avatar: null,
       rating: 5,
-      text: 'We\'ve seen a 40% improvement in student engagement since implementing GoStudyLab. The parent portal keeps families informed, and our teachers have more time to focus on actual teaching instead of administrative work.'
+      text: 'We\'ve seen a 40% improvement in student engagement since implementing KiVO Learning. The parent portal keeps families informed, and our teachers have more time to focus on actual teaching instead of administrative work.'
     },
     {
       name: 'Emily Rodriguez',
@@ -78,7 +79,7 @@ const LandingPage = () => {
       school: 'San Diego, California',
       avatar: null,
       rating: 5,
-      text: 'As a homeschooling mom of three, GoStudyLab is a lifesaver! The personalized learning paths keep each of my kids engaged at their own level. The AI tutor helps when I\'m juggling multiple subjects.'
+      text: 'As a homeschooling mom of three, KiVO Learning is a lifesaver! The personalized learning paths keep each of my kids engaged at their own level. The AI tutor helps when I\'m juggling multiple subjects.'
     },
     {
       name: 'David Kumar',
@@ -86,7 +87,7 @@ const LandingPage = () => {
       school: 'Austin ISD, Texas',
       avatar: null,
       rating: 5,
-      text: 'We rolled out GoStudyLab across 45 schools in our district. The bulk registration feature made onboarding seamless, and the analytics dashboard gives us incredible insights into student performance district-wide.'
+      text: 'We rolled out KiVO Learning across 45 schools in our district. The bulk registration feature made onboarding seamless, and the analytics dashboard gives us incredible insights into student performance district-wide.'
     }
   ];
 
@@ -143,11 +144,11 @@ const LandingPage = () => {
 
   const faqs = [
     {
-      question: 'What grade levels does GoStudyLab support?',
-      answer: 'GoStudyLab supports students from Kindergarten through Grade 12 (K-12). Our content is carefully curated and aligned with common curriculum standards including Common Core, CBSE, ICSE, and more.'
+      question: 'What grade levels does KiVO Learning support?',
+      answer: 'KiVO Learning supports students from Kindergarten through Grade 12 (K-12). Our content is carefully curated and aligned with common curriculum standards including Common Core, CBSE, ICSE, and more.'
     },
     {
-      question: 'Can I try GoStudyLab before subscribing?',
+      question: 'Can I try KiVO Learning before subscribing?',
       answer: 'Yes! We offer a free guest mode that allows you to try 3 assessments, 2 reading stories, and 1 game. No credit card required. You can also sign up for a free student account with daily limits.'
     },
     {
@@ -155,8 +156,8 @@ const LandingPage = () => {
       answer: 'Our AI tutor uses advanced natural language processing to understand student questions and provide accurate, age-appropriate explanations. It\'s available 24/7 and can help with homework, concepts, and problem-solving across all subjects.'
     },
     {
-      question: 'Is GoStudyLab suitable for homeschooling?',
-      answer: 'Absolutely! Many homeschool families use GoStudyLab as their primary curriculum tool. The personalized learning paths, progress tracking, and comprehensive resources make it perfect for homeschool education.'
+      question: 'Is KiVO Learning suitable for homeschooling?',
+      answer: 'Absolutely! Many homeschool families use KiVO Learning as their primary curriculum tool. The personalized learning paths, progress tracking, and comprehensive resources make it perfect for homeschool education.'
     },
     {
       question: 'What payment methods do you accept?',
@@ -203,8 +204,7 @@ const LandingPage = () => {
       <header className="landing-header">
         <div className="header-container">
           <div className="logo-section">
-            <span className="logo-icon">📚</span>
-            <span className="logo-text">GoStudyLab</span>
+            <img src={kivoLogo} alt="KiVO Learning" className="logo-image" style={{height: '60px', width: 'auto', backgroundColor: 'transparent', border: 'none'}} />
           </div>
 
           <nav className="header-nav">
@@ -344,7 +344,7 @@ const LandingPage = () => {
       <section id="demo-video" className="demo-section">
         <div className="section-container">
           <div className="section-header">
-            <h2 className="section-title">See GoStudyLab in Action</h2>
+            <h2 className="section-title">See KiVO Learning in Action</h2>
             <p className="section-description">
               Watch how teachers, students, and parents use our platform every day
             </p>
@@ -355,7 +355,7 @@ const LandingPage = () => {
               <div className="video-play-button">▶</div>
               <p className="video-text">Demo video coming soon!</p>
               <p className="video-subtext">
-                See how GoStudyLab transforms learning for thousands of schools worldwide
+                See how KiVO Learning transforms learning for thousands of schools worldwide
               </p>
             </div>
           </div>
@@ -406,7 +406,7 @@ const LandingPage = () => {
 
           <div className="pricing-note">
             <p>💡 All plans include 14-day free trial. No credit card required.</p>
-            <p>🏫 Schools & Districts: <a href="mailto:sales@gostudylab.com">Contact us</a> for custom enterprise pricing</p>
+            <p>🏫 Schools & Districts: <a href="mailto:sales@kivolearning.com">Contact us</a> for custom enterprise pricing</p>
           </div>
         </div>
       </section>
@@ -463,7 +463,7 @@ const LandingPage = () => {
           <div className="section-header">
             <h2 className="section-title">Frequently Asked Questions</h2>
             <p className="section-description">
-              Everything you need to know about GoStudyLab
+              Everything you need to know about KiVO Learning
             </p>
           </div>
 
@@ -493,7 +493,7 @@ const LandingPage = () => {
         <div className="cta-container">
           <h2 className="cta-title">Ready to Transform Your Learning Experience?</h2>
           <p className="cta-description">
-            Join 10,000+ schools and 500,000+ students already using GoStudyLab
+            Join 10,000+ schools and 500,000+ students already using KiVO Learning
           </p>
           <button className="btn-cta" onClick={handleGetStarted}>
             Start Your Free Trial Today
@@ -508,8 +508,7 @@ const LandingPage = () => {
           <div className="footer-grid">
             <div className="footer-column">
               <div className="footer-logo">
-                <span className="logo-icon">📚</span>
-                <span className="logo-text">GoStudyLab</span>
+                <img src={kivoLogo} alt="KiVO Learning" className="logo-image" style={{height: '50px', width: 'auto', backgroundColor: 'transparent', border: 'none'}} />
               </div>
               <p className="footer-description">
                 AI-powered learning platform for students, teachers, and schools worldwide.
@@ -583,7 +582,7 @@ const LandingPage = () => {
           </div>
 
           <div className="footer-bottom">
-            <p className="copyright">© 2026 GoStudyLab. All rights reserved.</p>
+            <p className="copyright">© 2026 KiVO Learning. All rights reserved.</p>
             <div className="footer-badges">
               <span className="security-badge">🔒 FERPA Compliant</span>
               <span className="security-badge">🛡️ COPPA Certified</span>

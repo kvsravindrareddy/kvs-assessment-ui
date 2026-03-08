@@ -342,16 +342,16 @@ export default function ReadingFlow() {
         doc.setLineWidth(0.5);
         doc.rect(margin / 2, margin / 2, pageWidth - margin, pageHeight - margin);
         
-        // B. Draw GoStudyLab Logo Header
+        // B. Draw KiVO Learning Logo Header
         // Light blue background pill box
         doc.setFillColor(239, 246, 255); // Blue-50
-        doc.roundedRect(margin, margin, 52, 12, 3, 3, 'F');
-        
+        doc.roundedRect(margin, margin, 60, 12, 3, 3, 'F');
+
         // Logo Text inside pill box
         doc.setFontSize(14);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(37, 99, 235); // Blue-600
-        doc.text('GoStudyLab', margin + 8, margin + 8);
+        doc.text('KiVO Learning', margin + 8, margin + 8);
         
         // Header Divider Line
         doc.setDrawColor(226, 232, 240); // Slate-200
@@ -371,7 +371,7 @@ export default function ReadingFlow() {
         window.open(blob);
     } else {
         const safeTitle = (storyDetails.title || 'Worksheet').replace(/[^a-zA-Z0-9]/g, '_');
-        doc.save(`GoStudyLab_${safeTitle}.pdf`);
+        doc.save(`KiVOLearning_${safeTitle}.pdf`);
     }
   };
 

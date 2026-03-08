@@ -20,6 +20,7 @@ import StoryManagement from './pages/admin/StoryManagement';
 import UsersManagement from './pages/admin/UsersManagement';
 import Analytics from './pages/admin/Analytics';
 import Settings from './pages/admin/Settings';
+import FlashMessageManager from './pages/admin/FlashMessageManager';
 
 // Landing Page
 import LandingPage from './pages/landing/LandingPage';
@@ -33,6 +34,9 @@ import AssessmentsHub from './pages/assessments/AssessmentsHub'; // <-- Added Im
 import MathByGrade from './pages/assessments/MathByGrade'; // <-- Math By Grade Import
 import ChallengeArena from './pages/assessments/ChallengeArena'; // <-- Challenge Arena Import
 import LeaderboardView from './pages/assessments/LeaderboardView'; // <-- Leaderboard View Import
+
+// Parent Pages
+import ParentMoments from './pages/parent/ParentMoments';
 
 // Protected Route & Dashboard
 import ProtectedRoute from './components/ProtectedRoute';
@@ -124,6 +128,16 @@ export const router = createBrowserRouter([
     )
   },
   {
+    path: '/parent/moments',
+    element: (
+      <ProtectedRoute requiredRole={['PARENT']}>
+        <UnifiedDashboard>
+          <ParentMoments />
+        </UnifiedDashboard>
+      </ProtectedRoute>
+    )
+  },
+  {
     path: '/admin',
     element: (
       <ProtectedRoute requiredRole={['ADMIN', 'SUPER_ADMIN']}>
@@ -158,6 +172,10 @@ export const router = createBrowserRouter([
       {
         path: 'settings',
         element: <Settings />
+      },
+      {
+        path: 'flash-messages',
+        element: <FlashMessageManager />
       }
     ]
   },

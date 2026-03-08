@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import './css/footer.css';
+import kivoLogo from './assets/kivo.png';
 
 import { getLocation } from './utils/location';
 import Contactus from './pages/admin/Contactus';
@@ -28,6 +29,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 // NEW: Import the beautiful Assessments Hub
 import AssessmentsHub from './pages/assessments/AssessmentsHub';
+import WorksheetsHub from './pages/worksheets/WorksheetsHub';
+import EnhancedSearch from './components/EnhancedSearch';
+import FlashMessages from './components/FlashMessages';
+import StreakWidget from './components/StreakWidget';
+import StreakModal from './components/StreakModal';
 
 function AppContent() {
   const [activeSection, setActiveSection] = useState('Home');
@@ -49,9 +55,6 @@ function AppContent() {
   const [gradeData, setGradeData] = useState({});
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [showSearchResults, setShowSearchResults] = useState(false);
   const [selectedGame, setSelectedGame] = useState(null);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -59,6 +62,7 @@ function AppContent() {
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showStreakModal, setShowStreakModal] = useState(false);
   const { user, logout, isAdmin } = useAuth();
   const { subscriptionTier, SUBSCRIPTION_TIERS, getRemainingUsage } = useSubscription();
 
@@ -142,27 +146,6 @@ function AppContent() {
     setExpandedSection(prev => (prev === section ? null : section));
   };
 
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-
-    if (query.trim().length < 2) {
-      setSearchResults([]);
-      setShowSearchResults(false);
-      return;
-    }
-
-    const lowerQuery = query.toLowerCase();
-    const filtered = allFeatures.filter(feature =>
-      feature.name.toLowerCase().includes(lowerQuery) ||
-      feature.description.toLowerCase().includes(lowerQuery) ||
-      feature.category.toLowerCase().includes(lowerQuery) ||
-      feature.keywords.some(keyword => keyword.includes(lowerQuery))
-    );
-
-    setSearchResults(filtered);
-    setShowSearchResults(true);
-  };
-
   const handleSearchResultClick = (feature) => {
     if (feature.gameId) {
       setSelectedGame(feature.gameId);
@@ -171,18 +154,15 @@ function AppContent() {
     }
 
     handleNavigationClick(feature.navigateTo);
-    setSearchQuery('');
-    setShowSearchResults(false);
-    setSearchResults([]);
   };
 
   return (
     <div id="mainpage" className={activeSection === 'Home' ? 'home' : ''}>
+      <FlashMessages />
       <div className="header">
         <div className="brand-section">
           <div className="logo-container">
-            <span className="logo-icon">📚</span>
-            <span className="logo-text">GoStudyLab</span>
+            <img src={kivoLogo} alt="KiVO Learning" className="logo-image" style={{height: '60px', width: 'auto', backgroundColor: 'transparent', border: 'none'}} />
           </div>
         </div>
         <div className="welcome-message">
@@ -216,6 +196,10 @@ function AppContent() {
           >
             🔍
           </button>
+
+          {user && (
+            <StreakWidget onStreakClick={() => setShowStreakModal(true)} />
+          )}
 
           <div className="profile-container">
             <button
@@ -324,95 +308,21 @@ function AppContent() {
         </div>
 
         {showSearchModal && (
-          <>
-            <div
-              className="search-modal-backdrop"
-              onClick={() => {
-                setShowSearchModal(false);
-                setSearchQuery('');
-                setShowSearchResults(false);
-              }}
-            />
-            <div className="search-modal">
-              <div className="search-modal-header">
-                <h3>🔍 Search</h3>
-                <button
-                  className="close-modal"
-                  onClick={() => {
-                    setShowSearchModal(false);
-                    setSearchQuery('');
-                    setShowSearchResults(false);
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="search-modal-content">
-                <input
-                  type="text"
-                  placeholder="Search for games, activities, subjects..."
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="search-modal-input"
-                  autoFocus
-                />
-
-                {searchResults.length > 0 && (
-                  <div className="search-results-list">
-                    <div className="results-count">
-                      Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
-                    </div>
-                    {searchResults.map((result, index) => (
-                      <div
-                        key={index}
-                        className="search-result-item"
-                        onClick={() => {
-                          handleSearchResultClick(result);
-                          setShowSearchModal(false);
-                        }}
-                      >
-                        <span className="result-icon">{result.icon}</span>
-                        <div className="result-info">
-                          <div className="result-name">{result.name}</div>
-                          <div className="result-description">{result.description}</div>
-                        </div>
-                        <span className="result-category">{result.category}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {searchResults.length === 0 && searchQuery.length >= 2 && (
-                  <div className="search-no-results">
-                    <span className="no-results-icon">🔍</span>
-                    <p>No results found for "{searchQuery}"</p>
-                    <small>Try searching for: games, numbers, colors, math, reading</small>
-                  </div>
-                )}
-
-                {searchQuery.length < 2 && (
-                  <div className="search-suggestions">
-                    <p>💡 Popular searches:</p>
-                    <div className="suggestion-chips">
-                      {['Sudoku', 'Math Challenge', 'Reading', 'Alphabets', 'AI Assistant'].map((term) => (
-                        <button
-                          key={term}
-                          className="suggestion-chip"
-                          onClick={() => {
-                            setSearchQuery(term);
-                            handleSearch(term);
-                          }}
-                        >
-                          {term}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
+          <EnhancedSearch
+            allFeatures={allFeatures}
+            onResultClick={(feature) => {
+              handleSearchResultClick(feature);
+              setShowSearchModal(false);
+            }}
+            onClose={() => setShowSearchModal(false)}
+            user={user}
+          />
         )}
+
+        <StreakModal
+          isOpen={showStreakModal}
+          onClose={() => setShowStreakModal(false)}
+        />
       </div>
 
       {isGuestUser && (
@@ -467,6 +377,7 @@ function AppContent() {
 
       {/* NEW: Renders the beautiful Assessments Hub when clicked */}
       {activeSection === 'AssessmentsHub' && <AssessmentsHub />}
+      {activeSection === 'Worksheets' && <WorksheetsHub />}
 
       {activeSection === 'Dashboard' && <UnifiedDashboard />}
       {activeSection === 'Pricing' && <PricingPage />}

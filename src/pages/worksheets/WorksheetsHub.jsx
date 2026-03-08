@@ -1,0 +1,574 @@
+import React, { useState } from 'react';
+import CONFIG from '../../Config';
+import './WorksheetsHub.css';
+
+export default function WorksheetsHub() {
+    const [activeTab, setActiveTab] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    // Multiplication Table state
+    const [multTableFrom, setMultTableFrom] = useState(1);
+    const [multTableTo, setMultTableTo] = useState(10);
+    const [multTableAnswers, setMultTableAnswers] = useState(false);
+
+    // Addition state
+    const [additionCount, setAdditionCount] = useState(20);
+    const [additionMax, setAdditionMax] = useState(100);
+    const [additionDifficulty, setAdditionDifficulty] = useState('easy');
+    const [additionAnswers, setAdditionAnswers] = useState(false);
+
+    // Subtraction state
+    const [subtractionCount, setSubtractionCount] = useState(20);
+    const [subtractionMax, setSubtractionMax] = useState(100);
+    const [subtractionDifficulty, setSubtractionDifficulty] = useState('easy');
+    const [subtractionAnswers, setSubtractionAnswers] = useState(false);
+
+    // Multiplication problems state
+    const [multiplicationCount, setMultiplicationCount] = useState(20);
+    const [multiplicationMax, setMultiplicationMax] = useState(12);
+    const [multiplicationDifficulty, setMultiplicationDifficulty] = useState('easy');
+    const [multiplicationAnswers, setMultiplicationAnswers] = useState(false);
+
+    // Division state
+    const [divisionCount, setDivisionCount] = useState(20);
+    const [divisionMax, setDivisionMax] = useState(144);
+    const [divisionDifficulty, setDivisionDifficulty] = useState('easy');
+    const [divisionAnswers, setDivisionAnswers] = useState(false);
+
+    // Number Writing state
+    const [numberFrom, setNumberFrom] = useState(1);
+    const [numberTo, setNumberTo] = useState(100);
+    const [numberPercentage, setNumberPercentage] = useState(50);
+
+    // Mixed Operations state
+    const [mixedCount, setMixedCount] = useState(20);
+    const [mixedMax, setMixedMax] = useState(100);
+    const [mixedDifficulty, setMixedDifficulty] = useState('easy');
+    const [mixedAnswers, setMixedAnswers] = useState(false);
+
+    const downloadPDF = async (endpoint, filename) => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${CONFIG.development.GATEWAY_URL}${endpoint}`);
+
+            if (!response.ok) {
+                throw new Error('Failed to generate worksheet');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            console.log('✅ Worksheet downloaded:', filename);
+        } catch (error) {
+            console.error('Error downloading worksheet:', error);
+            alert('Failed to generate worksheet. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleMultiplicationTable = () => {
+        const endpoint = `/v1/worksheets/multiplication-table?from=${multTableFrom}&to=${multTableTo}&includeAnswers=${multTableAnswers}`;
+        downloadPDF(endpoint, `multiplication_table_${multTableFrom}_to_${multTableTo}.pdf`);
+    };
+
+    const handleAddition = () => {
+        const endpoint = `/v1/worksheets/addition?count=${additionCount}&maxNumber=${additionMax}&difficulty=${additionDifficulty}&includeAnswers=${additionAnswers}`;
+        downloadPDF(endpoint, `addition_${additionDifficulty}.pdf`);
+    };
+
+    const handleSubtraction = () => {
+        const endpoint = `/v1/worksheets/subtraction?count=${subtractionCount}&maxNumber=${subtractionMax}&difficulty=${subtractionDifficulty}&includeAnswers=${subtractionAnswers}`;
+        downloadPDF(endpoint, `subtraction_${subtractionDifficulty}.pdf`);
+    };
+
+    const handleMultiplication = () => {
+        const endpoint = `/v1/worksheets/multiplication?count=${multiplicationCount}&maxMultiplier=${multiplicationMax}&difficulty=${multiplicationDifficulty}&includeAnswers=${multiplicationAnswers}`;
+        downloadPDF(endpoint, `multiplication_${multiplicationDifficulty}.pdf`);
+    };
+
+    const handleDivision = () => {
+        const endpoint = `/v1/worksheets/division?count=${divisionCount}&maxDividend=${divisionMax}&difficulty=${divisionDifficulty}&includeAnswers=${divisionAnswers}`;
+        downloadPDF(endpoint, `division_${divisionDifficulty}.pdf`);
+    };
+
+    const handleNumberWriting = () => {
+        const endpoint = `/v1/worksheets/number-writing?from=${numberFrom}&to=${numberTo}&percentage=${numberPercentage}`;
+        downloadPDF(endpoint, `number_writing_${numberFrom}_to_${numberTo}.pdf`);
+    };
+
+    const handleMixedOperations = () => {
+        const endpoint = `/v1/worksheets/mixed-operations?count=${mixedCount}&maxNumber=${mixedMax}&difficulty=${mixedDifficulty}&includeAnswers=${mixedAnswers}`;
+        downloadPDF(endpoint, `mixed_operations_${mixedDifficulty}.pdf`);
+    };
+
+    const worksheetTypes = [
+        { id: 'multiplication-table', name: 'Multiplication Tables', icon: '📊', description: 'Print multiplication tables from any range' },
+        { id: 'addition', name: 'Addition', icon: '➕', description: 'Practice addition problems' },
+        { id: 'subtraction', name: 'Subtraction', icon: '➖', description: 'Practice subtraction problems' },
+        { id: 'multiplication', name: 'Multiplication', icon: '✖️', description: 'Practice multiplication problems' },
+        { id: 'division', name: 'Division', icon: '➗', description: 'Practice division problems' },
+        { id: 'number-writing', name: 'Number Writing', icon: '✏️', description: 'Practice writing numbers' },
+        { id: 'mixed-operations', name: 'Mixed Operations', icon: '🔢', description: 'Mixed math operations' },
+        { id: 'coming-soon-1', name: 'Coming Soon', icon: '🚀', description: 'More worksheets coming soon', disabled: true },
+        { id: 'coming-soon-2', name: 'Coming Soon', icon: '⭐', description: 'More worksheets coming soon', disabled: true }
+    ];
+
+    return (
+        <div className="worksheets-hub">
+            <div className="worksheets-header">
+                <h1>🖨️ Math Worksheets Generator</h1>
+                <p>Generate unlimited printable worksheets instantly</p>
+            </div>
+
+            <div className="worksheets-tabs">
+                {worksheetTypes.map(type => (
+                    <button
+                        key={type.id}
+                        className={`worksheet-tab ${activeTab === type.id ? 'active' : ''} ${type.disabled ? 'disabled' : ''}`}
+                        onClick={() => !type.disabled && setActiveTab(type.id)}
+                        disabled={type.disabled}
+                        title={type.disabled ? type.description : ''}
+                    >
+                        <span className="tab-icon">{type.icon}</span>
+                        <span className="tab-name">{type.name}</span>
+                    </button>
+                ))}
+            </div>
+
+            {activeTab && (
+                <div className="worksheet-content">
+                    {activeTab === 'multiplication-table' && (
+                    <div className="worksheet-generator">
+                        <h2>📊 Multiplication Tables</h2>
+                        <p className="description">Generate multiplication tables for any range</p>
+
+                        <div className="form-group">
+                            <label>From:</label>
+                            <input
+                                type="number"
+                                value={multTableFrom}
+                                onChange={(e) => setMultTableFrom(parseInt(e.target.value))}
+                                min="1"
+                                max="20"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>To:</label>
+                            <input
+                                type="number"
+                                value={multTableTo}
+                                onChange={(e) => setMultTableTo(parseInt(e.target.value))}
+                                min={multTableFrom}
+                                max="20"
+                            />
+                        </div>
+
+                        <div className="form-group checkbox-group">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={multTableAnswers}
+                                    onChange={(e) => setMultTableAnswers(e.target.checked)}
+                                />
+                                Include Answers
+                            </label>
+                        </div>
+
+                        <button
+                            className="generate-btn"
+                            onClick={handleMultiplicationTable}
+                            disabled={loading}
+                        >
+                            {loading ? 'Generating...' : '🖨️ Generate PDF'}
+                        </button>
+                    </div>
+                )}
+
+                {activeTab === 'addition' && (
+                    <div className="worksheet-generator">
+                        <h2>➕ Addition Practice</h2>
+                        <p className="description">Generate random addition problems</p>
+
+                        <div className="form-group">
+                            <label>Number of Problems:</label>
+                            <input
+                                type="number"
+                                value={additionCount}
+                                onChange={(e) => setAdditionCount(parseInt(e.target.value))}
+                                min="10"
+                                max="100"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Maximum Number:</label>
+                            <input
+                                type="number"
+                                value={additionMax}
+                                onChange={(e) => setAdditionMax(parseInt(e.target.value))}
+                                min="10"
+                                max="1000"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Difficulty:</label>
+                            <select
+                                value={additionDifficulty}
+                                onChange={(e) => setAdditionDifficulty(e.target.value)}
+                            >
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group checkbox-group">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={additionAnswers}
+                                    onChange={(e) => setAdditionAnswers(e.target.checked)}
+                                />
+                                Include Answers
+                            </label>
+                        </div>
+
+                        <button
+                            className="generate-btn"
+                            onClick={handleAddition}
+                            disabled={loading}
+                        >
+                            {loading ? 'Generating...' : '🖨️ Generate PDF'}
+                        </button>
+                    </div>
+                )}
+
+                {activeTab === 'subtraction' && (
+                    <div className="worksheet-generator">
+                        <h2>➖ Subtraction Practice</h2>
+                        <p className="description">Generate random subtraction problems</p>
+
+                        <div className="form-group">
+                            <label>Number of Problems:</label>
+                            <input
+                                type="number"
+                                value={subtractionCount}
+                                onChange={(e) => setSubtractionCount(parseInt(e.target.value))}
+                                min="10"
+                                max="100"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Maximum Number:</label>
+                            <input
+                                type="number"
+                                value={subtractionMax}
+                                onChange={(e) => setSubtractionMax(parseInt(e.target.value))}
+                                min="10"
+                                max="1000"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Difficulty:</label>
+                            <select
+                                value={subtractionDifficulty}
+                                onChange={(e) => setSubtractionDifficulty(e.target.value)}
+                            >
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group checkbox-group">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={subtractionAnswers}
+                                    onChange={(e) => setSubtractionAnswers(e.target.checked)}
+                                />
+                                Include Answers
+                            </label>
+                        </div>
+
+                        <button
+                            className="generate-btn"
+                            onClick={handleSubtraction}
+                            disabled={loading}
+                        >
+                            {loading ? 'Generating...' : '🖨️ Generate PDF'}
+                        </button>
+                    </div>
+                )}
+
+                {activeTab === 'multiplication' && (
+                    <div className="worksheet-generator">
+                        <h2>✖️ Multiplication Practice</h2>
+                        <p className="description">Generate random multiplication problems</p>
+
+                        <div className="form-group">
+                            <label>Number of Problems:</label>
+                            <input
+                                type="number"
+                                value={multiplicationCount}
+                                onChange={(e) => setMultiplicationCount(parseInt(e.target.value))}
+                                min="10"
+                                max="100"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Maximum Multiplier:</label>
+                            <input
+                                type="number"
+                                value={multiplicationMax}
+                                onChange={(e) => setMultiplicationMax(parseInt(e.target.value))}
+                                min="5"
+                                max="20"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Difficulty:</label>
+                            <select
+                                value={multiplicationDifficulty}
+                                onChange={(e) => setMultiplicationDifficulty(e.target.value)}
+                            >
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group checkbox-group">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={multiplicationAnswers}
+                                    onChange={(e) => setMultiplicationAnswers(e.target.checked)}
+                                />
+                                Include Answers
+                            </label>
+                        </div>
+
+                        <button
+                            className="generate-btn"
+                            onClick={handleMultiplication}
+                            disabled={loading}
+                        >
+                            {loading ? 'Generating...' : '🖨️ Generate PDF'}
+                        </button>
+                    </div>
+                )}
+
+                {activeTab === 'division' && (
+                    <div className="worksheet-generator">
+                        <h2>➗ Division Practice</h2>
+                        <p className="description">Generate random division problems</p>
+
+                        <div className="form-group">
+                            <label>Number of Problems:</label>
+                            <input
+                                type="number"
+                                value={divisionCount}
+                                onChange={(e) => setDivisionCount(parseInt(e.target.value))}
+                                min="10"
+                                max="100"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Maximum Dividend:</label>
+                            <input
+                                type="number"
+                                value={divisionMax}
+                                onChange={(e) => setDivisionMax(parseInt(e.target.value))}
+                                min="20"
+                                max="500"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Difficulty:</label>
+                            <select
+                                value={divisionDifficulty}
+                                onChange={(e) => setDivisionDifficulty(e.target.value)}
+                            >
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group checkbox-group">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={divisionAnswers}
+                                    onChange={(e) => setDivisionAnswers(e.target.checked)}
+                                />
+                                Include Answers
+                            </label>
+                        </div>
+
+                        <button
+                            className="generate-btn"
+                            onClick={handleDivision}
+                            disabled={loading}
+                        >
+                            {loading ? 'Generating...' : '🖨️ Generate PDF'}
+                        </button>
+                    </div>
+                )}
+
+                {activeTab === 'number-writing' && (
+                    <div className="worksheet-generator">
+                        <h2>✏️ Number Writing Practice</h2>
+                        <p className="description">Practice writing numbers in sequence</p>
+
+                        <div className="form-group">
+                            <label>From:</label>
+                            <input
+                                type="number"
+                                value={numberFrom}
+                                onChange={(e) => setNumberFrom(parseInt(e.target.value))}
+                                min="1"
+                                max="1000"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>To:</label>
+                            <input
+                                type="number"
+                                value={numberTo}
+                                onChange={(e) => setNumberTo(parseInt(e.target.value))}
+                                min={numberFrom}
+                                max="1000"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Fill Percentage: {numberPercentage}%</label>
+                            <input
+                                type="range"
+                                value={numberPercentage}
+                                onChange={(e) => setNumberPercentage(parseInt(e.target.value))}
+                                min="10"
+                                max="90"
+                                step="10"
+                            />
+                            <small>Higher = more numbers pre-filled</small>
+                        </div>
+
+                        <button
+                            className="generate-btn"
+                            onClick={handleNumberWriting}
+                            disabled={loading}
+                        >
+                            {loading ? 'Generating...' : '🖨️ Generate PDF'}
+                        </button>
+                    </div>
+                )}
+
+                {activeTab === 'mixed-operations' && (
+                    <div className="worksheet-generator">
+                        <h2>🔢 Mixed Operations</h2>
+                        <p className="description">Practice all operations together</p>
+
+                        <div className="form-group">
+                            <label>Number of Problems:</label>
+                            <input
+                                type="number"
+                                value={mixedCount}
+                                onChange={(e) => setMixedCount(parseInt(e.target.value))}
+                                min="10"
+                                max="100"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Maximum Number:</label>
+                            <input
+                                type="number"
+                                value={mixedMax}
+                                onChange={(e) => setMixedMax(parseInt(e.target.value))}
+                                min="10"
+                                max="1000"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Difficulty:</label>
+                            <select
+                                value={mixedDifficulty}
+                                onChange={(e) => setMixedDifficulty(e.target.value)}
+                            >
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group checkbox-group">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={mixedAnswers}
+                                    onChange={(e) => setMixedAnswers(e.target.checked)}
+                                />
+                                Include Answers
+                            </label>
+                        </div>
+
+                        <button
+                            className="generate-btn"
+                            onClick={handleMixedOperations}
+                            disabled={loading}
+                        >
+                            {loading ? 'Generating...' : '🖨️ Generate PDF'}
+                        </button>
+                    </div>
+                )}
+
+                {(activeTab === 'coming-soon-1' || activeTab === 'coming-soon-2') && (
+                    <div className="worksheet-generator coming-soon-content">
+                        <div className="coming-soon-animation">
+                            <span className="coming-soon-icon">🚀</span>
+                        </div>
+                        <h2>More Worksheets Coming Soon!</h2>
+                        <p className="description">
+                            We're working on adding more exciting worksheet types including:
+                        </p>
+                        <ul className="coming-soon-list">
+                            <li>📐 Geometry & Shapes</li>
+                            <li>⏰ Time & Clock Reading</li>
+                            <li>📊 Fractions & Decimals</li>
+                            <li>📏 Measurement & Units</li>
+                            <li>💰 Money & Word Problems</li>
+                            <li>🧮 Algebra Basics</li>
+                            <li>📈 Data & Graphs</li>
+                            <li>🎲 Probability & Statistics</li>
+                        </ul>
+                        <p className="coming-soon-note">
+                            ⭐ Stay tuned for more educational content!
+                        </p>
+                    </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
