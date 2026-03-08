@@ -72,6 +72,9 @@ export default function IncidentManagement() {
     try {
       const token = localStorage.getItem('token');
       const url = `${CONFIG.development.ADMIN_BASE_URL}/admin-assessment/v1/incidents/${selectedIncident.incidentId}`;
+      
+      // Check if status changed to inform admin about the email
+      const statusChanged = updateData.status !== selectedIncident.status;
 
       await axios.put(url, updateData, {
         headers: {
@@ -80,7 +83,13 @@ export default function IncidentManagement() {
         }
       });
 
-      alert('Incident updated successfully!');
+      // 🌟 UX FIX: Better success message based on status change
+      if (statusChanged && selectedIncident.reportedByEmail) {
+          alert(`Incident updated! An email notification has been sent to ${selectedIncident.reportedByEmail}.`);
+      } else {
+          alert('Incident updated successfully!');
+      }
+
       setShowDetailsModal(false);
       loadIncidents();
       loadStatistics();
@@ -92,7 +101,7 @@ export default function IncidentManagement() {
 
   const handleCloseIncident = async () => {
     if (!selectedIncident) return;
-    if (!window.confirm('Are you sure you want to close this incident?')) return;
+    if (!window.confirm('Are you sure you want to close this incident? This will email the user.')) return;
 
     try {
       const token = localStorage.getItem('token');
@@ -105,7 +114,7 @@ export default function IncidentManagement() {
         }
       });
 
-      alert('Incident closed successfully!');
+      alert('Incident closed! The user has been notified.');
       setShowDetailsModal(false);
       loadIncidents();
       loadStatistics();
@@ -134,6 +143,9 @@ export default function IncidentManagement() {
       default: return '#6b7280';
     }
   };
+
+  // 🌟 Helper to check if status is modified
+  const isStatusChanged = selectedIncident && updateData.status !== selectedIncident.status;
 
   return (
     <div className="incident-management-container">
@@ -335,6 +347,7 @@ export default function IncidentManagement() {
                       <select
                         value={updateData.status}
                         onChange={(e) => setUpdateData({...updateData, status: e.target.value})}
+                        style={{ border: isStatusChanged ? '2px solid #3b82f6' : '' }} // Highlight if changed
                       >
                         <option value="OPEN">Open</option>
                         <option value="IN_PROGRESS">In Progress</option>
@@ -386,7 +399,7 @@ export default function IncidentManagement() {
                   </div>
 
                   <div className="form-group">
-                    <label>Resolution Notes:</label>
+                    <label>Resolution Notes (Will be visible to user):</label>
                     <textarea
                       value={updateData.resolutionNotes}
                       onChange={(e) => setUpdateData({...updateData, resolutionNotes: e.target.value})}
@@ -394,6 +407,13 @@ export default function IncidentManagement() {
                       rows={4}
                     />
                   </div>
+
+                  {/* 🌟 UX FIX: Show an alert if they are about to email the user! */}
+                  {isStatusChanged && selectedIncident.reportedByEmail && (
+                    <div style={{ padding: '10px', backgroundColor: '#eff6ff', color: '#1e3a8a', borderRadius: '6px', marginBottom: '15px', fontSize: '0.9rem', border: '1px solid #bfdbfe' }}>
+                      ℹ️ <strong>Note:</strong> Changing the status to <strong>{updateData.status.replace('_', ' ')}</strong> will automatically email the user ({selectedIncident.reportedByEmail}) with your resolution notes.
+                    </div>
+                  )}
 
                   <div className="modal-actions">
                     <button className="btn-update" onClick={handleUpdateIncident}>
