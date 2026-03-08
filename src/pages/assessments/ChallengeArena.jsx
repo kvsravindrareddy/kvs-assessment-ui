@@ -11,9 +11,9 @@ export default function ChallengeArena() {
     const [searchParams] = useSearchParams();
     const challengeIdParam = searchParams.get('challengeId');
 
-    // Use email as the primary identifier since backend uses email for userId
     const currentUserId = user ? (user.email || user.id || 'GUEST_USER') : 'GUEST_USER';
     const currentUserName = user?.username || user?.firstName || user?.name || 'Guest';
+    const [sessionUserId, setSessionUserId] = useState(currentUserId);
 
     console.log('[CHALLENGE_ARENA] Current user:', {
         user,
@@ -66,6 +66,20 @@ export default function ChallengeArena() {
 
     const grades = ['GRADE_1', 'GRADE_2', 'GRADE_3', 'GRADE_4', 'GRADE_5', 'GRADE_6', 'GRADE_7', 'GRADE_8', 'GRADE_9', 'GRADE_10'];
 
+    // 🌟 FIX: Foolproof Participant Extractor
+    const getMyParticipantId = (challenge = activeChallenge) => {
+        if (!challenge || !challenge.participants) return sessionUserId || currentUserId;
+        const token = localStorage.getItem('token');
+        if (!token) {
+            const guestP = challenge.participants.find(p => p.userId !== challenge.createdBy);
+            return guestP ? guestP.userId : sessionUserId || currentUserId;
+        }
+        const loggedInP = challenge.participants.find(p => 
+            p.userId === user?.username || p.userId === user?.email || p.userId === user?.id || p.userId === currentUserId
+        );
+        return loggedInP ? loggedInP.userId : currentUserId;
+    };
+
     // Timer effect
     useEffect(() => {
         let interval;
@@ -105,13 +119,14 @@ export default function ChallengeArena() {
         }
     }, [activeView, tournamentsTab]);
 
-    // Poll for challenge status when in waiting room
+    // 🌟 FIX: Safe Polling
     useEffect(() => {
         let pollInterval;
+        if (!activeChallenge) return;
 
-        if (activeView === 'waiting' && activeChallenge) {
-            console.log('[POLLING] Started polling for challenge:', activeChallenge.challengeId);
+        const shouldPoll = activeView === 'waiting' || (activeView === 'completed' && activeChallenge.status !== 'COMPLETED');
 
+        if (shouldPoll) {
             pollInterval = setInterval(async () => {
                 try {
                     const token = localStorage.getItem('token');
@@ -119,47 +134,28 @@ export default function ChallengeArena() {
                         ? `${CONFIG.development.GATEWAY_URL}/v1/challenge/${activeChallenge.challengeId}`
                         : `${CONFIG.development.GATEWAY_URL}/v1/challenge/${activeChallenge.challengeId}/guest`;
 
-                    console.log('[POLLING] Checking challenge status...', endpoint);
-
                     const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
                     const res = await axios.get(endpoint, config);
 
-                    console.log('[POLLING] Response:', {
-                        status: res.data.status,
-                        participants: res.data.currentParticipants + '/' + res.data.maxParticipants,
-                        hasQuestions: res.data.questions ? res.data.questions.length : 0
-                    });
-
                     setActiveChallenge(res.data);
 
-                    // If challenge is now active, start the game
-                    if (res.data.status === 'ACTIVE') {
-                        console.log('[POLLING] Challenge is ACTIVE! Starting game...');
+                    if (activeView === 'waiting' && res.data.status === 'ACTIVE') {
                         startChallengeQuestions(res.data);
                     }
                 } catch (err) {
-                    console.error('[POLLING] Error polling challenge status:', err);
+                    console.error('[POLLING] Error polling:', err);
                 }
-            }, 2000); // Poll every 2 seconds
+            }, 3000); 
         }
 
-        return () => {
-            if (pollInterval) {
-                console.log('[POLLING] Stopped polling');
-                clearInterval(pollInterval);
-            }
-        };
-    }, [activeView, activeChallenge?.challengeId]);
+        return () => clearInterval(pollInterval);
+    }, [activeView, activeChallenge?.status, activeChallenge?.challengeId]);
 
     const fetchFriendsData = async () => {
         try {
             const token = localStorage.getItem('token');
 
-            // Skip if no token (guest user)
-            if (!token) {
-                console.log('[FETCH] Skipping friends data - no token (guest user)');
-                return;
-            }
+            if (!token) return;
 
             if (friendsTab === 'friends') {
                 const res = await axios.get(`${CONFIG.development.GATEWAY_URL}/v1/friends/${currentUserId}`, {
@@ -177,9 +173,7 @@ export default function ChallengeArena() {
                 });
                 setPendingInvitations(res.data || []);
             }
-        } catch (err) {
-            console.error('[FETCH] Error fetching friends data:', err);
-        }
+        } catch (err) {}
     };
 
     const sendFriendRequest = async (friendEmail) => {
@@ -195,7 +189,6 @@ export default function ChallengeArena() {
             alert('Friend request sent successfully!');
             setFriendSearchQuery('');
         } catch (err) {
-            console.error('Error sending friend request:', err);
             alert(err.response?.data?.message || 'Failed to send friend request');
         }
     };
@@ -208,10 +201,7 @@ export default function ChallengeArena() {
             });
             alert('Friend request accepted!');
             fetchFriendsData();
-        } catch (err) {
-            console.error('Error accepting friend request:', err);
-            alert('Failed to accept friend request');
-        }
+        } catch (err) {}
     };
 
     const declineFriendRequest = async (friendshipId) => {
@@ -221,15 +211,11 @@ export default function ChallengeArena() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchFriendsData();
-        } catch (err) {
-            console.error('Error declining friend request:', err);
-            alert('Failed to decline friend request');
-        }
+        } catch (err) {}
     };
 
     const sendChallengeInvitation = async (friendId, friendName) => {
         try {
-            // First create a private challenge
             const token = localStorage.getItem('token');
             const challengeRes = await axios.post(`${CONFIG.development.GATEWAY_URL}/v1/challenge/create`, {
                 challengeType: challengeType,
@@ -250,7 +236,6 @@ export default function ChallengeArena() {
 
             const challengeId = challengeRes.data.challengeId;
 
-            // Send challenge invitation
             await axios.post(`${CONFIG.development.GATEWAY_URL}/v1/friends/challenge/invite`, {
                 challengeId: challengeId,
                 invitedByUserId: currentUserId,
@@ -263,10 +248,7 @@ export default function ChallengeArena() {
             });
 
             alert(`Challenge invitation sent to ${friendName}!`);
-        } catch (err) {
-            console.error('Error sending challenge invitation:', err);
-            alert('Failed to send challenge invitation');
-        }
+        } catch (err) {}
     };
 
     const acceptChallengeInvitation = async (invitation) => {
@@ -275,13 +257,8 @@ export default function ChallengeArena() {
             await axios.post(`${CONFIG.development.GATEWAY_URL}/v1/friends/challenge/accept/${invitation.id}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-
-            // Join the challenge
             await joinChallenge(invitation.challengeId);
-        } catch (err) {
-            console.error('Error accepting challenge invitation:', err);
-            alert('Failed to accept challenge invitation');
-        }
+        } catch (err) {}
     };
 
     const declineChallengeInvitation = async (invitationId) => {
@@ -291,21 +268,13 @@ export default function ChallengeArena() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchFriendsData();
-        } catch (err) {
-            console.error('Error declining challenge invitation:', err);
-            alert('Failed to decline challenge invitation');
-        }
+        } catch (err) {}
     };
 
     const fetchTournamentsData = async () => {
         try {
             const token = localStorage.getItem('token');
-
-            // Skip if no token (guest user)
-            if (!token) {
-                console.log('[FETCH] Skipping tournaments data - no token (guest user)');
-                return;
-            }
+            if (!token) return;
 
             if (tournamentsTab === 'upcoming') {
                 const res = await axios.get(`${CONFIG.development.GATEWAY_URL}/v1/tournaments/upcoming`, {
@@ -320,9 +289,7 @@ export default function ChallengeArena() {
                 });
                 setActiveTournaments(res.data || []);
             }
-        } catch (err) {
-            console.error('[FETCH] Error fetching tournaments:', err);
-        }
+        } catch (err) {}
     };
 
     const registerForTournament = async (tournamentId, tournamentName) => {
@@ -339,7 +306,6 @@ export default function ChallengeArena() {
             alert(`Successfully registered for ${tournamentName}!`);
             fetchTournamentsData();
         } catch (err) {
-            console.error('Error registering for tournament:', err);
             alert(err.response?.data?.message || 'Failed to register for tournament');
         }
     };
@@ -390,23 +356,14 @@ export default function ChallengeArena() {
     const fetchAvailableChallenges = async () => {
         try {
             const token = localStorage.getItem('token');
-
-            // Skip fetching if no token (guest user)
-            if (!token) {
-                console.log('[FETCH] Skipping available challenges fetch - no token (guest user)');
-                setAvailableChallenges([]);
-                return;
-            }
+            if (!token) return;
 
             const res = await axios.get(`${CONFIG.development.GATEWAY_URL}/v1/challenge/available`, {
-                params: { gradeLevel: 'GRADE_5' }, // TODO: Get from user profile
+                params: { gradeLevel: 'GRADE_5' }, 
                 headers: { Authorization: `Bearer ${token}` }
             });
             setAvailableChallenges(res.data || []);
-        } catch (err) {
-            console.error('[FETCH] Error fetching challenges:', err);
-            setAvailableChallenges([]);
-        }
+        } catch (err) {}
     };
 
     const loadChallengeById = async (challengeId) => {
@@ -414,38 +371,33 @@ export default function ChallengeArena() {
             setLoading(true);
             const token = localStorage.getItem('token');
 
-            // Use guest endpoint if not authenticated
             const endpoint = token
                 ? `${CONFIG.development.GATEWAY_URL}/v1/challenge/${challengeId}`
                 : `${CONFIG.development.GATEWAY_URL}/v1/challenge/${challengeId}/guest`;
 
-            const config = token
-                ? { headers: { Authorization: `Bearer ${token}` } }
-                : {};
-
-            console.log('[LOAD] Loading challenge:', { challengeId, currentUserId, endpoint });
+            const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
             const res = await axios.get(endpoint, config);
-
-            console.log('[LOAD] Challenge loaded:', {
-                status: res.data.status,
-                participants: res.data.participants,
-                currentUserId: currentUserId,
-                isParticipant: res.data.participants?.some(p => p.userId === currentUserId)
-            });
-
             setActiveChallenge(res.data);
 
-            if (res.data.status === 'ACTIVE') {
-                console.log('[LOAD] Challenge is ACTIVE, starting questions...');
-                startChallengeQuestions(res.data);
+            const myId = getMyParticipantId(res.data);
+            const myParticipant = res.data.participants?.find(p => p.userId === myId);
+            const isUserDone = myParticipant && myParticipant.questionsAttempted >= res.data.totalQuestions;
+
+            if (res.data.status === 'COMPLETED' || isUserDone) {
+                setChallengeCompleted(true);
+                setIsTimerRunning(false);
+                setActiveView('completed');
+                if (myParticipant) setScore(myParticipant.score);
+            } else if (res.data.status === 'ACTIVE') {
+                if (activeView !== 'challenge') {
+                    startChallengeQuestions(res.data);
+                }
             } else {
-                console.log('[LOAD] Challenge is WAITING, showing waiting room...');
                 setActiveView('waiting');
             }
         } catch (err) {
-            console.error('[LOAD] Error loading challenge:', err);
-            alert('Failed to load challenge. Please try again.');
+            alert('Failed to load challenge.');
         } finally {
             setLoading(false);
         }
@@ -456,14 +408,6 @@ export default function ChallengeArena() {
         try {
             const token = localStorage.getItem('token');
             const selectedType = challengeTypes.find(t => t.id === challengeType);
-
-            console.log('[CREATE] Creating challenge:', {
-                currentUserId,
-                userObject: user,
-                'user.id': user?.id,
-                'user.email': user?.email,
-                sendingUserId: currentUserId
-            });
 
             const res = await axios.post(`${CONFIG.development.GATEWAY_URL}/v1/challenge/create`, {
                 userId: currentUserId,
@@ -481,18 +425,10 @@ export default function ChallengeArena() {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            console.log('[CREATE] Challenge created:', {
-                challengeId: res.data.challengeId,
-                status: res.data.status,
-                participants: res.data.participants,
-                currentUserId
-            });
-
             setActiveChallenge(res.data);
             setActiveView('waiting');
         } catch (err) {
-            console.error('Error creating challenge:', err);
-            alert('Failed to create challenge: ' + (err.response?.data?.message || err.message));
+            alert('Failed to create challenge.');
         } finally {
             setLoading(false);
         }
@@ -503,21 +439,11 @@ export default function ChallengeArena() {
         try {
             const token = localStorage.getItem('token');
 
-            // Use guest endpoint if not authenticated
             const endpoint = token
                 ? `${CONFIG.development.GATEWAY_URL}/v1/challenge/join`
                 : `${CONFIG.development.GATEWAY_URL}/v1/challenge/join-guest`;
 
-            const config = token
-                ? { headers: { Authorization: `Bearer ${token}` } }
-                : {};
-
-            console.log('[JOIN] Joining challenge:', {
-                challengeId,
-                userId: currentUserId,
-                userName: currentUserName,
-                endpoint
-            });
+            const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
             const res = await axios.post(endpoint, {
                 challengeId: challengeId,
@@ -526,35 +452,28 @@ export default function ChallengeArena() {
                 email: user?.email || ''
             }, config);
 
-            console.log('[JOIN] Join response:', {
-                status: res.data.status,
-                participants: res.data.currentParticipants + '/' + res.data.maxParticipants,
-                hasQuestions: res.data.questions ? res.data.questions.length : 0
-            });
-
             setActiveChallenge(res.data);
 
+            if (!token && res.data.participants) {
+                const guestParticipant = res.data.participants.find(p => p.userId !== res.data.createdBy);
+                if (guestParticipant) {
+                    setSessionUserId(guestParticipant.userId);
+                }
+            }
+
             if (res.data.status === 'ACTIVE') {
-                console.log('[JOIN] Challenge is ACTIVE immediately! Starting game...');
                 startChallengeQuestions(res.data);
             } else {
-                console.log('[JOIN] Challenge still WAITING, entering waiting room...');
                 setActiveView('waiting');
             }
         } catch (err) {
-            console.error('[JOIN] Error joining challenge:', err);
-            alert('Failed to join challenge: ' + (err.response?.data?.message || err.message));
+            alert('Failed to join challenge.');
         } finally {
             setLoading(false);
         }
     };
 
     const startChallengeQuestions = (challenge) => {
-        console.log('[START] Starting challenge questions:', {
-            hasQuestions: challenge.questions ? challenge.questions.length : 0,
-            firstQuestion: challenge.questions?.[0]
-        });
-
         if (challenge.questions && challenge.questions.length > 0) {
             setCurrentQuestion(challenge.questions[0]);
             setQuestionIndex(1);
@@ -563,9 +482,6 @@ export default function ChallengeArena() {
             setIsTimerRunning(true);
             setChallengeCompleted(false);
             setActiveView('challenge');
-            console.log('[START] Challenge started! View changed to "challenge"');
-        } else {
-            console.error('[START] Cannot start - no questions available!');
         }
     };
 
@@ -575,55 +491,39 @@ export default function ChallengeArena() {
         try {
             const token = localStorage.getItem('token');
 
-            // Use guest endpoint if not authenticated
             const endpoint = token
                 ? `${CONFIG.development.GATEWAY_URL}/v1/challenge/submit-answer`
                 : `${CONFIG.development.GATEWAY_URL}/v1/challenge/submit-answer-guest`;
 
-            const config = token
-                ? { headers: { Authorization: `Bearer ${token}` } }
-                : {};
+            const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
-            console.log('[SUBMIT] Submitting answer:', {
-                endpoint,
-                challengeId: activeChallenge.challengeId,
-                userId: currentUserId,
-                questionIndex,
-                selectedAnswer,
-                hasToken: !!token
-            });
+            const myDbId = getMyParticipantId();
+            
+            // 🌟 FIX: Sends BOTH "A" and "45" so the backend string matching works perfectly!
+            const selectedValue = currentQuestion.options[selectedAnswer];
 
             const res = await axios.post(endpoint, {
                 challengeId: activeChallenge.challengeId,
-                userId: currentUserId,
+                userId: myDbId,
                 questionIndex: questionIndex,
-                userAnswer: [selectedAnswer],
+                userAnswer: [selectedAnswer, selectedValue], 
                 timeElapsedSeconds: timeElapsed
             }, config);
-
-            console.log('[SUBMIT] Answer submitted:', {
-                isCorrect: res.data.isCorrect,
-                currentScore: res.data.currentScore,
-                challengeCompleted: res.data.challengeCompleted
-            });
 
             setScore(res.data.currentScore);
 
             if (res.data.challengeCompleted) {
                 setChallengeCompleted(true);
                 setIsTimerRunning(false);
-                // Reload challenge to get final rankings
                 loadChallengeById(activeChallenge.challengeId);
             } else {
-                // Move to next question
                 const nextQuestion = activeChallenge.questions[questionIndex];
                 setCurrentQuestion(nextQuestion);
                 setQuestionIndex(questionIndex + 1);
                 setSelectedAnswer('');
             }
         } catch (err) {
-            console.error('[SUBMIT] Error submitting answer:', err);
-            alert('Failed to submit answer: ' + (err.response?.data?.message || err.message));
+            alert('Failed to submit answer.');
         }
     };
 
@@ -809,21 +709,12 @@ export default function ChallengeArena() {
 
                         {/* Check if current user is already a participant */}
                         {(() => {
+                            const myId = getMyParticipantId();
                             const isParticipant = activeChallenge.participants &&
-                                activeChallenge.participants.some(p => p.userId === currentUserId);
+                                activeChallenge.participants.some(p => p.userId === myId);
 
                             // Also check if user is the creator
-                            const isCreator = activeChallenge.createdBy === currentUserId;
-
-                            console.log('[WAITING_ROOM] Participant check:', {
-                                currentUserId,
-                                createdBy: activeChallenge.createdBy,
-                                participants: activeChallenge.participants,
-                                participantUserIds: activeChallenge.participants?.map(p => p.userId),
-                                isParticipant,
-                                isCreator,
-                                shouldShowJoinButton: !isParticipant && !isCreator
-                            });
+                            const isCreator = activeChallenge.createdBy === myId;
 
                             // Show join button only if NOT a participant AND NOT the creator
                             const shouldShowJoinButton = !isParticipant && !isCreator;
@@ -912,6 +803,12 @@ export default function ChallengeArena() {
                     <div className="completion-trophy">🏆</div>
                     <h2>Challenge Complete!</h2>
 
+                    {activeChallenge.status === 'ACTIVE' && (
+                        <div style={{ background: '#eff6ff', border: '2px solid #bfdbfe', borderRadius: '12px', padding: '15px', color: '#1e3a8a', fontWeight: 'bold', margin: '20px 0' }}>
+                            ⏳ Waiting for your opponent to finish...
+                        </div>
+                    )}
+
                     <div className="final-score">
                         <span className="score-value">{score}</span>
                         <span className="score-label">/ {activeChallenge.totalQuestions}</span>
@@ -924,13 +821,15 @@ export default function ChallengeArena() {
                             .map((participant, idx) => (
                                 <div key={participant.userId} className={`ranking-item rank-${idx + 1}`}>
                                     <span className="rank-badge">{participant.rank || '-'}</span>
-                                    <span className="participant-name">{participant.userName}</span>
+                                    <span className="participant-name">
+                                        {participant.userName} {participant.userId === getMyParticipantId() ? '(You)' : ''}
+                                    </span>
                                     <span className="participant-score">{participant.score} pts</span>
                                 </div>
                             ))}
                     </div>
 
-                    <button onClick={() => setActiveView('lobby')} className="back-to-lobby-btn">
+                    <button onClick={() => { setActiveView('lobby'); setActiveChallenge(null); setChallengeCompleted(false); }} className="back-to-lobby-btn">
                         Return to Lobby
                     </button>
                 </div>
