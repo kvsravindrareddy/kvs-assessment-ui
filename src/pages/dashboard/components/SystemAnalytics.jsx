@@ -331,8 +331,8 @@ const SystemAnalytics = () => {
                                             <td>{session.lastSeen}</td>
                                             <td>
                                                 <button onClick={() => blockIp(session.ip)} className="btn-action-block">🚫 Block IP</button>
-                                                {session.user !== 'GUEST' && session.user !== 'AUTH_USER' && (
-                                                    <button onClick={() => forceLogout(session.user)} className="btn-action-logout">⚠️ Kill Session</button>
+                                                {session.user !== 'GUEST' && (
+                                                    <button onClick={() => forceLogout(session.user)} className="btn-action-logout">⚠️ Force Logout</button>
                                                 )}
                                             </td>
                                         </tr>
