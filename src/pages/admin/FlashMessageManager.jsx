@@ -69,10 +69,10 @@ export default function FlashMessageManager() {
     const handleEdit = (msg) => {
         setEditingId(msg.id);
         setFormData({
-            message: msg.message,
-            type: msg.type,
-            active: msg.active,
-            targetRole: msg.targetRole,
+            message: msg.message || '',
+            type: msg.type || 'INFO',
+            active: msg.active === true || msg.active === 'true',
+            targetRole: msg.targetRole || 'ALL',
             startDate: msg.startDate ? msg.startDate.substring(0, 16) : '',
             endDate: msg.endDate ? msg.endDate.substring(0, 16) : ''
         });
@@ -152,7 +152,7 @@ export default function FlashMessageManager() {
                                 <label>Message *</label>
                                 <textarea
                                     value={formData.message}
-                                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                                     placeholder="Enter your message here..."
                                     required
                                     rows="3"
@@ -165,7 +165,7 @@ export default function FlashMessageManager() {
                                 <label>Type</label>
                                 <select
                                     value={formData.type}
-                                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
                                 >
                                     <option value="INFO">ℹ️ Info</option>
                                     <option value="SUCCESS">✅ Success</option>
@@ -179,7 +179,7 @@ export default function FlashMessageManager() {
                                 <label>Target Role</label>
                                 <select
                                     value={formData.targetRole}
-                                    onChange={(e) => setFormData({ ...formData, targetRole: e.target.value })}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, targetRole: e.target.value }))}
                                 >
                                     <option value="ALL">All Users</option>
                                     <option value="STUDENT">Students</option>
@@ -195,7 +195,7 @@ export default function FlashMessageManager() {
                                 <input
                                     type="datetime-local"
                                     value={formData.startDate}
-                                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
                                 />
                             </div>
 
@@ -204,20 +204,25 @@ export default function FlashMessageManager() {
                                 <input
                                     type="datetime-local"
                                     value={formData.endDate}
-                                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
                                 />
                             </div>
                         </div>
 
                         <div className="form-row">
-                            <div className="form-group checkbox-group">
-                                <label>
+                            <div className="form-group checkbox-group" style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
+                                {/* 🌟 FIX: Removed htmlFor and id to prevent double-firing clicks! */}
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold', color: '#1e293b' }}>
                                     <input
                                         type="checkbox"
-                                        checked={formData.active}
-                                        onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                                        checked={formData.active === true}
+                                        onChange={(e) => {
+                                            const isChecked = e.target.checked;
+                                            setFormData(prev => ({ ...prev, active: isChecked }));
+                                        }}
+                                        style={{ width: '22px', height: '22px', cursor: 'pointer', accentColor: '#3b82f6' }}
                                     />
-                                    Active
+                                    Enable this message instantly
                                 </label>
                             </div>
                         </div>
@@ -246,7 +251,7 @@ export default function FlashMessageManager() {
                         {messages.map(msg => (
                             <div key={msg.id} className={`message-card ${msg.active ? '' : 'inactive'}`}>
                                 <div className="message-header">
-                                    <span className="message-type-badge" data-type={msg.type.toLowerCase()}>
+                                    <span className="message-type-badge" data-type={msg.type?.toLowerCase()}>
                                         {getTypeIcon(msg.type)} {msg.type}
                                     </span>
                                     <span className={`status-badge ${msg.active ? 'active' : 'inactive'}`}>

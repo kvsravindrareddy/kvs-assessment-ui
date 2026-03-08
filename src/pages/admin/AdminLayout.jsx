@@ -12,7 +12,8 @@ import {
   Bars3Icon,
   XMarkIcon,
   BellIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  MegaphoneIcon // <-- Added Icon for Flash Alerts
 } from '@heroicons/react/24/outline';
 
 /**
@@ -32,6 +33,7 @@ const AdminLayout = () => {
     { path: '/admin/stories', icon: BookOpenIcon, label: 'Stories', color: 'text-green-600' },
     { path: '/admin/users', icon: UserGroupIcon, label: 'Users', color: 'text-orange-600' },
     { path: '/admin/analytics', icon: ChartBarIcon, label: 'Analytics', color: 'text-pink-600' },
+    { path: '/admin/flash-messages', icon: MegaphoneIcon, label: 'Flash Alerts', color: 'text-yellow-500' }, // <-- Added Menu Item
     { path: '/admin/settings', icon: Cog6ToothIcon, label: 'Settings', color: 'text-gray-600' },
   ];
 

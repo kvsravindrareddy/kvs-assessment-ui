@@ -10,6 +10,7 @@ import BulkRegistration from '../components/BulkRegistration';
 import SessionManagement from '../components/SessionManagement';
 import GradesManagement from '../components/GradesManagement';
 import IncidentManagement from '../components/IncidentManagement';
+import FlashMessageManager from '../../admin/FlashMessageManager'; // <-- Added Import
 import './SuperAdminDashboard.css';
 
 const SuperAdminDashboard = () => {
@@ -97,6 +98,10 @@ const SuperAdminDashboard = () => {
         </button>
 
         <div className="nav-section-title">⚙️ System</div>
+        {/* Added Flash Alerts Button */}
+        <button className={`nav-item ${activeSection === 'flash-alerts' ? 'active' : ''}`} onClick={() => setActiveSection('flash-alerts')}>
+          <span className="nav-icon">⚡</span><span className="nav-label">Flash Alerts</span>
+        </button>
         <button className={`nav-item ${activeSection === 'sessions' ? 'active' : ''}`} onClick={() => setActiveSection('sessions')}>
           <span className="nav-icon">💻</span><span className="nav-label">Active Sessions</span>
         </button>
@@ -160,7 +165,6 @@ const SuperAdminDashboard = () => {
     <div className="settings-container">
       <h2 className="section-title">System Settings</h2>
       <div className="settings-sections">
-        {/* Simplified for brevity */}
         <p>Settings configuration goes here...</p>
       </div>
     </div>
@@ -178,6 +182,7 @@ const SuperAdminDashboard = () => {
             {activeSection === 'bulk-registration' && '📋 Bulk User Registration'}
             {activeSection === 'content' && '📝 Content Management'}
             {activeSection === 'grades' && '🎓 Grades Management'}
+            {activeSection === 'flash-alerts' && '⚡ Flash Alerts & Messages'}
             {activeSection === 'sessions' && '🔄 Active Sessions Management'}
             {activeSection === 'incidents' && '🐛 Incident Reports & Tracking'}
             {activeSection === 'analytics' && '📈 Analytics & Reports'}
@@ -192,6 +197,7 @@ const SuperAdminDashboard = () => {
           {activeSection === 'bulk-registration' && <BulkRegistration />}
           {activeSection === 'content' && <ContentManagement />}
           {activeSection === 'grades' && <GradesManagement />}
+          {activeSection === 'flash-alerts' && <FlashMessageManager />} {/* <-- Render Component Here */}
           {activeSection === 'sessions' && <SessionManagement />}
           {activeSection === 'incidents' && <IncidentManagement />}
           {activeSection === 'analytics' && <SystemAnalytics />}
