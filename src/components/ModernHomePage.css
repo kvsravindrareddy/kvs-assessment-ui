@@ -358,8 +358,105 @@
 .innovation-subtitle strong {
   display: block;
   margin-top: 10px;
-  font-size: 1.2em;
+  font-size: 1.1em;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Hero Stats */
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 20px 30px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: scale(1.1);
+}
+
+.stat-number {
+  font-size: 3em;
+  font-weight: 900;
+  color: white;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 1em;
+  color: white;
+  margin-top: 8px;
+  font-weight: 700;
+  opacity: 0.95;
+}
+
+/* Feature Category Section */
+.feature-category-section {
+  margin-bottom: 60px;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 25px 30px;
+  background: linear-gradient(135deg, var(--category-color), var(--category-color)dd);
+  border-radius: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.category-header:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+
+.category-icon {
+  font-size: 3em;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.category-info {
+  flex: 1;
+}
+
+.category-title {
+  font-size: 2em;
+  color: white;
+  margin: 0 0 8px 0;
+  font-weight: 900;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.category-description {
+  font-size: 1.1em;
+  color: white;
+  margin: 0;
+  opacity: 0.95;
+  font-weight: 600;
+}
+
+.category-count {
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 1em;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 /* Innovation Grid */
@@ -367,7 +464,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 25px;
-  margin-bottom: 50px;
+  margin-bottom: 30px;
 }
 
 /* Innovation Cards */
@@ -507,8 +604,53 @@
   font-size: 1.3em;
   color: #636e72;
   font-weight: 700;
-  margin: 0 0 30px 0;
-  letter-spacing: 2px;
+  margin: 0 0 20px 0;
+  letter-spacing: 1px;
+}
+
+.cta-vision {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px 30px;
+  border-radius: 15px;
+  margin: 20px auto;
+  max-width: 700px;
+  border-left: 5px solid #667eea;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.cta-vision strong {
+  font-size: 1.3em;
+  color: #2d3436;
+  font-style: italic;
+  font-weight: 800;
+}
+
+.cta-features-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin: 25px auto 30px;
+  max-width: 800px;
+}
+
+.feature-pill {
+  background: white;
+  color: #2d3436;
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-size: 1em;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  border: 2px solid #667eea;
+}
+
+.feature-pill:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .cta-buttons {
@@ -612,6 +754,24 @@
     font-size: 3em;
   }
 
+  .category-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+
+  .category-icon {
+    font-size: 2.5em;
+  }
+
+  .category-title {
+    font-size: 1.6em;
+  }
+
+  .category-description {
+    font-size: 1em;
+  }
+
   .cta-title {
     font-size: 2em;
   }
@@ -623,6 +783,27 @@
   .cta-button {
     padding: 15px 30px;
     font-size: 1em;
+  }
+
+  .hero-stats {
+    gap: 20px;
+  }
+
+  .stat-item {
+    padding: 15px 20px;
+  }
+
+  .stat-number {
+    font-size: 2.5em;
+  }
+
+  .cta-features-list {
+    gap: 10px;
+  }
+
+  .feature-pill {
+    font-size: 0.9em;
+    padding: 10px 16px;
   }
 }
 
@@ -648,11 +829,46 @@
     font-size: 1.8em;
   }
 
+  .category-header {
+    padding: 20px;
+  }
+
+  .category-icon {
+    font-size: 2em;
+  }
+
+  .category-title {
+    font-size: 1.4em;
+  }
+
+  .category-count {
+    padding: 6px 15px;
+    font-size: 0.9em;
+  }
+
   .cta-buttons {
     flex-direction: column;
   }
 
   .cta-button {
     width: 100%;
+  }
+
+  .hero-stats {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .cta-vision strong {
+    font-size: 1.1em;
+  }
+
+  .cta-features-list {
+    flex-direction: column;
+  }
+
+  .feature-pill {
+    width: 100%;
+    text-align: center;
   }
 }

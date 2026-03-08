@@ -73,8 +73,9 @@ export const AuthProvider = ({ children }) => {
   // Traditional username/password login
   const login = async (credentials, isAdmin = false) => {
     try {
-      const endpoint = isAdmin ? '/auth/admin/login' : '/auth/login';
-      console.log('Login attempt:', { endpoint, username: credentials.username, isAdmin });
+      // Always use /auth/login - it works for all users including admin
+      const endpoint = '/auth/login';
+      console.log('Login attempt:', { endpoint, username: credentials.username, role: 'auto-detect' });
 
       const response = await axios.post(`http://localhost:9000${endpoint}`, credentials);
       console.log('Login response:', response.status, response.data);

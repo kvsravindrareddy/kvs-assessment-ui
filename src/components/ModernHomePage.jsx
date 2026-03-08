@@ -32,104 +32,280 @@ const ModernHomePage = ({ onNavigate, gradeData, onSubjectClick }) => {
     subjects: Object.keys(gradeData[grade] || {})
   }));
 
-  const revolutionaryFeatures = [
+  // Categorized Revolutionary Features
+  const featureCategories = [
     {
-      icon: '🧬',
-      title: 'AI Learning DNA',
-      desc: 'Personalized learning pathways that adapt to every student\'s unique style',
+      category: '🤖 AI-Powered Intelligence',
+      icon: '🤖',
       color: '#667eea',
-      badge: 'Revolutionary'
+      description: 'Advanced AI that learns, adapts, and grows with each student',
+      features: [
+        {
+          icon: '🧬',
+          title: 'AI Learning DNA',
+          desc: 'Learns your personality, interests, emotions - adapts like a real tutor who knows you',
+          color: '#667eea',
+          badge: 'Revolutionary'
+        },
+        {
+          icon: '❤️',
+          title: 'Live Emotional AI',
+          desc: 'Detects frustration, boredom, excitement - adjusts instantly like a caring teacher',
+          color: '#ef4444',
+          badge: 'Empathy AI'
+        },
+        {
+          icon: '🔮',
+          title: 'Future Gap Predictor',
+          desc: 'Predicts struggles 2-3 weeks before they happen - fixes problems before they exist',
+          color: '#ec4899',
+          badge: 'Predictive AI'
+        },
+        {
+          icon: '🔧',
+          title: 'Auto Concept Repair',
+          desc: 'Finds exactly what you missed and fixes it - no more "I don\'t get it"',
+          color: '#10b981',
+          badge: 'Auto-Fix'
+        },
+        {
+          icon: '🤖',
+          title: 'AI Study Buddy',
+          desc: 'Personal AI that grows with you K-12 - remembers everything about your journey',
+          color: '#8b5cf6',
+          badge: 'Always There'
+        },
+        {
+          icon: '🗣️',
+          title: 'Voice AI Conversation',
+          desc: 'Talk naturally with AI tutors - like having a friend who knows everything',
+          color: '#06b6d4',
+          badge: 'Voice AI'
+        }
+      ]
     },
     {
-      icon: '🔮',
-      title: 'Future Gap Predictor',
-      desc: 'Identifies learning gaps before they become problems',
+      category: '🎮 Gamified Learning',
+      icon: '🎮',
       color: '#ec4899',
-      badge: 'Predictive AI'
+      description: 'Learning so fun, kids choose it over video games',
+      features: [
+        {
+          icon: '🎮',
+          title: 'Learning Universe',
+          desc: 'AAA game quality - kids choose this over Fortnite and Roblox',
+          color: '#8b5cf6',
+          badge: 'Addictive'
+        },
+        {
+          icon: '🏆',
+          title: 'Team Learning Missions',
+          desc: 'Cooperative multiplayer - friends solve problems together, not compete',
+          color: '#f59e0b',
+          badge: 'Co-op Mode'
+        },
+        {
+          icon: '🌍',
+          title: 'AR Real-World Quests',
+          desc: 'Learn math at grocery stores, science at parks - education meets real life',
+          color: '#06b6d4',
+          badge: 'AR Powered'
+        },
+        {
+          icon: '📺',
+          title: 'Netflix Learning Series',
+          desc: 'Episodic stories kids wait for - cliffhangers that make them want to learn more',
+          color: '#e74c3c',
+          badge: 'Binge-Worthy'
+        },
+        {
+          icon: '🎵',
+          title: 'Multi-Sensory Learning',
+          desc: 'Music, movement, touch, sight - learn through all your senses',
+          color: '#9f7aea',
+          badge: 'Sensory'
+        }
+      ]
     },
     {
-      icon: '❤️',
-      title: 'Emotional Learning Detection',
-      desc: 'Real-time understanding of student engagement and emotional state',
-      color: '#ef4444',
-      badge: 'Live AI'
-    },
-    {
-      icon: '⚡',
-      title: 'Dynamic Question Engine',
-      desc: 'Questions that evolve based on student responses',
-      color: '#f59e0b',
-      badge: 'Smart'
-    },
-    {
-      icon: '🔧',
-      title: 'AI Concept Repair Mode',
-      desc: 'Automatically fixes knowledge gaps with targeted lessons',
-      color: '#10b981',
-      badge: 'Auto-Fix'
-    },
-    {
-      icon: '🗺️',
-      title: 'Knowledge Graph Visualization',
-      desc: 'See your learning journey as an interactive map',
-      color: '#06b6d4',
-      badge: 'Visual'
-    },
-    {
+      category: '👨‍👩‍👧 Family & Social',
       icon: '👨‍👩‍👧',
-      title: 'Parent Insight Engine',
-      desc: 'Simple, non-technical reports parents actually understand',
-      color: '#8b5cf6',
-      badge: 'Parent-Friendly'
-    },
-    {
-      icon: '🤝',
-      title: 'AI Peer Simulator',
-      desc: 'Practice with AI classmates anytime, anywhere',
-      color: '#9f7aea',
-      badge: 'Social AI'
-    },
-    {
-      icon: '🌟',
-      title: 'Life Skill Injection',
-      desc: 'Real-world skills embedded in every lesson',
-      color: '#f59e0b',
-      badge: 'Future Ready'
-    },
-    {
-      icon: '📡',
-      title: 'Offline Adaptive Mode',
-      desc: 'Full AI learning without internet connection',
       color: '#48bb78',
-      badge: 'Works Offline'
+      description: 'Strengthen family bonds while learning together',
+      features: [
+        {
+          icon: '👨‍👩‍👧',
+          title: 'Parent-Child Co-Learning',
+          desc: 'Learn together - bonding time that\'s educational AND fun for both',
+          color: '#9f7aea',
+          badge: 'Family Time'
+        },
+        {
+          icon: '📸',
+          title: 'Parent Moments Sharing',
+          desc: 'Parents receive child achievements as shareable moments for social media',
+          color: '#ec4899',
+          badge: 'Live Now ✓'
+        },
+        {
+          icon: '📱',
+          title: 'Parent Action Dashboard',
+          desc: 'Clear 5-minute actions parents can do today - not confusing data',
+          color: '#06b6d4',
+          badge: 'Actionable'
+        },
+        {
+          icon: '💬',
+          title: 'AI Peer Simulator',
+          desc: 'Practice explaining concepts to AI friends - deepens understanding',
+          color: '#48bb78',
+          badge: 'Social AI'
+        }
+      ]
     },
     {
-      icon: '📦',
-      title: 'Smart Printable Kits',
-      desc: 'AI-generated worksheets that continue learning offline',
-      color: '#ed8936',
-      badge: 'Print & Learn'
-    },
-    {
-      icon: '⚡',
-      title: 'Class Energy Meter',
-      desc: 'Measure classroom engagement in real-time',
-      color: '#ec4899',
-      badge: 'For Teachers'
-    },
-    {
+      category: '📊 Smart Assessment',
       icon: '📊',
-      title: 'Parent Action Dashboard',
-      desc: 'Clear actions parents can take to help their kids',
-      color: '#667eea',
-      badge: 'Actionable'
+      color: '#f59e0b',
+      description: 'Stress-free evaluation that celebrates growth',
+      features: [
+        {
+          icon: '📝',
+          title: 'AI Paper Correction',
+          desc: 'Scan handwritten homework with phone - instant AI grading with detailed feedback',
+          color: '#f59e0b',
+          badge: 'Coming Soon'
+        },
+        {
+          icon: '⚡',
+          title: 'Mistake-Powered Learning',
+          desc: 'Every error makes you smarter - no shame, just growth',
+          color: '#e74c3c',
+          badge: 'No Stress'
+        },
+        {
+          icon: '🎨',
+          title: 'Multiple Ways to Show',
+          desc: 'Draw, build, explain, perform - show knowledge YOUR way',
+          color: '#9f7aea',
+          badge: 'Creative'
+        },
+        {
+          icon: '📊',
+          title: 'Holistic Progress Tree',
+          desc: 'Track academic, emotional, physical, creative, social growth in one place',
+          color: '#48bb78',
+          badge: 'Whole Child'
+        },
+        {
+          icon: '🗺️',
+          title: 'Knowledge Galaxy Map',
+          desc: 'Visual universe of what you know - exploration not obligation',
+          color: '#8b5cf6',
+          badge: 'Beautiful'
+        }
+      ]
     },
     {
-      icon: '🎯',
-      title: 'Real-Life Skill Days',
-      desc: 'Weekly challenges connecting learning to real life',
+      category: '🌟 Life Skills & Character',
+      icon: '🌟',
       color: '#10b981',
-      badge: 'Practical'
+      description: 'Real-world skills and emotional intelligence development',
+      features: [
+        {
+          icon: '💰',
+          title: 'Financial Literacy Gaming',
+          desc: 'Budget, invest, save in simulation - real money skills through play',
+          color: '#f59e0b',
+          badge: 'Life Skills'
+        },
+        {
+          icon: '🎯',
+          title: 'Critical Thinking Lab',
+          desc: 'Solve real problems - climate, poverty, health - think like world changers',
+          color: '#10b981',
+          badge: 'Problem Solving'
+        },
+        {
+          icon: '🎭',
+          title: 'Character Development',
+          desc: 'Growth mindset, resilience, empathy tracked like academic progress',
+          color: '#667eea',
+          badge: 'EQ Focus'
+        },
+        {
+          icon: '🏗️',
+          title: 'Project-Based Learning',
+          desc: 'Build real things - apps, robots, businesses - learn by creating',
+          color: '#06b6d4',
+          badge: 'Build & Learn'
+        },
+        {
+          icon: '🌟',
+          title: 'Life Skill Days',
+          desc: 'Cooking math, cleaning science, shopping budgets - school meets real life',
+          color: '#ed8936',
+          badge: 'Practical'
+        },
+        {
+          icon: '🔬',
+          title: 'Curiosity Engine',
+          desc: 'Every answer sparks 3 new questions - endless wonder and discovery',
+          color: '#10b981',
+          badge: 'Wonder Driven'
+        }
+      ]
+    },
+    {
+      category: '🌍 Global & Accessible',
+      icon: '🌍',
+      color: '#06b6d4',
+      description: 'Learning for everyone, everywhere - online or offline',
+      features: [
+        {
+          icon: '📡',
+          title: 'Offline-First World',
+          desc: 'Download personalized content packages - full learning with zero internet',
+          color: '#667eea',
+          badge: 'Live Now ✓'
+        },
+        {
+          icon: '📦',
+          title: 'Smart Printable Worksheets',
+          desc: 'Auto-generated math worksheets (addition, subtraction, multiplication, division)',
+          color: '#ec4899',
+          badge: 'Live Now ✓'
+        },
+        {
+          icon: '🌐',
+          title: 'Hyper-Local Content',
+          desc: 'Math with local currency, science with local plants - culturally relevant',
+          color: '#10b981',
+          badge: 'Local First'
+        },
+        {
+          icon: '🌈',
+          title: 'Neurodiversity Adaptive',
+          desc: 'Perfect for ADHD, autism, dyslexia - learns how YOUR brain works best',
+          color: '#9f7aea',
+          badge: 'Inclusive'
+        }
+      ]
+    },
+    {
+      category: '👩‍🏫 Teacher Tools',
+      icon: '👩‍🏫',
+      color: '#8b5cf6',
+      description: 'Empowering teachers with AI-assisted insights',
+      features: [
+        {
+          icon: '⚡',
+          title: 'Class Energy Meter',
+          desc: 'Teachers see real-time engagement - adjust on the fly',
+          color: '#f59e0b',
+          badge: 'For Teachers'
+        }
+      ]
     }
   ];
 
@@ -237,38 +413,77 @@ const ModernHomePage = ({ onNavigate, gradeData, onSubjectClick }) => {
         {activeTab === 'our-innovation' && (
           <div className="tab-panel fade-in">
             <div className="innovation-hero">
-              <h2 className="innovation-title">🚀 Transforming Education Worldwide</h2>
+              <h2 className="innovation-title">🚀 The Future of Learning is HERE</h2>
               <p className="innovation-subtitle">
-                We're not just teaching—we're revolutionizing how children learn, think, and grow.
+                <strong>KiVO Learning:</strong> The platform kids CHOOSE over video games • Parents TRUST for whole-child development • Teachers EMBRACE as their AI co-teacher
                 <br />
-                <strong>Join us in changing the student world forever.</strong>
+                <strong>🌍 No other platform in the world combines gaming quality + emotional AI + family bonding + real-world skills + offline accessibility</strong>
               </p>
+              <div className="hero-stats">
+                <div className="stat-item">
+                  <div className="stat-number">28+</div>
+                  <div className="stat-label">Revolutionary Features</div>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-number">100%</div>
+                  <div className="stat-label">Works Offline</div>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-number">∞</div>
+                  <div className="stat-label">Personalized Paths</div>
+                </div>
+              </div>
             </div>
 
-            <div className="innovation-grid">
-              {revolutionaryFeatures.map((feature, index) => (
-                <div
-                  key={index}
-                  className="innovation-card"
-                  style={{ '--feature-color': feature.color }}
-                >
-                  <div className="innovation-badge">{feature.badge}</div>
-                  <div className="innovation-icon">{feature.icon}</div>
-                  <h3 className="innovation-card-title">{feature.title}</h3>
-                  <p className="innovation-card-desc">{feature.desc}</p>
-                  <div className="innovation-glow"></div>
+            {/* Categorized Features */}
+            {featureCategories.map((category, catIndex) => (
+              <div key={catIndex} className="feature-category-section">
+                <div className="category-header" style={{ '--category-color': category.color }}>
+                  <span className="category-icon">{category.icon}</span>
+                  <div className="category-info">
+                    <h3 className="category-title">{category.category}</h3>
+                    <p className="category-description">{category.description}</p>
+                  </div>
+                  <span className="category-count">{category.features.length} features</span>
                 </div>
-              ))}
-            </div>
+
+                <div className="innovation-grid">
+                  {category.features.map((feature, index) => (
+                    <div
+                      key={index}
+                      className="innovation-card"
+                      style={{ '--feature-color': feature.color }}
+                    >
+                      <div className="innovation-badge">{feature.badge}</div>
+                      <div className="innovation-icon">{feature.icon}</div>
+                      <h3 className="innovation-card-title">{feature.title}</h3>
+                      <p className="innovation-card-desc">{feature.desc}</p>
+                      <div className="innovation-glow"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
 
             <div className="innovation-cta">
-              <h3 className="cta-title">Ready to Transform Learning?</h3>
+              <h3 className="cta-title">Join the Learning Revolution</h3>
               <p className="cta-subtitle">
-                Technology • Education • Ethics • Life Skills
+                💡 Technology • 🎓 Education • 🌱 Ethics • 🌟 Life Skills • ❤️ Emotional Intelligence
               </p>
+              <div className="cta-vision">
+                <strong>"We're not building another learning platform. We're changing the student world."</strong>
+              </div>
+              <div className="cta-features-list">
+                <div className="feature-pill">✅ Kids choose it over games</div>
+                <div className="feature-pill">✅ Parents trust holistic development</div>
+                <div className="feature-pill">✅ Teachers love the AI assistance</div>
+                <div className="feature-pill">✅ Works 100% offline</div>
+                <div className="feature-pill">✅ Multiple user roles (Student, Parent, Teacher)</div>
+                <div className="feature-pill">✅ Free to start, affordable to continue</div>
+              </div>
               <div className="cta-buttons">
-                <button className="cta-button primary">Join as School</button>
-                <button className="cta-button secondary">Start Learning Free</button>
+                <button className="cta-button primary">🏫 Partner as School</button>
+                <button className="cta-button secondary">🎮 Start Free Adventure</button>
               </div>
             </div>
           </div>
