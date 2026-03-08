@@ -7,9 +7,15 @@ const SystemAnalytics = () => {
     const [logs, setLogs] = useState([]);
     const [isStreaming, setIsStreaming] = useState(false);
     const [trackingInfo, setTrackingInfo] = useState('');
-    
-    // State to track live IPs and Sessions
     const [activeSessions, setActiveSessions] = useState(new Map());
+    
+    // 🌟 NEW: State for real-time analytics
+    const [analyticsData, setAnalyticsData] = useState({
+        totalVisits: '0',
+        guestUsers: '0',
+        registeredUsers: '0',
+        subscribedUsers: '0'
+    });
 
     const logsEndRef = useRef(null);
     const abortControllerRef = useRef(null);
@@ -19,8 +25,28 @@ const SystemAnalytics = () => {
     }, [logs]);
 
     useEffect(() => {
-        return () => stopLogStream();
+        // Fetch analytics on load
+        fetchAnalytics();
+        // Set up an interval to refresh the top cards every 10 seconds
+        const interval = setInterval(fetchAnalytics, 10000);
+        return () => {
+            stopLogStream();
+            clearInterval(interval);
+        };
     }, []);
+
+    // 🌟 NEW: Fetch data from Gateway Redis
+    const fetchAnalytics = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get(`${CONFIG.development.GATEWAY_URL}/api/gateway/analytics/overview`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setAnalyticsData(res.data);
+        } catch (error) {
+            console.error("Failed to fetch analytics", error);
+        }
+    };
 
     const startLogStream = async () => {
         if (isStreaming) return;
@@ -62,7 +88,6 @@ const SystemAnalytics = () => {
                             return updatedLogs;
                         });
 
-                        // Parse the log to extract IP and User dynamically!
                         try {
                             const ipMatch = logData.match(/IP:\s*([^\s|]+)/);
                             const userMatch = logData.match(/User:\s*([^\s|]+)/);
@@ -90,15 +115,12 @@ const SystemAnalytics = () => {
                                 });
                             }
                         } catch (e) {
-                            console.error("Failed to parse log for session tracking", e);
+                            console.error("Failed to parse log", e);
                         }
                     }
                 });
             }
         } catch (error) {
-            if (error.name !== 'AbortError') {
-                console.error("Stream failed or disconnected", error);
-            }
             setIsStreaming(false);
         }
     };
@@ -111,126 +133,95 @@ const SystemAnalytics = () => {
         setIsStreaming(false);
     };
 
-    const blockIp = async (ip) => {
-        if (!window.confirm(`Are you sure you want to block traffic from IP: ${ip}?`)) return;
-        try {
-            const token = localStorage.getItem('token');
-            await axios.post(`${CONFIG.development.GATEWAY_URL}/admin-assessment/api/ip/block`, { ip }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            alert(`IP ${ip} has been successfully blocked.`);
-        } catch (error) {
-            alert('Failed to block IP. Check console.');
-        }
-    };
-
-    // 🌟 NEW: The Force Logout Function!
     const forceLogout = async (userEmail) => {
-        if (!userEmail || userEmail === 'GUEST' || userEmail === 'AUTH_USER') {
-            alert('Cannot forcefully log out an unknown user.');
-            return;
-        }
-        
-        if (!window.confirm(`⚠️ WARNING: Are you sure you want to instantly disconnect ${userEmail} from the platform?\n\nThey will be blocked from making any API requests for 24 hours unless they log in again.`)) return;
+        if (!userEmail || userEmail === 'GUEST' || userEmail === 'AUTH_USER') return;
+        if (!window.confirm(`⚠️ Kick ${userEmail} from the platform?`)) return;
         
         try {
             const token = localStorage.getItem('token');
-            // Calls the Gateway's new Redis Blacklist API
+            let myEmail = '';
+            if (token) myEmail = JSON.parse(atob(token.split('.')[1])).email;
+
             await axios.post(`${CONFIG.development.GATEWAY_URL}/api/gateway/sessions/logout?email=${encodeURIComponent(userEmail)}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            alert(`User ${userEmail} has been forcefully logged out. All their active requests will now be rejected.`);
+            alert(`User ${userEmail} disconnected.`);
             
+            if (userEmail === myEmail) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
         } catch (error) {
-            alert('Failed to force logout. Check console. Make sure your Gateway Redis controller is running.');
-            console.error(error);
+            alert('Failed to force logout.');
         }
     };
-
-    const fetchTrackingInfo = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`${CONFIG.development.GATEWAY_URL}/admin-assessment/api/track`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setTrackingInfo(response.data);
-        } catch (error) {
-            setTrackingInfo('Error fetching tracking info: ' + error.message);
-        }
-    };
-
-    const triggerHoneyPotDownload = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`${CONFIG.development.GATEWAY_URL}/admin-assessment/api/download`, {
-                headers: { Authorization: `Bearer ${token}` },
-                responseType: 'blob' 
-            });
-
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'security-report.txt'); 
-            document.body.appendChild(link);
-            link.click();
-            link.parentNode.removeChild(link);
-            window.URL.revokeObjectURL(url);
-            
-        } catch (error) {
-            alert('Failed to download security file.');
-        }
-    };
-
-    const clearLogs = () => setLogs([]);
 
     return (
         <div className="system-analytics">
-            <h3 className="section-title">
-                <span className="title-icon">📈</span>
-                System Analytics
-            </h3>
+            <div className="analytics-header">
+                <h3 className="section-title">
+                    <span className="title-icon">📈</span>
+                    System Analytics & Monitoring
+                </h3>
+                <span className="live-status-badge">🟢 System Online</span>
+            </div>
 
-            {/* Original Analytics Grid */}
+            {/* 🌟 NEW: Live Real-Time Gateway Analytics */}
             <div className="analytics-grid">
-                <div className="analytics-card">
-                    <h4>User Growth</h4>
-                    <div className="chart-placeholder"><span className="chart-icon">📊</span><p>User registration trends over time</p></div>
+                <div className="analytics-card metric-card">
+                    <div className="metric-icon blue">🌐</div>
+                    <div className="metric-data">
+                        <h4>{analyticsData.totalVisits}</h4>
+                        <p>Total Platform Requests</p>
+                        <span className="trend positive">↑ Live</span>
+                    </div>
                 </div>
-                <div className="analytics-card">
-                    <h4>Assessment Activity</h4>
-                    <div className="chart-placeholder"><span className="chart-icon">📝</span><p>Assessments created and completed</p></div>
+                <div className="analytics-card metric-card">
+                    <div className="metric-icon green">👤</div>
+                    <div className="metric-data">
+                        <h4>{analyticsData.registeredUsers}</h4>
+                        <p>Total Registered Users</p>
+                        <span className="trend neutral">Unique IPs</span>
+                    </div>
                 </div>
-                <div className="analytics-card">
-                    <h4>Engagement Metrics</h4>
-                    <div className="chart-placeholder"><span className="chart-icon">🎯</span><p>User engagement and activity levels</p></div>
+                <div className="analytics-card metric-card">
+                    <div className="metric-icon purple">⭐</div>
+                    <div className="metric-data">
+                        <h4>{analyticsData.subscribedUsers}</h4>
+                        <p>Premium Subscribers</p>
+                        <span className="trend positive">↑ Growing</span>
+                    </div>
                 </div>
-                <div className="analytics-card">
-                    <h4>Performance Trends</h4>
-                    <div className="chart-placeholder"><span className="chart-icon">📈</span><p>Average scores and completion rates</p></div>
+                <div className="analytics-card metric-card">
+                    <div className="metric-icon orange">👻</div>
+                    <div className="metric-data">
+                        <h4>{analyticsData.guestUsers}</h4>
+                        <p>Guest Interactions</p>
+                        <span className="trend negative">Unregistered</span>
+                    </div>
                 </div>
             </div>
 
             {/* Live System Logs Section */}
             <div className="live-logs-section">
                 <div className="logs-header-bar">
-                    <h4>Live System Traffic & Audit Logs</h4>
+                    <h4>Live Network Traffic & Audit Logs</h4>
                     <div className="header-actions">
                         <button className={`stream-btn ${isStreaming ? 'active' : ''}`} onClick={isStreaming ? stopLogStream : startLogStream}>
-                            {isStreaming ? '🛑 Stop Stream' : '▶️ Start Live Stream'}
+                            {isStreaming ? '🛑 Stop Capture' : '▶️ Start Packet Capture'}
                         </button>
-                        <button className="clear-btn" onClick={clearLogs}>🗑️ Clear</button>
+                        <button className="clear-btn" onClick={() => setLogs([])}>🗑️ Clear</button>
                     </div>
                 </div>
 
-                {/* Terminal Window */}
                 <div className="terminal-window">
                     <div className="terminal-header">
                         <span className="dot red"></span><span className="dot yellow"></span><span className="dot green"></span>
-                        <span className="terminal-title">admin-server@logs ~ /admin-assessment/api/logs/live</span>
+                        <span className="terminal-title">admin@kobs-gateway ~ /var/log/traffic</span>
                     </div>
                     <div className="terminal-body">
                         {logs.length === 0 ? (
-                            <div className="terminal-empty">Waiting for incoming traffic logs...</div>
+                            <div className="terminal-empty">Ready. Click 'Start Packet Capture' to view live traffic...</div>
                         ) : (
                             logs.map((log) => (
                                 <div key={log.id} className="log-entry">
@@ -243,40 +234,36 @@ const SystemAnalytics = () => {
                     </div>
                 </div>
 
-                {/* Active Sessions & IP Management Table */}
-                <div className="active-sessions-panel">
-                    <h4>📡 Active Client Sessions (Live Intersect)</h4>
-                    <p>Real-time extraction of active users and their IP addresses.</p>
-                    
+                {/* Active Sessions Table */}
+                <div className="active-sessions-panel" style={{marginTop: '20px'}}>
+                    <h4>📡 Real-Time Client Intercept</h4>
+                    <p>Live extraction of active users traversing the Gateway.</p>
                     <div className="table-responsive">
                         <table className="sessions-table">
                             <thead>
                                 <tr>
-                                    <th>IP Address</th>
-                                    <th>Identified User</th>
-                                    <th>Requests</th>
-                                    <th>Last Seen</th>
-                                    <th>Actions</th>
+                                    <th>Origin IP Address</th>
+                                    <th>Identity (JWT)</th>
+                                    <th>Request Volume</th>
+                                    <th>Last Packet Seen</th>
+                                    <th>Security Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {Array.from(activeSessions.values()).length === 0 ? (
-                                    <tr><td colSpan="5" className="text-center">No active sessions detected yet. Start the stream to capture IPs.</td></tr>
+                                    <tr><td colSpan="5" className="text-center" style={{padding: '20px'}}>No sessions trapped. Stream is inactive.</td></tr>
                                 ) : (
                                     Array.from(activeSessions.values()).sort((a,b) => b.requestCount - a.requestCount).map(session => (
                                         <tr key={session.ip}>
                                             <td className="ip-cell"><code>{session.ip}</code></td>
                                             <td className="user-cell">
-                                                {session.user === 'GUEST' ? <span className="badge badge-guest">Guest User</span> : <span className="badge badge-auth">{session.user}</span>}
+                                                {session.user === 'GUEST' ? <span className="badge badge-guest">Anonymous</span> : <span className="badge badge-auth">{session.user}</span>}
                                             </td>
-                                            <td>{session.requestCount}</td>
+                                            <td><strong>{session.requestCount}</strong> hits</td>
                                             <td>{session.lastSeen}</td>
                                             <td>
-                                                <button onClick={() => blockIp(session.ip)} className="btn-action-block">🚫 Block IP</button>
-                                                
-                                                {/* 🌟 NEW: Connected the Force Logout Button */}
                                                 {session.user !== 'GUEST' && session.user !== 'AUTH_USER' && (
-                                                    <button onClick={() => forceLogout(session.user)} className="btn-action-logout">⚠️ Force Logout</button>
+                                                    <button onClick={() => forceLogout(session.user)} className="btn-action-logout">⚠️ Kill Session</button>
                                                 )}
                                             </td>
                                         </tr>
@@ -284,24 +271,6 @@ const SystemAnalytics = () => {
                                 )}
                             </tbody>
                         </table>
-                    </div>
-                </div>
-
-                {/* Security Tools Panel */}
-                <div className="security-tools-panel">
-                    <h4>🛡️ Security & Tracking Tools</h4>
-                    <div className="tools-grid">
-                        <div className="tool-card">
-                            <h5>IP Tracker</h5>
-                            <p>Perform a reverse DNS lookup to track your current connection IP and Hostname.</p>
-                            <button onClick={fetchTrackingInfo} className="tool-btn">Track My Connection</button>
-                            {trackingInfo && <div className="tool-result"><code>{trackingInfo}</code></div>}
-                        </div>
-                        <div className="tool-card honeypot-card">
-                            <h5>Threat Analysis / Honeypot</h5>
-                            <p>Trigger a file download that executes a background port scan on the client machine.</p>
-                            <button onClick={triggerHoneyPotDownload} className="tool-btn danger">Trigger Security Download</button>
-                        </div>
                     </div>
                 </div>
             </div>
