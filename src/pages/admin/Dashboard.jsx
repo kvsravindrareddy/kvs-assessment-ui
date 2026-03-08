@@ -39,8 +39,8 @@ const Dashboard = () => {
     try {
       // Load all statistics in parallel
       const [questionsRes, storiesRes] = await Promise.all([
-        axios.get(`${config.ADMIN_BASE_URL}/listallquestions`),
-        axios.get(`${config.ADMIN_BASE_URL}/listAllStories`)
+        axios.get(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/listallquestions`),
+        axios.get(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/listAllStories`)
       ]);
 
       const questions = questionsRes.data || [];

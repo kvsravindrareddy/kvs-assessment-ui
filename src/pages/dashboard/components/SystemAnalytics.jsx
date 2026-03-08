@@ -8,7 +8,7 @@ const SystemAnalytics = () => {
     const [isStreaming, setIsStreaming] = useState(false);
     const [trackingInfo, setTrackingInfo] = useState('');
     
-    // 🌟 NEW: State to track live IPs and Sessions
+    // State to track live IPs and Sessions
     const [activeSessions, setActiveSessions] = useState(new Map());
 
     const logsEndRef = useRef(null);
@@ -62,8 +62,7 @@ const SystemAnalytics = () => {
                             return updatedLogs;
                         });
 
-                        // 🌟 NEW: Parse the log to extract IP and User dynamically!
-                        // Format expected: ... | IP: 192.168.1.1 | User: veera@kobs.com
+                        // Parse the log to extract IP and User dynamically!
                         try {
                             const ipMatch = logData.match(/IP:\s*([^\s|]+)/);
                             const userMatch = logData.match(/User:\s*([^\s|]+)/);
@@ -83,7 +82,7 @@ const SystemAnalytics = () => {
                                     
                                     newMap.set(ip, {
                                         ...existing,
-                                        user: user !== 'GUEST' ? user : existing.user, // Update guest to real user if they log in
+                                        user: user !== 'GUEST' ? user : existing.user, 
                                         lastSeen: new Date().toLocaleTimeString(),
                                         requestCount: existing.requestCount + 1
                                     });
@@ -112,18 +111,39 @@ const SystemAnalytics = () => {
         setIsStreaming(false);
     };
 
-    // 🌟 NEW: Connect to your IPManagementController
     const blockIp = async (ip) => {
         if (!window.confirm(`Are you sure you want to block traffic from IP: ${ip}?`)) return;
         try {
             const token = localStorage.getItem('token');
-            // Update this URL to match your actual IPManagementController endpoint
             await axios.post(`${CONFIG.development.GATEWAY_URL}/admin-assessment/api/ip/block`, { ip }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert(`IP ${ip} has been successfully blocked.`);
         } catch (error) {
             alert('Failed to block IP. Check console.');
+        }
+    };
+
+    // 🌟 NEW: The Force Logout Function!
+    const forceLogout = async (userEmail) => {
+        if (!userEmail || userEmail === 'GUEST' || userEmail === 'AUTH_USER') {
+            alert('Cannot forcefully log out an unknown user.');
+            return;
+        }
+        
+        if (!window.confirm(`⚠️ WARNING: Are you sure you want to instantly disconnect ${userEmail} from the platform?\n\nThey will be blocked from making any API requests for 24 hours unless they log in again.`)) return;
+        
+        try {
+            const token = localStorage.getItem('token');
+            // Calls the Gateway's new Redis Blacklist API
+            await axios.post(`${CONFIG.development.GATEWAY_URL}/api/gateway/sessions/logout?email=${encodeURIComponent(userEmail)}`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            alert(`User ${userEmail} has been forcefully logged out. All their active requests will now be rejected.`);
+            
+        } catch (error) {
+            alert('Failed to force logout. Check console. Make sure your Gateway Redis controller is running.');
+            console.error(error);
         }
     };
 
@@ -223,7 +243,7 @@ const SystemAnalytics = () => {
                     </div>
                 </div>
 
-                {/* 🌟 NEW: Active Sessions & IP Management Table */}
+                {/* Active Sessions & IP Management Table */}
                 <div className="active-sessions-panel">
                     <h4>📡 Active Client Sessions (Live Intersect)</h4>
                     <p>Real-time extraction of active users and their IP addresses.</p>
@@ -253,8 +273,10 @@ const SystemAnalytics = () => {
                                             <td>{session.lastSeen}</td>
                                             <td>
                                                 <button onClick={() => blockIp(session.ip)} className="btn-action-block">🚫 Block IP</button>
-                                                {session.user !== 'GUEST' && (
-                                                    <button onClick={() => alert('Force logout triggered (coming soon)')} className="btn-action-logout">⚠️ Force Logout</button>
+                                                
+                                                {/* 🌟 NEW: Connected the Force Logout Button */}
+                                                {session.user !== 'GUEST' && session.user !== 'AUTH_USER' && (
+                                                    <button onClick={() => forceLogout(session.user)} className="btn-action-logout">⚠️ Force Logout</button>
                                                 )}
                                             </td>
                                         </tr>

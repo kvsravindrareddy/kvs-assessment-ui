@@ -34,10 +34,10 @@ const SuperAdminDashboard = () => {
   const loadDashboardStatistics = async () => {
     try {
       const [usersRes, pendingRes, questionsRes, storiesRes] = await Promise.all([
-        axios.get('http://localhost:9000/auth/admin/users').catch(() => ({ data: [] })),
-        axios.get('http://localhost:9000/auth/admin/pending-users').catch(() => ({ data: [] })),
-        axios.get(`${config.ADMIN_BASE_URL}/listallquestions`).catch(() => ({ data: [] })),
-        axios.get(`${config.ADMIN_BASE_URL}/listAllStories`).catch(() => ({ data: [] }))
+        axios.get(`${config.ADMIN_BASE_URL}/auth/admin/users`).catch(() => ({ data: [] })),
+        axios.get(`${config.ADMIN_BASE_URL}/auth/admin/pending-users`).catch(() => ({ data: [] })),
+        axios.get(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/listallquestions`).catch(() => ({ data: [] })),
+        axios.get(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/listAllStories`).catch(() => ({ data: [] }))
       ]);
 
       const users = usersRes.data || [];

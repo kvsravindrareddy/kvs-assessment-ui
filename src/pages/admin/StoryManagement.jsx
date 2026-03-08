@@ -40,7 +40,7 @@ const StoryManagement = () => {
   const loadStories = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${config.ADMIN_BASE_URL}/listAllStories`);
+      const response = await axios.get(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/listAllStories`);
       setStories(response.data || []);
     } catch (error) {
       console.error('Error loading stories:', error);
