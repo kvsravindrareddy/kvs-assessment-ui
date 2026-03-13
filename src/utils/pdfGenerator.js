@@ -316,5 +316,173 @@ export const PDFGenerator = {
     const pdfBlob = doc.output('blob');
     const pdfUrl = URL.createObjectURL(pdfBlob);
     window.open(pdfUrl, '_blank');
+  },
+
+  /**
+   * Generate Custom Question Worksheet from Backend Questions
+   * Supports multiple choice questions with answer keys
+   */
+  generateCustomQuestionWorksheet(questions, options = {}) {
+    const doc = new jsPDF();
+    const {
+      title = 'Worksheet',
+      grade = '',
+      difficulty = '',
+      topic = '',
+      includeAnswers = false
+    } = options;
+
+    // Header
+    let subtitle = [];
+    if (grade) subtitle.push(`Grade: ${grade}`);
+    if (difficulty) subtitle.push(`Difficulty: ${difficulty}`);
+    if (topic) subtitle.push(`Topic: ${topic}`);
+
+    addHeader(
+      doc,
+      title,
+      includeAnswers ? `ANSWER KEY | ${subtitle.join(' | ')}` : subtitle.join(' | ')
+    );
+
+    let yPosition = 40;
+    const leftMargin = 15;
+    const rightMargin = 195;
+    const lineHeight = 6;
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    questions.forEach((question, index) => {
+      // Check if we need a new page
+      if (yPosition > pageHeight - 40) {
+        doc.addPage();
+        addHeader(doc, title, includeAnswers ? `ANSWER KEY | ${subtitle.join(' | ')}` : subtitle.join(' | '));
+        yPosition = 40;
+      }
+
+      // Question number and difficulty badge
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Q${index + 1}.`, leftMargin, yPosition);
+
+      // Difficulty badge
+      if (question.complexity) {
+        doc.setFontSize(8);
+        const complexityColor = {
+          EASY: [34, 197, 94],
+          MEDIUM: [234, 179, 8],
+          COMPLEX: [239, 68, 68]
+        };
+        const color = complexityColor[question.complexity] || [156, 163, 175];
+        doc.setFillColor(...color);
+        doc.setTextColor(255, 255, 255);
+        doc.roundedRect(rightMargin - 25, yPosition - 4, 25, 6, 1, 1, 'F');
+        doc.text(question.complexity, rightMargin - 12.5, yPosition, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+      }
+
+      yPosition += lineHeight;
+
+      // Question text
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      const questionText = question.question?.name || question.name || 'Question text not available';
+      const splitQuestion = doc.splitTextToSize(questionText, rightMargin - leftMargin - 5);
+
+      splitQuestion.forEach(line => {
+        if (yPosition > pageHeight - 40) {
+          doc.addPage();
+          addHeader(doc, title, includeAnswers ? `ANSWER KEY | ${subtitle.join(' | ')}` : subtitle.join(' | '));
+          yPosition = 40;
+        }
+        doc.text(line, leftMargin + 5, yPosition);
+        yPosition += lineHeight;
+      });
+
+      yPosition += 2;
+
+      // Options (if multiple choice)
+      if (question.question?.options || question.options) {
+        const options = question.question?.options || question.options;
+        const correctAnswer = question.answer?.values || question.correctAnswerKeys || [];
+
+        Object.entries(options).forEach(([key, value]) => {
+          if (yPosition > pageHeight - 40) {
+            doc.addPage();
+            addHeader(doc, title, includeAnswers ? `ANSWER KEY | ${subtitle.join(' | ')}` : subtitle.join(' | '));
+            yPosition = 40;
+          }
+
+          const isCorrect = includeAnswers && correctAnswer.includes(key);
+
+          if (isCorrect) {
+            doc.setFont(undefined, 'bold');
+            doc.setFillColor(220, 252, 231);
+            doc.rect(leftMargin + 5, yPosition - 4, rightMargin - leftMargin - 10, lineHeight, 'F');
+          } else {
+            doc.setFont(undefined, 'normal');
+          }
+
+          const optionText = `${key}) ${value}`;
+          const splitOption = doc.splitTextToSize(optionText, rightMargin - leftMargin - 15);
+
+          splitOption.forEach((line, idx) => {
+            if (yPosition > pageHeight - 40) {
+              doc.addPage();
+              addHeader(doc, title, includeAnswers ? `ANSWER KEY | ${subtitle.join(' | ')}` : subtitle.join(' | '));
+              yPosition = 40;
+            }
+            doc.text(line, leftMargin + 10, yPosition);
+            yPosition += lineHeight;
+          });
+
+          doc.setFont(undefined, 'normal');
+        });
+      }
+
+      // Answer section (if not showing answers)
+      if (!includeAnswers) {
+        yPosition += 2;
+        if (yPosition > pageHeight - 40) {
+          doc.addPage();
+          addHeader(doc, title, subtitle.join(' | '));
+          yPosition = 40;
+        }
+        doc.setFontSize(9);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Answer: _________________', leftMargin + 10, yPosition);
+        doc.setTextColor(0, 0, 0);
+        yPosition += lineHeight;
+      }
+
+      yPosition += 8; // Space between questions
+    });
+
+    // Add answer summary at the end if includeAnswers
+    if (includeAnswers) {
+      doc.addPage();
+      addHeader(doc, 'Answer Key Summary', subtitle.join(' | '));
+      yPosition = 40;
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Quick Reference:', leftMargin, yPosition);
+      yPosition += lineHeight + 2;
+
+      doc.setFont(undefined, 'normal');
+      questions.forEach((question, index) => {
+        if (yPosition > pageHeight - 40) {
+          doc.addPage();
+          addHeader(doc, 'Answer Key Summary', subtitle.join(' | '));
+          yPosition = 40;
+        }
+
+        const correctAnswer = question.answer?.values || question.correctAnswerKeys || [];
+        const answerText = correctAnswer.length > 0 ? correctAnswer.join(', ') : 'N/A';
+        doc.text(`Q${index + 1}: ${answerText}`, leftMargin + 5, yPosition);
+        yPosition += lineHeight;
+      });
+    }
+
+    addFooter(doc);
+    return doc;
   }
 };

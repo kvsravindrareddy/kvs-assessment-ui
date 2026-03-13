@@ -9,6 +9,7 @@ export default function WorksheetManager() {
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState('templates'); // 'templates', 'questions', 'stories'
     const [filters, setFilters] = useState({
         category: '',
         difficulty: '',
@@ -26,10 +27,25 @@ export default function WorksheetManager() {
     });
     const [statistics, setStatistics] = useState(null);
     const [showBulkModal, setShowBulkModal] = useState(false);
+    const [questionFilters, setQuestionFilters] = useState({
+        grade: 'I',
+        subject: 'Math',
+        topic: '',
+        difficulty: 'EASY',
+        count: 20,
+        worksheetType: 'RANDOM', // RANDOM or STATIC
+        includeAnswerKey: true
+    });
+    const [storyFilters, setStoryFilters] = useState({ grade: 'I', type: 'Reading', count: 5 });
+    const [loadedQuestions, setLoadedQuestions] = useState([]);
+    const [loadedStories, setLoadedStories] = useState([]);
+    const [responseTime, setResponseTime] = useState(null);
 
     const categories = getAllCategories();
     const difficulties = ['BEGINNER', 'EASY', 'MEDIUM', 'HARD', 'ADVANCED', 'EXPERT'];
     const grades = ['PRE_K', 'K', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+    const subjects = ['Math', 'English', 'Science', 'Social Studies', 'Reading'];
+    const storyTypes = ['Reading', 'Comprehension', 'Fiction', 'Non-Fiction'];
 
     useEffect(() => {
         fetchTemplates();
@@ -179,6 +195,105 @@ export default function WorksheetManager() {
         setShowForm(false);
     };
 
+    const loadQuestionsFromBackend = async () => {
+        setLoading(true);
+        const startTime = Date.now();
+
+        try {
+            const token = localStorage.getItem('token');
+
+            // Determine which endpoint to use based on filters
+            let endpoint = '';
+            let payload = {
+                grade: questionFilters.grade,
+                count: questionFilters.count,
+                randomize: questionFilters.worksheetType === 'RANDOM'
+            };
+
+            if (questionFilters.topic && questionFilters.topic.trim() !== '') {
+                // Use topic-based endpoint (most specific)
+                endpoint = `${CONFIG.development.ADMIN_API_URL}/v1/content-library/worksheets/load-by-topic`;
+                payload.topic = questionFilters.topic;
+                payload.difficulty = questionFilters.difficulty;
+            } else if (questionFilters.subject) {
+                // Use subject-based endpoint
+                endpoint = `${CONFIG.development.ADMIN_API_URL}/v1/content-library/worksheets/load-by-subject`;
+                payload.subject = questionFilters.subject;
+            } else {
+                // Use grade-only endpoint (fastest)
+                endpoint = `${CONFIG.development.ADMIN_API_URL}/v1/content-library/worksheets/load-by-grade`;
+            }
+
+            const response = await axios.post(endpoint, payload, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            const data = response.data;
+            const clientResponseTime = Date.now() - startTime;
+
+            if (data.success && data.questions) {
+                setLoadedQuestions(data.questions);
+                setResponseTime({
+                    server: data.responseTimeMs,
+                    client: clientResponseTime,
+                    total: clientResponseTime
+                });
+                alert(`✅ ${data.message}\n🚀 Client Total: ${clientResponseTime}ms\n⚡ Server Query: ${data.responseTimeMs}ms\n📊 Type: ${data.worksheetType}`);
+            } else {
+                alert('❌ No questions found matching the criteria');
+            }
+        } catch (error) {
+            console.error('Error loading questions:', error);
+            alert('❌ Failed to load questions: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadStoriesFromBackend = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.post(
+                `${CONFIG.development.ADMIN_API_URL}/assessment/loadstories`,
+                {
+                    grade: storyFilters.grade,
+                    type: storyFilters.type,
+                    count: storyFilters.count
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            // Parse the response (it returns a JSON string)
+            const stories = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+            setLoadedStories(Array.isArray(stories) ? stories : [stories]);
+            alert(`✅ Loaded ${Array.isArray(stories) ? stories.length : 1} stories successfully!`);
+        } catch (error) {
+            console.error('Error loading stories:', error);
+            alert('❌ Failed to load stories: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const generateQuestionWorksheet = () => {
+        if (loadedQuestions.length === 0) {
+            alert('Please load questions first');
+            return;
+        }
+        alert('Question worksheet PDF generation coming soon! Questions loaded: ' + loadedQuestions.length);
+        // TODO: Integrate with PDFGenerator to create worksheet from questions
+    };
+
+    const generateStoryWorksheet = () => {
+        if (loadedStories.length === 0) {
+            alert('Please load stories first');
+            return;
+        }
+        alert('Story worksheet PDF generation coming soon! Stories loaded: ' + loadedStories.length);
+        // TODO: Integrate with PDFGenerator to create worksheet from stories
+    };
+
     const renderCategoryForm = () => {
         const categoryDef = getCategoryById(formData.category);
         if (!categoryDef) return null;
@@ -300,8 +415,57 @@ export default function WorksheetManager() {
                 </div>
             </div>
 
+            {/* Tab Navigation */}
+            <div className="tab-navigation" style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '2px solid #e2e8f0', padding: '10px 0' }}>
+                <button
+                    className={`tab-btn ${activeTab === 'templates' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('templates')}
+                    style={{
+                        padding: '10px 20px',
+                        background: activeTab === 'templates' ? '#667eea' : 'white',
+                        color: activeTab === 'templates' ? 'white' : '#667eea',
+                        border: '2px solid #667eea',
+                        borderRadius: '8px',
+                        fontWeight: '600',
+                        cursor: 'pointer'
+                    }}
+                >
+                    📝 GPT Templates
+                </button>
+                <button
+                    className={`tab-btn ${activeTab === 'questions' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('questions')}
+                    style={{
+                        padding: '10px 20px',
+                        background: activeTab === 'questions' ? '#4facfe' : 'white',
+                        color: activeTab === 'questions' ? 'white' : '#4facfe',
+                        border: '2px solid #4facfe',
+                        borderRadius: '8px',
+                        fontWeight: '600',
+                        cursor: 'pointer'
+                    }}
+                >
+                    ❓ Load Questions
+                </button>
+                <button
+                    className={`tab-btn ${activeTab === 'stories' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('stories')}
+                    style={{
+                        padding: '10px 20px',
+                        background: activeTab === 'stories' ? '#f093fb' : 'white',
+                        color: activeTab === 'stories' ? 'white' : '#f093fb',
+                        border: '2px solid #f093fb',
+                        borderRadius: '8px',
+                        fontWeight: '600',
+                        cursor: 'pointer'
+                    }}
+                >
+                    📚 Load Stories
+                </button>
+            </div>
+
             {/* Statistics Dashboard */}
-            {statistics && (
+            {statistics && activeTab === 'templates' && (
                 <div className="statistics-dashboard">
                     <div className="stat-card">
                         <h3>📊 Total Templates</h3>
@@ -318,8 +482,274 @@ export default function WorksheetManager() {
                 </div>
             )}
 
+            {/* Questions Tab Content */}
+            {activeTab === 'questions' && (
+                <div className="questions-section">
+                    <div className="section-header" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '24px', borderRadius: '16px', marginBottom: '20px', boxShadow: '0 8px 20px rgba(79, 172, 254, 0.3)' }}>
+                        <h2 style={{ margin: '0 0 8px 0', fontSize: '1.8rem' }}>⚡ High-Performance Worksheet Generator</h2>
+                        <p style={{ margin: 0, fontSize: '1.1rem', opacity: 0.95 }}>🚀 Lightning-fast response times | 📊 Multiple filter options | 🎲 Static & Random modes</p>
+                    </div>
+
+                    <div className="filters-card" style={{ background: 'white', padding: '28px', borderRadius: '16px', marginBottom: '20px', boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)' }}>
+                        <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#2c3e50', fontSize: '1.3rem' }}>🎯 Filter Options</h3>
+
+                        {/* Row 1: Basic Filters */}
+                        <div className="form-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '20px' }}>
+                            <div className="form-group">
+                                <label style={{ fontWeight: '700', marginBottom: '10px', display: 'block', color: '#475569', fontSize: '0.95rem' }}>📚 Grade *</label>
+                                <select
+                                    value={questionFilters.grade}
+                                    onChange={(e) => setQuestionFilters(prev => ({ ...prev, grade: e.target.value }))}
+                                    style={{ width: '100%', padding: '12px 14px', border: '2px solid #cbd5e1', borderRadius: '10px', fontSize: '1rem', fontWeight: '500' }}
+                                >
+                                    {grades.map(g => <option key={g} value={g}>{g}</option>)}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label style={{ fontWeight: '700', marginBottom: '10px', display: 'block', color: '#475569', fontSize: '0.95rem' }}>📖 Subject</label>
+                                <select
+                                    value={questionFilters.subject}
+                                    onChange={(e) => setQuestionFilters(prev => ({ ...prev, subject: e.target.value }))}
+                                    style={{ width: '100%', padding: '12px 14px', border: '2px solid #cbd5e1', borderRadius: '10px', fontSize: '1rem', fontWeight: '500' }}
+                                >
+                                    {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label style={{ fontWeight: '700', marginBottom: '10px', display: 'block', color: '#475569', fontSize: '0.95rem' }}>📝 Topic/Chapter</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g., Algebra, Fractions"
+                                    value={questionFilters.topic}
+                                    onChange={(e) => setQuestionFilters(prev => ({ ...prev, topic: e.target.value }))}
+                                    style={{ width: '100%', padding: '12px 14px', border: '2px solid #cbd5e1', borderRadius: '10px', fontSize: '1rem' }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Row 2: Advanced Filters */}
+                        <div className="form-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '20px' }}>
+                            <div className="form-group">
+                                <label style={{ fontWeight: '700', marginBottom: '10px', display: 'block', color: '#475569', fontSize: '0.95rem' }}>🎚️ Difficulty</label>
+                                <select
+                                    value={questionFilters.difficulty}
+                                    onChange={(e) => setQuestionFilters(prev => ({ ...prev, difficulty: e.target.value }))}
+                                    style={{ width: '100%', padding: '12px 14px', border: '2px solid #cbd5e1', borderRadius: '10px', fontSize: '1rem', fontWeight: '500' }}
+                                >
+                                    <option value="EASY">Easy</option>
+                                    <option value="MEDIUM">Medium</option>
+                                    <option value="COMPLEX">Complex</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label style={{ fontWeight: '700', marginBottom: '10px', display: 'block', color: '#475569', fontSize: '0.95rem' }}>🔢 Question Count</label>
+                                <input
+                                    type="number"
+                                    value={questionFilters.count}
+                                    onChange={(e) => setQuestionFilters(prev => ({ ...prev, count: parseInt(e.target.value) }))}
+                                    min="5"
+                                    max="100"
+                                    style={{ width: '100%', padding: '12px 14px', border: '2px solid #cbd5e1', borderRadius: '10px', fontSize: '1rem', fontWeight: '500' }}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label style={{ fontWeight: '700', marginBottom: '10px', display: 'block', color: '#475569', fontSize: '0.95rem' }}>🎲 Worksheet Type</label>
+                                <select
+                                    value={questionFilters.worksheetType}
+                                    onChange={(e) => setQuestionFilters(prev => ({ ...prev, worksheetType: e.target.value }))}
+                                    style={{ width: '100%', padding: '12px 14px', border: '2px solid #cbd5e1', borderRadius: '10px', fontSize: '1rem', fontWeight: '600', background: questionFilters.worksheetType === 'RANDOM' ? '#f0fdf4' : '#fef3c7' }}
+                                >
+                                    <option value="RANDOM">🎲 Random (Different Each Time)</option>
+                                    <option value="STATIC">📌 Static (Fixed Questions)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Row 3: Options */}
+                        <div style={{ marginBottom: '20px', padding: '16px', background: '#f8fafc', borderRadius: '10px', border: '2px solid #e2e8f0' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', fontWeight: '600', color: '#475569' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={questionFilters.includeAnswerKey}
+                                    onChange={(e) => setQuestionFilters(prev => ({ ...prev, includeAnswerKey: e.target.checked }))}
+                                    style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                                />
+                                <span style={{ fontSize: '1.05rem' }}>✅ Include Answer Key (Separate PDF)</span>
+                            </label>
+                        </div>
+                        <button
+                            onClick={loadQuestionsFromBackend}
+                            disabled={loading}
+                            style={{
+                                width: '100%',
+                                padding: '18px 32px',
+                                background: loading ? '#94a3b8' : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '12px',
+                                fontSize: '1.15rem',
+                                fontWeight: '700',
+                                cursor: loading ? 'not-allowed' : 'pointer',
+                                boxShadow: loading ? 'none' : '0 6px 20px rgba(79, 172, 254, 0.4)',
+                                transition: 'all 0.3s ease',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '10px'
+                            }}
+                        >
+                            {loading ? (
+                                <>
+                                    <div style={{ width: '20px', height: '20px', border: '3px solid rgba(255,255,255,0.3)', borderTop: '3px solid white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+                                    Loading Questions...
+                                </>
+                            ) : (
+                                <>⚡ Load Questions</>
+                            )}
+                        </button>
+
+                        {/* Performance Info */}
+                        {responseTime && (
+                            <div style={{ marginTop: '16px', padding: '12px', background: '#f0fdf4', borderRadius: '10px', border: '2px solid #10b981' }}>
+                                <strong style={{ color: '#065f46' }}>🚀 Performance:</strong>
+                                <div style={{ marginTop: '8px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', fontSize: '0.9rem' }}>
+                                    <div><strong>Server Query:</strong> {responseTime.server}ms</div>
+                                    <div><strong>Client Total:</strong> {responseTime.client}ms</div>
+                                    <div><strong>Type:</strong> {questionFilters.worksheetType}</div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {loadedQuestions.length > 0 && (
+                        <div className="loaded-content" style={{ background: 'white', padding: '28px', borderRadius: '16px', boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <h3 style={{ margin: 0, color: '#10b981', fontSize: '1.5rem' }}>✅ Loaded {loadedQuestions.length} Questions</h3>
+                                <span style={{ padding: '8px 16px', background: questionFilters.worksheetType === 'RANDOM' ? '#dcfce7' : '#fef3c7', borderRadius: '20px', fontWeight: '600', fontSize: '0.9rem' }}>
+                                    {questionFilters.worksheetType === 'RANDOM' ? '🎲 Random' : '📌 Static'}
+                                </span>
+                            </div>
+                            <div style={{ maxHeight: '400px', overflowY: 'auto', marginBottom: '20px' }}>
+                                {loadedQuestions.map((q, idx) => (
+                                    <div key={idx} style={{ padding: '12px', background: '#f8fafc', marginBottom: '10px', borderRadius: '8px', borderLeft: '4px solid #4facfe' }}>
+                                        <strong>Q{idx + 1}:</strong> {q.question || q.text || JSON.stringify(q).substring(0, 100)}
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                onClick={generateQuestionWorksheet}
+                                style={{
+                                    padding: '14px 28px',
+                                    background: '#10b981',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                📄 Generate PDF Worksheet
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Stories Tab Content */}
+            {activeTab === 'stories' && (
+                <div className="stories-section">
+                    <div className="section-header" style={{ background: '#f093fb', color: 'white', padding: '20px', borderRadius: '12px', marginBottom: '20px' }}>
+                        <h2>📚 Load Existing Stories for Worksheets</h2>
+                        <p>Load stories from your story bank and generate PDF worksheets</p>
+                    </div>
+
+                    <div className="filters-card" style={{ background: 'white', padding: '24px', borderRadius: '12px', marginBottom: '20px', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)' }}>
+                        <div className="form-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                            <div className="form-group">
+                                <label style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>Grade</label>
+                                <select
+                                    value={storyFilters.grade}
+                                    onChange={(e) => setStoryFilters(prev => ({ ...prev, grade: e.target.value }))}
+                                    style={{ width: '100%', padding: '10px', border: '2px solid #e2e8f0', borderRadius: '8px' }}
+                                >
+                                    {grades.map(g => <option key={g} value={g}>{g}</option>)}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>Story Type</label>
+                                <select
+                                    value={storyFilters.type}
+                                    onChange={(e) => setStoryFilters(prev => ({ ...prev, type: e.target.value }))}
+                                    style={{ width: '100%', padding: '10px', border: '2px solid #e2e8f0', borderRadius: '8px' }}
+                                >
+                                    {storyTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>Story Count</label>
+                                <input
+                                    type="number"
+                                    value={storyFilters.count}
+                                    onChange={(e) => setStoryFilters(prev => ({ ...prev, count: parseInt(e.target.value) }))}
+                                    min="1"
+                                    max="20"
+                                    style={{ width: '100%', padding: '10px', border: '2px solid #e2e8f0', borderRadius: '8px' }}
+                                />
+                            </div>
+                        </div>
+                        <button
+                            onClick={loadStoriesFromBackend}
+                            disabled={loading}
+                            style={{
+                                marginTop: '20px',
+                                padding: '14px 28px',
+                                background: '#f093fb',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                cursor: loading ? 'not-allowed' : 'pointer',
+                                opacity: loading ? 0.6 : 1
+                            }}
+                        >
+                            {loading ? '⏳ Loading...' : '📥 Load Stories from Backend'}
+                        </button>
+                    </div>
+
+                    {loadedStories.length > 0 && (
+                        <div className="loaded-content" style={{ background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)' }}>
+                            <h3 style={{ marginBottom: '16px' }}>✅ Loaded {loadedStories.length} Stories</h3>
+                            <div style={{ maxHeight: '400px', overflowY: 'auto', marginBottom: '20px' }}>
+                                {loadedStories.map((s, idx) => (
+                                    <div key={idx} style={{ padding: '12px', background: '#f8fafc', marginBottom: '10px', borderRadius: '8px', borderLeft: '4px solid #f093fb' }}>
+                                        <strong>Story {idx + 1}:</strong> {s.title || s.name || JSON.stringify(s).substring(0, 100)}
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                onClick={generateStoryWorksheet}
+                                style={{
+                                    padding: '14px 28px',
+                                    background: '#10b981',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                📄 Generate PDF Worksheet
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Generate Form */}
-            {showForm && (
+            {showForm && activeTab === 'templates' && (
                 <div className="worksheet-form-card">
                     <h2>{editingId ? 'Edit Template' : '🤖 Generate Template with GPT-4'}</h2>
                     <form onSubmit={handleGenerateWithGPT}>
@@ -398,6 +828,7 @@ export default function WorksheetManager() {
             )}
 
             {/* Filters */}
+            {activeTab === 'templates' && (
             <div className="filters-bar">
                 <select
                     value={filters.category}
@@ -441,7 +872,10 @@ export default function WorksheetManager() {
                 />
             </div>
 
+            )}
+
             {/* Templates List */}
+            {activeTab === 'templates' && (
             <div className="templates-list">
                 <h2>All Templates ({templates.length})</h2>
                 {templates.length === 0 ? (
@@ -503,6 +937,7 @@ export default function WorksheetManager() {
                     </div>
                 )}
             </div>
+            )}
 
             {/* Bulk Generate Modal */}
             {showBulkModal && (

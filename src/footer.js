@@ -45,6 +45,9 @@ function Footer({onNavigate}) {
             <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Success Stories'); }} className="nav-link">
               <span className="link-icon">▸</span>Success
             </a>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Platform Stats'); }} className="nav-link">
+              <span className="link-icon">▸</span>Platform Stats
+            </a>
             <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('System Health'); }} className="nav-link">
               <span className="link-icon">▸</span>Health
             </a>
