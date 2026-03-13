@@ -430,7 +430,7 @@
   border-radius: 15px;
   font-size: 1.3em;
   font-weight: 700;
-  animation: bounceIn 0.5s ease-out;
+  /* animation: bounce removed - annoying */
 }
 
 .feedback.success {

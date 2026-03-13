@@ -13,7 +13,8 @@ import {
   XMarkIcon,
   BellIcon,
   MagnifyingGlassIcon,
-  MegaphoneIcon // <-- Added Icon for Flash Alerts
+  MegaphoneIcon, // <-- Added Icon for Flash Alerts
+  FolderIcon // <-- Added Icon for Content Library
 } from '@heroicons/react/24/outline';
 
 /**
@@ -29,11 +30,10 @@ const AdminLayout = () => {
 
   const menuItems = [
     { path: '/admin/dashboard', icon: HomeIcon, label: 'Dashboard', color: 'text-blue-600' },
-    { path: '/admin/questions', icon: QuestionMarkCircleIcon, label: 'Questions', color: 'text-purple-600' },
-    { path: '/admin/stories', icon: BookOpenIcon, label: 'Stories', color: 'text-green-600' },
+    { path: '/admin/content-library', icon: FolderIcon, label: 'Content Library', color: 'text-indigo-600' }, // <-- Content Library Hub
     { path: '/admin/users', icon: UserGroupIcon, label: 'Users', color: 'text-orange-600' },
     { path: '/admin/analytics', icon: ChartBarIcon, label: 'Analytics', color: 'text-pink-600' },
-    { path: '/admin/flash-messages', icon: MegaphoneIcon, label: 'Flash Alerts', color: 'text-yellow-500' }, // <-- Added Menu Item
+    { path: '/admin/flash-messages', icon: MegaphoneIcon, label: 'Flash Alerts', color: 'text-yellow-500' },
     { path: '/admin/settings', icon: Cog6ToothIcon, label: 'Settings', color: 'text-gray-600' },
   ];
 

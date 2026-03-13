@@ -241,7 +241,7 @@
 .game-icon {
   font-size: 5em;
   margin-bottom: 20px;
-  animation: bounce 2s ease-in-out infinite;
+  /* animation: bounce removed - annoying */
 }
 
 .game-card:hover .game-icon {

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns#">
+  <head>
+    <!-- Basic Meta Tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Primary Meta Tags - SEO Optimized -->
+    <title>KIVO Learning | AI-Powered K-12 Education Platform with Predictive Learning & Emotional Intelligence</title>
+    <meta name="title" content="KIVO Learning | AI-Powered K-12 Education Platform with Predictive Learning & Emotional Intelligence" />
+    <meta name="description" content="Revolutionary AI tutor platform that predicts learning gaps 2-3 weeks early. Features emotional AI, gamified learning, 5000+ questions, AI worksheet generator, and lifetime study buddy. Perfect for K-12 students, teachers, and parents. Free trial available!" />
+    <meta name="keywords" content="AI tutor, K-12 learning platform, predictive learning, emotional AI, educational games, math assessment, reading comprehension, worksheet generator, online learning, homework help, auto-grading, student progress tracking, parent dashboard, teacher tools, edtech software, gamified education, life skills learning, STEM education, Common Core, CBSE learning, personalized learning" />
+    <meta name="author" content="KIVO Learning International" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="language" content="English" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="rating" content="General" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://kivolearning.com/" />
+
+    <!-- Open Graph / Facebook Meta Tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://kivolearning.com/" />
+    <meta property="og:site_name" content="KIVO Learning" />
+    <meta property="og:title" content="KIVO Learning | AI Tutor That Predicts Learning Gaps Before They Happen" />
+    <meta property="og:description" content="The only AI learning platform that predicts struggles 2-3 weeks early. With emotional intelligence, gamified lessons, and lifetime AI study buddy. Transform your child's learning journey. Try free!" />
+    <meta property="og:image" content="https://kivolearning.com/kivo-og-image.png" />
+    <meta property="og:image:secure_url" content="https://kivolearning.com/kivo-og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="KIVO Learning - AI-Powered Education Platform" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="fb:app_id" content="YOUR_FACEBOOK_APP_ID" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@KIVOLearning" />
+    <meta name="twitter:creator" content="@KIVOLearning" />
+    <meta name="twitter:url" content="https://kivolearning.com/" />
+    <meta name="twitter:title" content="KIVO Learning | AI Tutor with Predictive Learning & Emotional Intelligence" />
+    <meta name="twitter:description" content="Revolutionary AI platform that predicts learning gaps weeks early. Emotional AI adapts to your child's needs. 5000+ questions, games kids love, instant parent moments. Start free trial!" />
+    <meta name="twitter:image" content="https://kivolearning.com/kivo-twitter-card.png" />
+    <meta name="twitter:image:alt" content="KIVO Learning Platform Interface" />
+
+    <!-- Additional Social Meta Tags -->
+    <meta property="og:phone_number" content="+1-XXX-XXX-XXXX" />
+    <meta property="og:email" content="support@kivolearning.com" />
+    <meta property="og:latitude" content="YOUR_LATITUDE" />
+    <meta property="og:longitude" content="YOUR_LONGITUDE" />
+    <meta property="og:street-address" content="YOUR_STREET_ADDRESS" />
+    <meta property="og:locality" content="YOUR_CITY" />
+    <meta property="og:region" content="YOUR_STATE" />
+    <meta property="og:postal-code" content="YOUR_ZIP" />
+    <meta property="og:country-name" content="United States" />
+
+    <!-- Mobile Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="KIVO Learning" />
+    <meta name="application-name" content="KIVO Learning" />
+    <meta name="msapplication-TileColor" content="#667eea" />
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png" />
+    <meta name="theme-color" content="#667eea" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" href="/kivo-logo.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+    <!-- Preconnect to External Resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.google-analytics.com" />
+
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+Bhai+2:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Structured Data (JSON-LD) - Educational Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EducationalOrganization",
+      "@id": "https://kivolearning.com/#organization",
+      "name": "KIVO Learning International",
+      "alternateName": "KIVO Learning",
+      "url": "https://kivolearning.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://kivolearning.com/kivo-logo.png",
+        "width": 512,
+        "height": 512
+      },
+      "image": "https://kivolearning.com/kivo-og-image.png",
+      "description": "Revolutionary AI-powered K-12 education platform with predictive learning gap detection, emotional intelligence, and gamified learning. The first platform to predict learning struggles 2-3 weeks before they happen.",
+      "email": "support@kivolearning.com",
+      "telephone": "+1-XXX-XXX-XXXX",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "YOUR STREET ADDRESS",
+        "addressLocality": "YOUR CITY",
+        "addressRegion": "YOUR STATE",
+        "postalCode": "YOUR ZIP",
+        "addressCountry": "US"
+      },
+      "sameAs": [
+        "https://facebook.com/KIVOLearning",
+        "https://twitter.com/KIVOLearning",
+        "https://instagram.com/KIVOLearning",
+        "https://linkedin.com/company/kivo-learning",
+        "https://youtube.com/@KIVOLearning"
+      ],
+      "founder": {
+        "@type": "Person",
+        "name": "FOUNDER NAME"
+      },
+      "foundingDate": "2024",
+      "areaServed": "Worldwide",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Learning Programs",
+        "itemListElement": [
+          {
+            "@type": "OfferCatalog",
+            "name": "Free Forever Plan",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Course",
+                  "name": "Basic K-12 Learning",
+                  "description": "100 questions/month, 7 free games, basic progress tracking",
+                  "provider": {
+                    "@type": "EducationalOrganization",
+                    "name": "KIVO Learning"
+                  }
+                },
+                "price": "0",
+                "priceCurrency": "USD"
+              }
+            ]
+          },
+          {
+            "@type": "OfferCatalog",
+            "name": "Premium Plan",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Course",
+                  "name": "Premium K-12 Learning with AI",
+                  "description": "Unlimited AI tutor, 5000+ questions, premium games, predictive learning",
+                  "provider": {
+                    "@type": "EducationalOrganization",
+                    "name": "KIVO Learning"
+                  }
+                },
+                "price": "9.99",
+                "priceCurrency": "USD",
+                "billingDuration": "P1M"
+              }
+            ]
+          },
+          {
+            "@type": "OfferCatalog",
+            "name": "Family Plan",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Course",
+                  "name": "Family Learning (Up to 6 Kids)",
+                  "description": "All premium features for entire family, co-learning activities",
+                  "provider": {
+                    "@type": "EducationalOrganization",
+                    "name": "KIVO Learning"
+                  }
+                },
+                "price": "19.99",
+                "priceCurrency": "USD",
+                "billingDuration": "P1M"
+              }
+            ]
+          }
+        ]
+      },
+      "makesOffer": [
+        {
+          "@type": "Offer",
+          "name": "Free 7-Day Trial",
+          "description": "Try all premium features free for 7 days",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Structured Data - WebApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "KIVO Learning Platform",
+      "url": "https://kivolearning.com",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "50000",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "featureList": [
+        "AI-Powered Predictive Learning",
+        "Emotional Intelligence Detection",
+        "5000+ Assessment Questions",
+        "AI Worksheet Generator",
+        "12 Educational Games",
+        "1200+ Reading Stories",
+        "Auto-Grading System",
+        "Parent Dashboard",
+        "Teacher Tools",
+        "Progress Tracking",
+        "Offline Mode",
+        "Multi-Device Sync"
+      ],
+      "screenshot": "https://kivolearning.com/app-screenshot.png",
+      "softwareVersion": "1.0.0",
+      "releaseNotes": "Revolutionary AI tutor with predictive learning gap detection"
+    }
+    </script>
+
+    <!-- Structured Data - FAQ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What makes KIVO Learning different from other education platforms?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "KIVO is the only platform with predictive AI that identifies learning gaps 2-3 weeks before they happen. It features emotional intelligence that adapts to your child's feelings in real-time, a lifetime AI study buddy that grows with them K-12, and AAA-quality games kids choose over Fortnite."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does predictive learning work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Our breakthrough AI analyzes learning patterns, progress speed, mistake types, and engagement levels to predict when a student will struggle with upcoming concepts 2-3 weeks in advance. This allows proactive intervention before problems occur."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What grade levels does KIVO support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "KIVO supports Pre-K through Grade 12 (K-12) with comprehensive coverage of Math, Science, English, and Reading. Our AI study buddy grows with your child throughout their entire school journey."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is there a free trial?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! KIVO offers a 7-day free trial of all premium features. We also have a Forever Free plan with 100 questions/month and 7 educational games at no cost ever."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can parents track their child's progress?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolutely! Parents get a comprehensive dashboard with real-time progress tracking, achievement notifications, shareable social media moments, and clear 5-minute daily action items. Track academic, emotional, social, and creative development."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does KIVO work for homeschooling?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! KIVO is perfect for homeschooling with comprehensive K-12 curriculum, Common Core and CBSE alignment, parent co-learning activities, printable worksheets, and flexible pacing. Many homeschool families use KIVO as their primary platform."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What devices does KIVO work on?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "KIVO works on all devices - computers, tablets, smartphones (iOS and Android), and as a Progressive Web App that can be installed on any device. All progress syncs across devices with offline mode support."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does the AI worksheet generator work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Our GPT-4 powered system generates unlimited custom worksheets across 20+ categories covering K-12 math. Teachers and parents can create personalized worksheets instantly, customize difficulty, and generate PDFs client-side for free at scale."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Structured Data - BreadcrumbList (will be dynamically updated per page) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://kivolearning.com/"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Google Analytics (replace with your tracking ID) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+
+    <!-- Google Tag Manager (optional - replace with your GTM ID) -->
+    <!--
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
+    -->
+
+    <!-- Microsoft Clarity (optional - for user behavior analytics) -->
+    <!--
+    <script type="text/javascript">
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "XXXXXXXXX");
+    </script>
+    -->
+
+    <!-- Facebook Pixel (optional) -->
+    <!--
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', 'YOUR_PIXEL_ID');
+      fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID&ev=PageView&noscript=1"
+    /></noscript>
+    -->
+
+  </head>
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <!--
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    -->
+
+    <noscript>
+      <div style="padding: 20px; text-align: center; font-family: sans-serif;">
+        <h1>KIVO Learning - AI-Powered Education Platform</h1>
+        <p>You need to enable JavaScript to run this app.</p>
+        <p>KIVO Learning is a revolutionary AI-powered K-12 education platform that predicts learning gaps before they happen, with emotional intelligence and lifetime AI study buddy.</p>
+        <p>Please enable JavaScript in your browser settings to experience the full platform.</p>
+      </div>
+    </noscript>
+
+    <div id="root"></div>
+
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+              console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>

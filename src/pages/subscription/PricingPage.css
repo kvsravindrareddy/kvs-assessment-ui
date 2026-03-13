@@ -145,7 +145,7 @@
 .plan-icon {
   font-size: 56px;
   margin-bottom: 16px;
-  animation: bounce 2s ease-in-out infinite;
+  /* animation: bounce removed - annoying */
 }
 
 @keyframes bounce {

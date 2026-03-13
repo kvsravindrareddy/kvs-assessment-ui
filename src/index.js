@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import './index.css';
 import './css/mobile-responsive.css';
+import './css/scroll-fix.css';
 import { router } from './router';
 import { AuthProvider } from './context/AuthContext';
 import reportWebVitals from './reportWebVitals';

@@ -267,7 +267,7 @@
 .math-icon-large {
   font-size: 4rem;
   margin-bottom: 16px;
-  animation: bounce-icon 2s ease-in-out infinite;
+  /* animation: bounce removed - annoying */
 }
 
 @keyframes bounce-icon {

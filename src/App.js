@@ -7,6 +7,18 @@ import { getLocation } from './utils/location';
 import Contactus from './pages/admin/Contactus';
 import AboutUs from './pages/admin/AboutUs';
 import Subscribe from './pages/admin/Subscribe';
+import PrivacyPolicy from './pages/admin/PrivacyPolicy';
+import TermsOfService from './pages/admin/TermsOfService';
+import OurInnovation from './pages/admin/OurInnovation';
+import HowItWorks from './pages/admin/HowItWorks';
+import FAQ from './pages/admin/FAQ';
+import SuccessStories from './pages/admin/SuccessStories';
+import PlatformStats from './pages/admin/PlatformStats';
+import SystemHealth from './pages/admin/SystemHealth';
+import Leaderboard from './pages/admin/Leaderboard';
+import Rewards from './pages/admin/Rewards';
+import IdeaHub from './pages/admin/IdeaHub';
+import ReportBug from './pages/admin/ReportBug';
 import AIHub from './pages/ai/AIHub';
 import Footer from './footer';
 import EarlyEducation from './components/EarlyEducation';
@@ -25,6 +37,7 @@ import UnifiedDashboard from './pages/dashboard/UnifiedDashboard';
 import PricingPage from './pages/subscription/PricingPage';
 import UsageIndicator from './components/UsageIndicator';
 import ErrorReportButton from './components/ErrorReportButton';
+import IdeaSubmitButton from './components/IdeaSubmitButton';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 // NEW: Import the beautiful Assessments Hub
@@ -162,7 +175,7 @@ function AppContent() {
       <div className="header">
         <div className="brand-section">
           <div className="logo-container">
-            <img src={kivoLogo} alt="KiVO Learning" className="logo-image" style={{height: '60px', width: 'auto', backgroundColor: 'transparent', border: 'none'}} />
+            <img src={kivoLogo} alt="KiVO Learning" className="logo-image" style={{maxWidth: '300px', marginBottom: '1rem', backgroundColor: 'transparent', border: 'none'}} />
           </div>
         </div>
         <div className="welcome-message">
@@ -337,6 +350,27 @@ function AppContent() {
         </div>
       )}
 
+      {/* Modern Breadcrumb Navigation for Dashboard */}
+      {activeSection === 'Dashboard' && (
+        <div className="breadcrumb-nav">
+          <button
+            className="breadcrumb-item"
+            onClick={() => {
+              setActiveSection('Home');
+              navigate('/');
+            }}
+          >
+            <span className="breadcrumb-icon">🏠</span>
+            <span>Home</span>
+          </button>
+          <span className="breadcrumb-separator">›</span>
+          <span className="breadcrumb-item active">
+            <span className="breadcrumb-icon">📊</span>
+            <span>Dashboard</span>
+          </span>
+        </div>
+      )}
+
       {showStudentNav && activeSection !== 'Dashboard' && (
         <div className="student-nav-wrapper">
           <nav className="flat-topnav">
@@ -387,6 +421,18 @@ function AppContent() {
       {activeSection === 'Subscribe' && <Subscribe />}
       {activeSection === 'Contact' && <Contactus />}
       {activeSection === 'About Us' && <AboutUs />}
+      {activeSection === 'Our Innovation' && <OurInnovation />}
+      {activeSection === 'How It Works' && <HowItWorks />}
+      {activeSection === 'FAQ' && <FAQ />}
+      {activeSection === 'Success Stories' && <SuccessStories />}
+      {activeSection === 'Platform Stats' && <PlatformStats />}
+      {activeSection === 'System Health' && <SystemHealth />}
+      {activeSection === 'Leaderboard' && <Leaderboard />}
+      {activeSection === 'Rewards' && <Rewards />}
+      {activeSection === 'Idea Hub' && <IdeaHub />}
+      {activeSection === 'Report Bug' && <ReportBug />}
+      {activeSection === 'Privacy' && <PrivacyPolicy />}
+      {activeSection === 'Terms' && <TermsOfService />}
       {activeSection === 'AssessmentFlow' && (
         <AssessmentFlow preSelectedCategory={selectedGrade} preSelectedType={selectedSubject} audioEnabled={audioEnabled} />
       )}
@@ -432,6 +478,9 @@ function AppContent() {
 
       {/* Floating Error Report Button - Always visible */}
       <ErrorReportButton />
+
+      {/* Floating Idea Submit Button - Always visible */}
+      <IdeaSubmitButton />
     </div>
   );
 }

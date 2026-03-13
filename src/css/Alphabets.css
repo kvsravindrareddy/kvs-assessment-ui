@@ -163,7 +163,7 @@
 .word-emoji {
   font-size: 3em;
   margin: 15px 0;
-  animation: bounce 2s ease-in-out infinite;
+  /* animation: bounce removed - annoying */
 }
 
 .alphabet-card:hover .word-emoji {

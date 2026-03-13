@@ -90,7 +90,7 @@
     top: -5px;
     right: -5px;
     font-size: 1.2rem;
-    animation: bounce 1s infinite;
+    /* animation: bounce removed - annoying */
 }
 
 @keyframes bounce {

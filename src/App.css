@@ -98,21 +98,17 @@ body {
   align-items: center;
   gap: 12px;
   padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 50px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
+  /* Removed background egg box as requested */
   cursor: pointer;
 }
 
 .logo-container:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  /* Removed all hover effects and animations as requested */
 }
 
 .logo-icon {
   font-size: 32px;
-  animation: bookFlip 3s ease-in-out infinite;
+  /* Removed bookFlip animation as requested */
 }
 
 @keyframes bookFlip {
@@ -758,6 +754,61 @@ body {
 @keyframes sparkle {
   0%, 100% { transform: translateX(-50%) scale(1) rotate(0deg); opacity: 0.7; }
   50% { transform: translateX(-50%) scale(1.2) rotate(180deg); opacity: 1; }
+}
+
+/* ===========================
+   MODERN BREADCRUMB NAVIGATION
+   =========================== */
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 40px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.breadcrumb-item:not(.active):hover {
+  background: #f3f4f6;
+  color: #1f2937;
+  transform: translateY(-1px);
+}
+
+.breadcrumb-item.active {
+  color: #667eea;
+  cursor: default;
+  background: #eef2ff;
+  border: 2px solid #667eea;
+}
+
+.breadcrumb-icon {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-separator {
+  font-size: 20px;
+  color: #d1d5db;
+  font-weight: 300;
 }
 
 .nav-item {

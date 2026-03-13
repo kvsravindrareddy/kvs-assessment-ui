@@ -10,7 +10,8 @@ import {
   ArrowTrendingUpIcon,
   ClockIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
+  FolderIcon
 } from '@heroicons/react/24/outline';
 
 /**
@@ -223,7 +224,15 @@ const Dashboard = () => {
       {/* Quick Actions */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg p-8 text-white">
         <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <button
+            onClick={() => navigate('/admin/content-library')}
+            className="bg-white text-gray-900 rounded-lg p-4 hover:shadow-lg transition-shadow text-left"
+          >
+            <FolderIcon className="w-8 h-8 text-indigo-600 mb-2" />
+            <h3 className="font-semibold">Content Library</h3>
+            <p className="text-sm text-gray-600 mt-1">Manage questions, stories & worksheets</p>
+          </button>
           <button
             onClick={() => navigate('/admin/questions')}
             className="bg-white text-gray-900 rounded-lg p-4 hover:shadow-lg transition-shadow text-left"

@@ -17,23 +17,66 @@ function Footer({onNavigate}) {
           </div>
         </div>
 
-        {/* Ultra-Minimal Navigation */}
-        <nav className="footer-nav">
-          <a href="#" onClick={() => onNavigate('Home')} className="nav-link">
-            <span className="link-icon">▸</span>Home
-          </a>
-          <a href="#" onClick={() => onNavigate('Reading')} className="nav-link">
-            <span className="link-icon">▸</span>Reading
-          </a>
-          <a href="#" onClick={() => onNavigate('AI')} className="nav-link">
-            <span className="link-icon">▸</span>AI Hub
-          </a>
-          <a href="#" onClick={() => onNavigate('About Us')} className="nav-link">
-            <span className="link-icon">▸</span>About
-          </a>
-          <a href="#" onClick={() => onNavigate('Contact')} className="nav-link">
-            <span className="link-icon">▸</span>Contact
-          </a>
+        {/* Organized Navigation Grid */}
+        <nav className="footer-nav-grid">
+          {/* Column 1: Company */}
+          <div className="footer-nav-column">
+            <h4 className="footer-nav-title">Company</h4>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('About Us'); }} className="nav-link">
+              <span className="link-icon">▸</span>About
+            </a>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Our Innovation'); }} className="nav-link">
+              <span className="link-icon">▸</span>Innovation
+            </a>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Contact'); }} className="nav-link">
+              <span className="link-icon">▸</span>Contact
+            </a>
+          </div>
+
+          {/* Column 2: Resources */}
+          <div className="footer-nav-column">
+            <h4 className="footer-nav-title">Resources</h4>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('How It Works'); }} className="nav-link">
+              <span className="link-icon">▸</span>How It Works
+            </a>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('FAQ'); }} className="nav-link">
+              <span className="link-icon">▸</span>FAQ
+            </a>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Success Stories'); }} className="nav-link">
+              <span className="link-icon">▸</span>Success
+            </a>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('System Health'); }} className="nav-link">
+              <span className="link-icon">▸</span>Health
+            </a>
+          </div>
+
+          {/* Column 3: Platform */}
+          <div className="footer-nav-column">
+            <h4 className="footer-nav-title">Platform</h4>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Home'); }} className="nav-link">
+              <span className="link-icon">▸</span>Home
+            </a>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Pricing'); }} className="nav-link">
+              <span className="link-icon">▸</span>Pricing
+            </a>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Leaderboard'); }} className="nav-link">
+              <span className="link-icon">▸</span>Leaderboard
+            </a>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Rewards'); }} className="nav-link">
+              <span className="link-icon">▸</span>Rewards
+            </a>
+          </div>
+
+          {/* Column 4: Community */}
+          <div className="footer-nav-column">
+            <h4 className="footer-nav-title">Community</h4>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Idea Hub'); }} className="nav-link">
+              <span className="link-icon">▸</span>Idea Hub
+            </a>
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Report Bug'); }} className="nav-link">
+              <span className="link-icon">▸</span>Report Bug
+            </a>
+          </div>
         </nav>
 
         {/* Futuristic Social Links */}
@@ -54,11 +97,11 @@ function Footer({onNavigate}) {
 
         {/* Minimalist Legal */}
         <div className="footer-legal">
-          <a href="#" onClick={(e) => { e.preventDefault(); alert('Privacy Policy'); }}>Privacy</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Privacy'); }}>Privacy</a>
           <span className="legal-dot">•</span>
-          <a href="#" onClick={(e) => { e.preventDefault(); alert('Terms'); }}>Terms</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Terms'); }}>Terms</a>
           <span className="legal-dot">•</span>
-          <span className="copyright">© 2025 Kobyte</span>
+          <span className="copyright">© 2026 KiVO Learning International</span>
         </div>
       </div>
 

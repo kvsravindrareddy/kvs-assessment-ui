@@ -214,7 +214,7 @@
   font-size: 1.4em;
   font-weight: 700;
   text-align: center;
-  animation: bounceIn 0.5s ease-out;
+  /* animation: bounce removed - annoying */
 }
 
 .feedback-message.success {

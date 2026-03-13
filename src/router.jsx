@@ -21,6 +21,11 @@ import UsersManagement from './pages/admin/UsersManagement';
 import Analytics from './pages/admin/Analytics';
 import Settings from './pages/admin/Settings';
 import FlashMessageManager from './pages/admin/FlashMessageManager';
+import ContentLibrary from './pages/admin/ContentLibrary';
+import WorksheetManager from './pages/admin/WorksheetManager';
+import AboutUs from './pages/admin/AboutUs';
+import PrivacyPolicy from './pages/admin/PrivacyPolicy';
+import TermsOfService from './pages/admin/TermsOfService';
 
 // Landing Page
 import LandingPage from './pages/landing/LandingPage';
@@ -176,6 +181,19 @@ export const router = createBrowserRouter([
       {
         path: 'flash-messages',
         element: <FlashMessageManager />
+      },
+      {
+        path: 'content-library',
+        children: [
+          {
+            index: true,
+            element: <ContentLibrary />
+          },
+          {
+            path: 'worksheets',
+            element: <WorksheetManager />
+          }
+        ]
       }
     ]
   },
@@ -202,6 +220,18 @@ export const router = createBrowserRouter([
   {
     path: '/games/next-pattern',
     element: <NextInPattern />
+  },
+  {
+    path: '/about',
+    element: <AboutUs />
+  },
+  {
+    path: '/privacy',
+    element: <PrivacyPolicy />
+  },
+  {
+    path: '/terms',
+    element: <TermsOfService />
   },
   {
     path: '/*',

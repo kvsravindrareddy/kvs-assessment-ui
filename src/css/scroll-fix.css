@@ -1,0 +1,34 @@
+/* ===============================================
+   SCROLL FIX - Resolves "scroll twice" issue
+   =============================================== */
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Fix for the "scroll twice" issue caused by 100vh containers */
+.section {
+  min-height: auto !important;
+}
+
+/* iOS momentum scrolling for touch devices */
+@media (hover: none) and (pointer: coarse) {
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Ensure proper scroll container hierarchy */
+html, body {
+  height: 100%;
+}
+
+#root {
+  min-height: 100%;
+}
+
+/* Remove conflicting min-height from sections */
+section[class*="section"] {
+  min-height: auto;
+}

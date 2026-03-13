@@ -1,3 +1,15 @@
-# https://www.robotstxt.org/robotstxt.html
+# robots.txt for KIVO Learning - AI-Powered Education Platform
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /profile/
+Disallow: /settings/
+
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.png$
+Allow: /*.jpg$
+
+Sitemap: https://kivolearning.com/sitemap.xml

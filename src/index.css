@@ -2,6 +2,10 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Fredoka One', cursive;
   background: linear-gradient(to right, #fceabb, #f8b500);

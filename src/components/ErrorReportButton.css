@@ -4,15 +4,15 @@
 
 .error-report-float-btn {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 56px;
-  height: 56px;
+  bottom: 100px;
+  right: 30px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
   transition: all 0.3s ease;
@@ -306,12 +306,25 @@
    RESPONSIVE DESIGN
    ============================================ */
 
+/* Large monitors - keep button visible */
+@media (min-width: 1920px) {
+  .error-report-float-btn {
+    right: calc((100vw - 2400px) / 2 + 30px);
+  }
+}
+
+@media (min-width: 2560px) {
+  .error-report-float-btn {
+    right: calc((100vw - 2400px) / 2 + 30px);
+  }
+}
+
 @media (max-width: 768px) {
   .error-report-float-btn {
-    bottom: 20px;
+    bottom: 90px;
     right: 20px;
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
     font-size: 1.3rem;
   }
 
@@ -353,10 +366,10 @@
 
 @media (max-width: 480px) {
   .error-report-float-btn {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
     font-size: 1.2rem;
-    bottom: 16px;
+    bottom: 80px;
     right: 16px;
   }
 

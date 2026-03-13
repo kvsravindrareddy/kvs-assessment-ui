@@ -1,0 +1,386 @@
+/* Legal Pages CSS - About, Privacy, Terms */
+
+.section {
+  min-height: 100vh;
+  padding: 80px 20px 40px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+  margin-bottom: 40px;
+}
+
+.text-section {
+  width: 100%;
+  color: #333;
+  line-height: 1.8;
+}
+
+/* Headings */
+.section-heading {
+  color: #1e90ff;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-align: center;
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.section-heading::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #1e90ff, #ff8c00);
+  border-radius: 2px;
+}
+
+.subsection-heading {
+  color: #2c3e50;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid #1e90ff;
+  padding-left: 15px;
+}
+
+.text-section h3 {
+  color: #34495e;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.8rem;
+}
+
+/* Paragraphs */
+.text-section p {
+  margin-bottom: 1rem;
+  font-size: 1.05rem;
+  color: #555;
+}
+
+.text-section p strong {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+/* Lists */
+.text-section ul,
+.text-section ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.text-section li {
+  margin-bottom: 0.8rem;
+  font-size: 1.05rem;
+  color: #555;
+}
+
+.text-section li strong {
+  color: #1e90ff;
+  font-weight: 600;
+}
+
+/* Links */
+.text-section a {
+  color: #1e90ff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.text-section a:hover {
+  color: #ff8c00;
+  border-bottom-color: #ff8c00;
+}
+
+/* Sections */
+.about-kivo,
+.our-mission,
+.what-we-offer,
+.our-platform,
+.our-impact,
+.developed-by,
+.get-in-touch,
+.privacy-section,
+.terms-section {
+  margin-bottom: 3rem;
+}
+
+.privacy-intro,
+.terms-intro {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #1e90ff;
+  margin-bottom: 2rem;
+}
+
+/* Logo Images */
+.text-section img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Buttons */
+.text-section a[style*="padding"] {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.text-section a[style*="padding"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Info Boxes */
+.text-section > div[style*="backgroundColor"] {
+  transition: box-shadow 0.3s ease;
+}
+
+.text-section > div[style*="backgroundColor"]:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .section {
+    padding: 60px 15px 30px;
+  }
+
+  .content {
+    padding: 25px;
+  }
+
+  .section-heading {
+    font-size: 2rem;
+  }
+
+  .subsection-heading {
+    font-size: 1.5rem;
+  }
+
+  .text-section h3 {
+    font-size: 1.2rem;
+  }
+
+  .text-section p,
+  .text-section li {
+    font-size: 1rem;
+  }
+
+  .text-section ul,
+  .text-section ol {
+    margin-left: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-heading {
+    font-size: 1.7rem;
+  }
+
+  .subsection-heading {
+    font-size: 1.3rem;
+  }
+
+  .content {
+    padding: 20px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .section {
+    background: white;
+    padding: 20px;
+  }
+
+  .content {
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .section-heading::after {
+    display: none;
+  }
+
+  .text-section a {
+    color: #000;
+    border-bottom: 1px solid #000;
+  }
+}
+
+/* Animation for page load */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Table of Contents (if needed) */
+.toc {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc li {
+  margin-bottom: 0.5rem;
+}
+
+.toc a {
+  color: #1e90ff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.toc a:hover {
+  color: #ff8c00;
+}
+
+/* Highlight important notices */
+.notice-box {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 1.5rem;
+  border-radius: 4px;
+  margin: 2rem 0;
+}
+
+.notice-box p {
+  margin: 0;
+}
+
+.info-box {
+  background: #e3f2fd;
+  border-left: 4px solid #1e90ff;
+  padding: 1.5rem;
+  border-radius: 4px;
+  margin: 2rem 0;
+}
+
+.info-box p {
+  margin: 0;
+}
+
+/* Success box */
+.success-box {
+  background: #d4edda;
+  border-left: 4px solid #28a745;
+  padding: 1.5rem;
+  border-radius: 4px;
+  margin: 2rem 0;
+}
+
+.success-box p {
+  margin: 0;
+  color: #155724;
+}
+
+/* Contact section styling */
+.contact-box {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.contact-box p {
+  margin: 0.5rem 0;
+}
+
+/* Feature grid for About page */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.feature-card {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #1e90ff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card h3 {
+  margin-top: 0;
+  color: #1e90ff;
+}
+
+/* Stats section */
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.stat-box {
+  background: linear-gradient(135deg, #1e90ff 0%, #4169e1 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 1rem;
+  opacity: 0.9;
+}

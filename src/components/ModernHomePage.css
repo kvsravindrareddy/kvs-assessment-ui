@@ -525,7 +525,7 @@
 .innovation-icon {
   font-size: 4em;
   margin: 15px 0;
-  animation: bounce 2s ease-in-out infinite;
+  /* animation: bounce removed - annoying */
   position: relative;
   z-index: 1;
 }

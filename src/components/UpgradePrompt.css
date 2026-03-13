@@ -62,7 +62,7 @@
 .upgrade-modal-icon {
   font-size: 64px;
   margin-bottom: 20px;
-  animation: bounce 1s ease infinite;
+  /* animation: bounce removed - annoying */
 }
 
 @keyframes bounce {

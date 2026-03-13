@@ -453,7 +453,7 @@ button:disabled {
 .brand-section img {
   width: 180px;
   height: 80px;
-  animation: bounce 1s infinite alternate; 
+  /* animation: bounce removed - annoying */ 
 }
 
 @keyframes bounce {

@@ -61,7 +61,7 @@
 .shape-icon {
   font-size: 5em;
   margin-bottom: 15px;
-  animation: bounce 1s ease-in-out infinite;
+  /* animation: bounce removed - annoying */
 }
 
 .shape-card:hover .shape-icon {
