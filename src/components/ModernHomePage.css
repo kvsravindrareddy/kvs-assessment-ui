@@ -150,16 +150,56 @@
 /* Large Cards Grid (4 columns) */
 .cards-grid-large {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 25px;
   margin-bottom: 20px;
+}
+
+/* Responsive for Large Grid */
+@media (max-width: 1200px) {
+  .cards-grid-large {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .cards-grid-large {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cards-grid-large {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Medium Cards Grid (6 columns) */
 .cards-grid-medium {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(6, 1fr);
   gap: 20px;
+}
+
+/* Responsive for Medium Grid */
+@media (max-width: 1200px) {
+  .cards-grid-medium {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .cards-grid-medium {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cards-grid-medium {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* Beautiful Cards */
