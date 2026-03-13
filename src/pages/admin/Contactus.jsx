@@ -75,7 +75,7 @@ const Contactus = () => {
                     <p>
                         You can contact us via email for any inquiries or support you may need.
                     </p>
-                    <p>Email: <a href="mailto:contact@kobstechnologies.com">contact@kobstechnologies.com</a></p>
+                    <p>Email: <a href="mailto:contact@kobytetechnologies.com">contact@kobytetechnologies.com</a></p>
                 </div>
                 <div className="contact-form-container">
                     <h2>Submit the enquiry Form</h2>
@@ -100,7 +100,6 @@ const Contactus = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
-                                pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
                                 title="Please enter a valid email address."
                             />
                         </div>
