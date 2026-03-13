@@ -319,6 +319,20 @@ export const PDFGenerator = {
   },
 
   /**
+   * Print PDF directly
+   */
+  printPDF(doc) {
+    const pdfBlob = doc.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    const printWindow = window.open(pdfUrl, '_blank');
+    if (printWindow) {
+      printWindow.onload = function() {
+        printWindow.print();
+      };
+    }
+  },
+
+  /**
    * Generate Custom Question Worksheet from Backend Questions
    * Supports multiple choice questions with answer keys
    */
@@ -329,13 +343,14 @@ export const PDFGenerator = {
       grade = '',
       difficulty = '',
       topic = '',
-      includeAnswers = false
+      includeAnswers = false,
+      showDifficulty = false  // New option to control difficulty display
     } = options;
 
-    // Header
+    // Header - build subtitle without difficulty
     let subtitle = [];
     if (grade) subtitle.push(`Grade: ${grade}`);
-    if (difficulty) subtitle.push(`Difficulty: ${difficulty}`);
+    if (showDifficulty && difficulty) subtitle.push(`Difficulty: ${difficulty}`);
     if (topic) subtitle.push(`Topic: ${topic}`);
 
     addHeader(

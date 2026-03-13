@@ -1041,3 +1041,115 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==================== PRINT BUTTON STYLES ==================== */
+
+.btn-download.print-btn {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+}
+
+.download-btn.print {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+/* ==================== EXPANDABLE PREVIEW STYLES ==================== */
+
+.expand-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.expand-btn:hover {
+  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+  border-color: #9ca3af;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.expand-btn:active {
+  transform: translateY(0);
+}
+
+/* Animation for expanding */
+.questions-list-compact {
+  transition: max-height 0.3s ease-in-out;
+}
+
+/* Update template actions grid for 3 buttons */
+.template-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.template-actions .btn-download {
+  font-size: 0.8rem;
+  padding: 8px;
+}
+
+/* Update generate buttons for 3 buttons */
+.generate-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+/* Update download section for 3 buttons */
+.download-section {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+}
+
+.download-section .download-btn {
+  min-width: 100px;
+}
+
+.download-section .download-btn.print {
+  grid-column: 2;
+  min-width: 80px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .template-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .template-actions .btn-download {
+    font-size: 0.875rem;
+    padding: 10px;
+  }
+
+  .generate-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .download-section {
+    grid-template-columns: 1fr;
+  }
+
+  .download-section .download-btn.print {
+    grid-column: 1;
+  }
+}
+
+/* Remove old more-indicator styling */
+.more-indicator {
+  display: none;
+}

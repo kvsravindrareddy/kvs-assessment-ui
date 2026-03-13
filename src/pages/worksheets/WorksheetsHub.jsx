@@ -25,6 +25,7 @@ export default function WorksheetsHub() {
     const [grades, setGrades] = useState([]);
     const [loadedQuestions, setLoadedQuestions] = useState([]);
     const [responseTime, setResponseTime] = useState(null);
+    const [expandedPreview, setExpandedPreview] = useState(false);
 
     // Common State
     const [loading, setLoading] = useState(false);
@@ -109,7 +110,7 @@ export default function WorksheetsHub() {
 
     // ==================== CUSTOM MATH GENERATORS ====================
 
-    const generateFromTemplate = (template, includeAnswers) => {
+    const generateFromTemplate = (template, includeAnswers, print = false) => {
         setLoading(true);
         try {
             let doc;
@@ -128,8 +129,14 @@ export default function WorksheetsHub() {
             } else if (activeCategory === 'mixedOperations') {
                 doc = PDFGenerator.generateMixedOperationsWorksheet(template.count, template.max, template.difficulty, includeAnswers);
             }
-            PDFGenerator.downloadPDF(doc, `${template.name.replace(/\s+/g, '_')}_${includeAnswers ? 'answers' : 'worksheet'}.pdf`);
-            setMessage({ type: 'success', text: '✅ PDF downloaded successfully!' });
+
+            if (print) {
+                PDFGenerator.printPDF(doc);
+                setMessage({ type: 'success', text: '✅ Opening print dialog...' });
+            } else {
+                PDFGenerator.downloadPDF(doc, `${template.name.replace(/\s+/g, '_')}_${includeAnswers ? 'answers' : 'worksheet'}.pdf`);
+                setMessage({ type: 'success', text: '✅ PDF downloaded successfully!' });
+            }
         } catch (error) {
             setMessage({ type: 'error', text: '❌ Failed to generate worksheet' });
         } finally {
@@ -137,7 +144,7 @@ export default function WorksheetsHub() {
         }
     };
 
-    const generateCustom = (includeAnswers) => {
+    const generateCustom = (includeAnswers, print = false) => {
         setLoading(true);
         try {
             let doc;
@@ -157,8 +164,14 @@ export default function WorksheetsHub() {
             } else if (activeCategory === 'mixedOperations') {
                 doc = PDFGenerator.generateMixedOperationsWorksheet(params.count, params.max, params.difficulty, includeAnswers);
             }
-            PDFGenerator.downloadPDF(doc, `custom_${activeCategory}_${includeAnswers ? 'answers' : 'worksheet'}.pdf`);
-            setMessage({ type: 'success', text: '✅ Custom worksheet downloaded!' });
+
+            if (print) {
+                PDFGenerator.printPDF(doc);
+                setMessage({ type: 'success', text: '✅ Opening print dialog...' });
+            } else {
+                PDFGenerator.downloadPDF(doc, `custom_${activeCategory}_${includeAnswers ? 'answers' : 'worksheet'}.pdf`);
+                setMessage({ type: 'success', text: '✅ Custom worksheet downloaded!' });
+            }
         } catch (error) {
             setMessage({ type: 'error', text: '❌ Failed to generate custom worksheet' });
         } finally {
@@ -234,7 +247,7 @@ export default function WorksheetsHub() {
         }
     };
 
-    const generateWorksheetPDF = (includeAnswers = false) => {
+    const generateWorksheetPDF = (includeAnswers = false, print = false) => {
         if (loadedQuestions.length === 0) {
             alert('Please load questions first!');
             return;
@@ -247,19 +260,26 @@ export default function WorksheetsHub() {
                 {
                     title: `${worksheetForm.subject || 'Math'} Worksheet - Grade ${worksheetForm.grade}`,
                     grade: worksheetForm.grade,
-                    difficulty: worksheetForm.difficulty,
                     topic: worksheetForm.topic,
-                    includeAnswers: includeAnswers
+                    includeAnswers: includeAnswers,
+                    showDifficulty: false  // Don't show difficulty in PDF
                 }
             );
 
-            const filename = `worksheet_${worksheetForm.grade}_${worksheetForm.difficulty}_${Date.now()}_${includeAnswers ? 'answers' : 'questions'}.pdf`;
-            PDFGenerator.downloadPDF(doc, filename);
-
-            setMessage({
-                type: 'success',
-                text: `✅ ${includeAnswers ? 'Answer key' : 'Worksheet'} downloaded!`
-            });
+            if (print) {
+                PDFGenerator.printPDF(doc);
+                setMessage({
+                    type: 'success',
+                    text: '✅ Opening print dialog...'
+                });
+            } else {
+                const filename = `worksheet_${worksheetForm.grade}_${Date.now()}_${includeAnswers ? 'answers' : 'questions'}.pdf`;
+                PDFGenerator.downloadPDF(doc, filename);
+                setMessage({
+                    type: 'success',
+                    text: `✅ ${includeAnswers ? 'Answer key' : 'Worksheet'} downloaded!`
+                });
+            }
         } catch (error) {
             console.error('Error generating PDF:', error);
             alert('Failed to generate PDF');
@@ -391,7 +411,15 @@ export default function WorksheetsHub() {
                                             onClick={() => generateFromTemplate(template, false)}
                                             disabled={loading}
                                         >
-                                            📄 Worksheet
+                                            📄 Download
+                                        </button>
+                                        <button
+                                            className="btn-download print-btn"
+                                            onClick={() => generateFromTemplate(template, false, true)}
+                                            disabled={loading}
+                                            title="Print worksheet"
+                                        >
+                                            🖨️ Print
                                         </button>
                                         {activeCategory !== 'numberWriting' && (
                                             <button
@@ -399,7 +427,7 @@ export default function WorksheetsHub() {
                                                 onClick={() => generateFromTemplate(template, true)}
                                                 disabled={loading}
                                             >
-                                                ✅ Answer Key
+                                                ✅ Answers
                                             </button>
                                         )}
                                     </div>
@@ -521,7 +549,16 @@ export default function WorksheetsHub() {
                                     disabled={loading}
                                     style={{ background: categories.find(c => c.id === activeCategory)?.color }}
                                 >
-                                    📄 Generate Worksheet
+                                    📄 Download Worksheet
+                                </button>
+                                <button
+                                    className="btn-generate print"
+                                    onClick={() => generateCustom(false, true)}
+                                    disabled={loading}
+                                    style={{ background: '#6b7280' }}
+                                    title="Print worksheet"
+                                >
+                                    🖨️ Print Worksheet
                                 </button>
                                 {activeCategory !== 'numberWriting' && (
                                     <button
@@ -530,7 +567,7 @@ export default function WorksheetsHub() {
                                         disabled={loading}
                                         style={{ background: categories.find(c => c.id === activeCategory)?.color }}
                                     >
-                                        ✅ Generate Answer Key
+                                        ✅ Download Answers
                                     </button>
                                 )}
                             </div>
@@ -686,7 +723,7 @@ export default function WorksheetsHub() {
                                     <div className="questions-preview-compact">
                                         <h4>📝 Preview</h4>
                                         <div className="questions-list-compact">
-                                            {loadedQuestions.slice(0, 3).map((q, idx) => (
+                                            {(expandedPreview ? loadedQuestions : loadedQuestions.slice(0, 3)).map((q, idx) => (
                                                 <div key={idx} className="question-card-compact">
                                                     <span className="q-number">Q{idx + 1}</span>
                                                     <span className="q-text">{q.question?.name || q.name || 'Question'}</span>
@@ -696,9 +733,16 @@ export default function WorksheetsHub() {
                                                 </div>
                                             ))}
                                             {loadedQuestions.length > 3 && (
-                                                <div className="more-indicator">
-                                                    + {loadedQuestions.length - 3} more questions
-                                                </div>
+                                                <button
+                                                    className="expand-btn"
+                                                    onClick={() => setExpandedPreview(!expandedPreview)}
+                                                >
+                                                    {expandedPreview ? (
+                                                        <>▲ Show Less</>
+                                                    ) : (
+                                                        <>▼ + {loadedQuestions.length - 3} more questions</>
+                                                    )}
+                                                </button>
                                             )}
                                         </div>
                                     </div>
@@ -709,14 +753,22 @@ export default function WorksheetsHub() {
                                             onClick={() => generateWorksheetPDF(false)}
                                             disabled={loading}
                                         >
-                                            📄 Download Worksheet
+                                            📄 Download
+                                        </button>
+                                        <button
+                                            className="download-btn print"
+                                            onClick={() => generateWorksheetPDF(false, true)}
+                                            disabled={loading}
+                                            title="Print worksheet"
+                                        >
+                                            🖨️ Print
                                         </button>
                                         <button
                                             className="download-btn secondary"
                                             onClick={() => generateWorksheetPDF(true)}
                                             disabled={loading}
                                         >
-                                            ✅ Download Answer Key
+                                            ✅ Answers
                                         </button>
                                     </div>
                                 </div>
