@@ -11,18 +11,21 @@ const StudentDashboard = () => {
       <div className="quick-actions-section" style={{ marginBottom: '30px' }}>
         <h3>Quick Actions</h3>
         <div className="action-grid">
+          <button className="action-card" onClick={() => navigate('/student/grading-dashboard')}>
+            <span className="action-icon">📊</span><span>Grading Dashboard</span>
+          </button>
           <button className="action-card" onClick={() => navigate('/reading')}>
             <span className="action-icon">📚</span><span>Read Stories</span>
           </button>
           <button className="action-card" onClick={() => navigate('/games')}>
             <span className="action-icon">🎮</span><span>Play Games</span>
           </button>
-          
+
           {/* UPDATED: Now points to the new Assessment Hub! */}
           <button className="action-card" onClick={() => navigate('/assessments')}>
             <span className="action-icon">📝</span><span>Assessments</span>
           </button>
-          
+
           <button className="action-card" onClick={() => navigate('/ai-hub')}>
             <span className="action-icon">🤖</span><span>AI Learning</span>
           </button>

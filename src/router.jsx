@@ -48,6 +48,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import UnifiedDashboard from './pages/dashboard/UnifiedDashboard';
 import SpeedMathChallenge from './pages/assessments/SpeedMathChallenge';
 import SubjectAssessments from './pages/assessments/SubjectAssessments';
+import StudentGradingDashboard from './pages/student/StudentGradingDashboard';
 
 // Old App Content (existing features)
 import App from './App';
@@ -104,6 +105,16 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <UnifiedDashboard>
           <SubjectAssessments />
+        </UnifiedDashboard>
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/student/grading-dashboard',
+    element: (
+      <ProtectedRoute>
+        <UnifiedDashboard>
+          <StudentGradingDashboard />
         </UnifiedDashboard>
       </ProtectedRoute>
     )
