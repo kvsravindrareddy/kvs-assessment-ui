@@ -43,10 +43,10 @@ const TIER_LIMITS = {
     assessmentsTotal: -1, // unlimited total
     storiesPerDay: 5,
     gamesPerDay: 3,
-    aiQuestionsPerMonth: 0,
+    aiQuestionsPerMonth: -1, // unlimited for free users
     canSaveProgress: true,
     canDownloadCertificates: false,
-    canAccessAI: false,
+    canAccessAI: true, // AI available for all logged-in users
     showWatermark: false,
     canCreateClasses: false,
     maxStudents: 0
@@ -84,10 +84,10 @@ const TIER_LIMITS = {
     assessmentsTotal: -1,
     storiesPerDay: -1,
     gamesPerDay: -1,
-    aiQuestionsPerMonth: 0,
+    aiQuestionsPerMonth: -1, // unlimited for free users
     canSaveProgress: true,
     canDownloadCertificates: false,
-    canAccessAI: false,
+    canAccessAI: true, // AI available for all logged-in users
     showWatermark: false,
     canCreateClasses: true,
     maxClasses: 1,
@@ -181,7 +181,28 @@ export const SubscriptionProvider = ({ children }) => {
   // Get user's subscription tier from localStorage or default to GUEST
   const [subscriptionTier, setSubscriptionTier] = useState(() => {
     const saved = localStorage.getItem('subscriptionTier');
-    return saved || SUBSCRIPTION_TIERS.GUEST;
+    if (saved) {
+      console.log('SubscriptionContext: Loaded tier from localStorage:', saved);
+      return saved;
+    }
+
+    // Fallback: check if user is logged in and has tier in user object
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.subscriptionTier) {
+          console.log('SubscriptionContext: Using tier from user object:', user.subscriptionTier);
+          localStorage.setItem('subscriptionTier', user.subscriptionTier);
+          return user.subscriptionTier;
+        }
+      } catch (e) {
+        console.error('Failed to parse user from localStorage', e);
+      }
+    }
+
+    console.log('SubscriptionContext: Defaulting to GUEST');
+    return SUBSCRIPTION_TIERS.GUEST;
   });
 
   // Track daily usage
@@ -205,8 +226,31 @@ export const SubscriptionProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : { totalAssessments: 0, totalStories: 0, totalGames: 0 };
   });
 
+  // Sync subscription tier when user logs in/out
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const newTier = localStorage.getItem('subscriptionTier');
+      if (newTier && newTier !== subscriptionTier) {
+        console.log('SubscriptionContext: Tier changed in localStorage, syncing:', newTier);
+        setSubscriptionTier(newTier);
+      }
+    };
+
+    // Listen for storage events (from other tabs/windows)
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also check periodically (for same-tab changes)
+    const intervalId = setInterval(handleStorageChange, 1000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(intervalId);
+    };
+  }, [subscriptionTier]);
+
   // Save to localStorage whenever subscription tier changes
   useEffect(() => {
+    console.log('SubscriptionContext: Saving tier to localStorage:', subscriptionTier);
     localStorage.setItem('subscriptionTier', subscriptionTier);
   }, [subscriptionTier]);
 

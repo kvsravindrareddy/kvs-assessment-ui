@@ -120,6 +120,26 @@ export const router = createBrowserRouter([
     )
   },
   {
+    path: '/reading',
+    element: <App /> // Handled by App.js routing
+  },
+  {
+    path: '/games',
+    element: <App /> // Handled by App.js routing
+  },
+  {
+    path: '/assessments',
+    element: <App /> // Handled by App.js routing - AssessmentsHub
+  },
+  {
+    path: '/ai-hub',
+    element: <App /> // Handled by App.js routing
+  },
+  {
+    path: '/worksheets',
+    element: <App /> // Handled by App.js routing - WorksheetsHub
+  },
+  {
     path: '/assessments/math-by-grade',
     element: (
       <ProtectedRoute>

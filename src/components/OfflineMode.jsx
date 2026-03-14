@@ -8,8 +8,11 @@ export default function OfflineMode() {
     const [loading, setLoading] = useState(true);
     const [downloading, setDownloading] = useState(false);
     const [syncing, setSyncing] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [networkType, setNetworkType] = useState('Unknown');
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
 
     useEffect(() => {
         checkStatus();
@@ -33,8 +36,16 @@ export default function OfflineMode() {
         }
     };
 
-    const checkStatus = async () => {
+    const showToastNotification = (message) => {
+        setToastMessage(message);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+    };
+
+    const checkStatus = async (showRefreshing = false) => {
         try {
+            if (showRefreshing) setRefreshing(true);
+
             const token = localStorage.getItem('token');
             const response = await axios.get(
                 `${CONFIG.development.GATEWAY_URL}/v1/offline-mode/status`,
@@ -42,9 +53,21 @@ export default function OfflineMode() {
             );
             setPackageStatus(response.data);
             setLoading(false);
+
+            if (showRefreshing) {
+                // Show success feedback
+                setTimeout(() => {
+                    setRefreshing(false);
+                    showToastNotification('✅ Status refreshed successfully!');
+                }, 500);
+            }
         } catch (error) {
             console.error('Error checking offline status:', error);
             setLoading(false);
+            setRefreshing(false);
+            if (showRefreshing) {
+                showToastNotification('❌ Failed to refresh status');
+            }
         }
     };
 
@@ -88,12 +111,31 @@ export default function OfflineMode() {
             );
 
             // Poll for progress
+            let pollCount = 0;
+            const maxPolls = 300; // 5 minutes max (300 seconds)
+
             const interval = setInterval(async () => {
-                await checkStatus();
-                if (packageStatus?.progress === 100) {
+                pollCount++;
+
+                // Fetch fresh status
+                const statusResponse = await axios.get(
+                    `${CONFIG.development.GATEWAY_URL}/v1/offline-mode/status`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                const freshStatus = statusResponse.data;
+                setPackageStatus(freshStatus);
+
+                // Check if download is complete or if we've exceeded max polls
+                if (freshStatus?.status === 'READY' || freshStatus?.progress === 100 || pollCount >= maxPolls) {
                     clearInterval(interval);
                     setDownloading(false);
-                    alert('✅ Offline content ready! You can now learn without internet for 3 days.');
+
+                    if (freshStatus?.status === 'READY' || freshStatus?.progress === 100) {
+                        alert('✅ Offline content ready! You can now learn without internet for 3 days.');
+                    } else {
+                        alert('⚠️ Download taking longer than expected. Please check status later.');
+                    }
                 }
             }, 1000);
 
@@ -131,6 +173,13 @@ export default function OfflineMode() {
 
     return (
         <div className="offline-mode-container">
+            {/* Toast Notification */}
+            {showToast && (
+                <div className="toast-notification">
+                    {toastMessage}
+                </div>
+            )}
+
             <div className="offline-header">
                 <h2>📶 Offline Adaptive Mode</h2>
                 <p className="offline-subtitle">Learn anywhere, even without internet!</p>
@@ -146,10 +195,10 @@ export default function OfflineMode() {
                 </div>
             </div>
 
-            {/* India-specific message */}
+            {/* Low connectivity message */}
             <div className="india-message">
-                <span className="flag">🇮🇳</span>
-                <p>Perfect for rural areas and low-connectivity zones across India!</p>
+                <span className="flag">📶</span>
+                <p>Perfect for low-connectivity zones and areas with limited internet access!</p>
             </div>
 
             {/* Package Status */}
@@ -197,23 +246,45 @@ export default function OfflineMode() {
                             </div>
                         )}
 
-                        {/* Pending Analytics */}
-                        {packageStatus.pendingAnalytics > 0 && (
-                            <div className="pending-analytics">
-                                <span className="pending-badge">
-                                    ⏳ {packageStatus.pendingAnalytics} activities pending sync
-                                </span>
-                                {isOnline && (
-                                    <button
-                                        className="sync-btn"
-                                        onClick={syncAnalytics}
-                                        disabled={syncing}
-                                    >
-                                        {syncing ? '🔄 Syncing...' : '🔄 Sync Now'}
-                                    </button>
-                                )}
-                            </div>
-                        )}
+                        {/* Action Buttons */}
+                        <div className="package-actions">
+                            <button
+                                className={`refresh-btn ${refreshing ? 'refreshing' : ''}`}
+                                onClick={() => checkStatus(true)}
+                                disabled={loading || refreshing}
+                            >
+                                {refreshing ? '🔄 Refreshing...' : '🔄 Refresh Status'}
+                            </button>
+
+                            {/* Pending Analytics */}
+                            {packageStatus.pendingAnalytics > 0 && (
+                                <div className="pending-analytics">
+                                    <span className="pending-badge">
+                                        ⏳ {packageStatus.pendingAnalytics} activities pending sync
+                                    </span>
+                                    {isOnline && (
+                                        <button
+                                            className="sync-btn"
+                                            onClick={syncAnalytics}
+                                            disabled={syncing}
+                                        >
+                                            {syncing ? '🔄 Syncing...' : '🔄 Sync Now'}
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Regenerate button if package is expired or old */}
+                            {(packageStatus.status === 'EXPIRED' || packageStatus.status === 'READY') && (
+                                <button
+                                    className="regenerate-btn"
+                                    onClick={generatePackage}
+                                    disabled={downloading}
+                                >
+                                    {downloading ? '⏳ Generating...' : '🔄 Generate New Package'}
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     <div className="package-features">
@@ -240,7 +311,7 @@ export default function OfflineMode() {
                             <li>✅ AI predicts what you'll need next</li>
                             <li>✅ 65% smaller with smart compression</li>
                             <li>✅ Auto-syncs when internet returns</li>
-                            <li>✅ Perfect for rural India 🇮🇳</li>
+                            <li>✅ Perfect for low-connectivity areas</li>
                         </ul>
                     </div>
 
@@ -282,17 +353,17 @@ export default function OfflineMode() {
                 </div>
             </div>
 
-            {/* Stats for India */}
+            {/* Stats */}
             <div className="india-stats">
-                <h4>📊 Impact in India:</h4>
+                <h4>📊 Key Features:</h4>
                 <div className="stats-grid">
                     <div className="stat">
-                        <span className="stat-number">400M+</span>
-                        <span className="stat-label">Students in rural areas</span>
+                        <span className="stat-number">Adaptive</span>
+                        <span className="stat-label">Smart content prediction</span>
                     </div>
                     <div className="stat">
                         <span className="stat-number">2G/3G</span>
-                        <span className="stat-label">Common connectivity</span>
+                        <span className="stat-label">Works on slow networks</span>
                     </div>
                     <div className="stat">
                         <span className="stat-number">65%</span>

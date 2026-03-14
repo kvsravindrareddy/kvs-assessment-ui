@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import SpeakComponent from './SpeakComponent';
 import StoryGenerator from './StoryGenerator';
 import RhymeFinder from './RhymeFinder';
+import PersonalizedLearning from './PersonalizedLearning';
 import '../../css/AIHub.css';
 import { useSubscription } from '../../context/SubscriptionContext';
 import UpgradePrompt from '../../components/UpgradePrompt';
@@ -15,6 +16,14 @@ const AIHub = ({ audioEnabled = true }) => {
   const aiLocked = isFeatureLocked('ai');
 
   const aiFeatures = [
+    {
+      id: 'personalized',
+      name: 'Personalized Learning',
+      icon: '🎯',
+      description: 'AI-powered recommendations based on your emotions, progress & interests',
+      color: '#667eea',
+      featured: true
+    },
     {
       id: 'speak',
       name: 'AI Voice Assistant',
@@ -44,6 +53,7 @@ const AIHub = ({ audioEnabled = true }) => {
         <button className="back-button" onClick={() => setSelectedFeature(null)}>
           ← Back to AI Hub
         </button>
+        {selectedFeature === 'personalized' && <PersonalizedLearning />}
         {selectedFeature === 'speak' && <SpeakComponent audioEnabled={audioEnabled} />}
         {selectedFeature === 'story' && <StoryGenerator audioEnabled={audioEnabled} />}
         {selectedFeature === 'rhyme' && <RhymeFinder audioEnabled={audioEnabled} />}
@@ -97,7 +107,7 @@ const AIHub = ({ audioEnabled = true }) => {
         {aiFeatures.map((feature) => (
           <div
             key={feature.id}
-            className="ai-feature-card"
+            className={`ai-feature-card ${feature.featured ? 'featured' : ''}`}
             onClick={() => setSelectedFeature(feature.id)}
             style={{ '--feature-color': feature.color }}
           >

@@ -59,7 +59,9 @@ function AppContent() {
     else if (path.includes('/dashboard')) setActiveSection('Dashboard');
     else if (path.includes('/games')) setActiveSection('Games');
     // NEW: Tells the nav bar to highlight Assessments when on this URL
-    else if (path.includes('/assessments')) setActiveSection('AssessmentsHub'); 
+    else if (path.includes('/assessments')) setActiveSection('AssessmentsHub');
+    else if (path.includes('/ai-hub')) setActiveSection('AI');
+    else if (path.includes('/worksheets')) setActiveSection('Worksheets');
     else if (path === '/' && activeSection !== 'Home') setActiveSection('Home');
   }, [location.pathname]);
 
@@ -152,6 +154,8 @@ function AppContent() {
     else if (option === 'Reading') navigate('/reading');
     else if (option === 'Games') navigate('/games');
     else if (option === 'AssessmentsHub') navigate('/assessments'); // NEW: Navigates to correct URL
+    else if (option === 'AI') navigate('/ai-hub');
+    else if (option === 'Worksheets') navigate('/worksheets');
     else if (option === 'Home') navigate('/');
   };
 

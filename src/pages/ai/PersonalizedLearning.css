@@ -1,0 +1,405 @@
+.personalized-learning-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 20px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Emotion Check-in */
+.emotion-checkin-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 40px;
+  margin-bottom: 32px;
+  color: white;
+  text-align: center;
+}
+
+.emotion-checkin-section h2 {
+  font-size: 2rem;
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0 0 32px 0;
+}
+
+.emotions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.emotion-button {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.emotion-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-4px) scale(1.05);
+}
+
+.emotion-button.selected {
+  background: rgba(255, 255, 255, 0.35);
+  border-width: 4px;
+  transform: scale(1.1);
+}
+
+.emotion-emoji {
+  font-size: 2.5rem;
+}
+
+.emotion-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.emotion-ripple {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 16px;
+  opacity: 0.3;
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  from {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.emotion-feedback {
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Emotion Analytics */
+.emotion-analytics-section {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.emotion-analytics-section h3 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin: 0 0 24px 0;
+}
+
+.emotion-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.emotion-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.emotion-bar-emoji {
+  font-size: 1.5rem;
+  width: 40px;
+  text-align: center;
+}
+
+.emotion-bar-wrapper {
+  flex: 1;
+  background: #f1f5f9;
+  border-radius: 8px;
+  height: 32px;
+  overflow: hidden;
+}
+
+.emotion-bar {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.5s ease;
+}
+
+.emotion-bar-value {
+  font-weight: 700;
+  color: #1e293b;
+  min-width: 50px;
+}
+
+.insights {
+  background: #f0f9ff;
+  border-left: 4px solid #3b82f6;
+  padding: 16px 20px;
+  border-radius: 8px;
+}
+
+/* Recommendations */
+.recommendations-section {
+  margin-bottom: 40px;
+}
+
+.recommendations-section h3 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin: 0 0 20px 0;
+}
+
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.recommendation-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border-top: 4px solid #667eea;
+}
+
+.recommendation-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.recommendation-card.performance {
+  border-top-color: #10b981;
+}
+
+.recommendation-card.interest {
+  border-top-color: #f59e0b;
+}
+
+.recommendation-card.peer {
+  border-top-color: #ec4899;
+}
+
+.rec-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.rec-icon {
+  font-size: 2.5rem;
+}
+
+.rec-badge,
+.rec-score {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.recommendation-card h4 {
+  font-size: 1.2rem;
+  color: #1e293b;
+  margin: 0 0 12px 0;
+}
+
+.rec-reason,
+.rec-description {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.rec-meta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.rec-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tag {
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.peer-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.success-rate {
+  margin-bottom: 16px;
+}
+
+.progress-bar {
+  background: #f1f5f9;
+  border-radius: 8px;
+  height: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  transition: width 0.5s ease;
+}
+
+.success-rate span {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.start-learning-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.start-learning-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Motivation Section */
+.motivation-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.streak-card,
+.achievement-card,
+.next-milestone-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.streak-card {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  color: white;
+}
+
+.streak-count {
+  font-size: 4rem;
+  font-weight: 800;
+  margin: 16px 0;
+}
+
+.achievement-icon {
+  font-size: 4rem;
+  margin: 16px 0;
+}
+
+.achievement-card h4 {
+  font-size: 1.3rem;
+  color: #1e293b;
+  margin: 16px 0 8px 0;
+}
+
+.milestone-progress {
+  margin-top: 16px;
+}
+
+@media (max-width: 768px) {
+  .emotions-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .recommendations-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .motivation-section {
+    grid-template-columns: 1fr;
+  }
+}

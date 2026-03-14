@@ -922,6 +922,14 @@ const ParentDashboard = () => {
             >
               🎯 Action Center
             </button>
+            <button
+              className={`tab-btn ${activeTab === 'moments' ? 'active' : ''}`}
+              onClick={() => {
+                window.location.href = '/parent/moments';
+              }}
+            >
+              🎉 Share Moments
+            </button>
           </div>
 
           <div className="details-content">

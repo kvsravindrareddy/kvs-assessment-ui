@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import studentGradingService from '../../services/studentGradingService';
 import PerformanceLineChart from '../../components/charts/PerformanceLineChart';
@@ -14,6 +15,7 @@ import './StudentGradingDashboard.css';
  * charts, subject breakdown, and exam history
  */
 const StudentGradingDashboard = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -92,6 +94,11 @@ const StudentGradingDashboard = () => {
 
   return (
     <div className="grading-dashboard-container">
+      {/* Back Navigation */}
+      <button className="back-to-dashboard-btn" onClick={() => navigate('/dashboard')}>
+        ← Back to Dashboard
+      </button>
+
       {/* Header Section */}
       <div className="dashboard-header">
         <div className="header-content">

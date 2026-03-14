@@ -62,6 +62,36 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
+.ai-feature-card.featured {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: 3px solid #ffd700;
+  box-shadow: 0 15px 50px rgba(255, 215, 0, 0.3);
+}
+
+.ai-feature-card.featured::before {
+  display: none;
+}
+
+.ai-feature-card.featured .feature-name,
+.ai-feature-card.featured .feature-description {
+  color: white;
+}
+
+.ai-feature-card.featured::after {
+  content: '⭐ FEATURED';
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #ffd700;
+  color: #2d3436;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
 .feature-icon {
   font-size: 5em;
   margin-bottom: 20px;

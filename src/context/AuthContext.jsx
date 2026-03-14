@@ -59,13 +59,29 @@ export const AuthProvider = ({ children }) => {
     const storedTheme = localStorage.getItem('theme') || 'light';
     const storedLanguage = localStorage.getItem('language') || 'en';
 
+    console.log('AuthContext: Initializing from localStorage', {
+      hasUser: !!storedUser,
+      hasToken: !!storedToken
+    });
+
     if (storedUser && storedToken) {
-      const userData = JSON.parse(storedUser);
-      setUser(userData);
-      setActiveRole(storedActiveRole || userData.role);
-      setTheme(storedTheme);
-      setLanguage(storedLanguage);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+      try {
+        const userData = JSON.parse(storedUser);
+        console.log('AuthContext: User restored from localStorage', userData.username);
+        setUser(userData);
+        setActiveRole(storedActiveRole || userData.role);
+        setTheme(storedTheme);
+        setLanguage(storedLanguage);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+      } catch (error) {
+        console.error('AuthContext: Failed to parse user from localStorage', error);
+        // Clear corrupted data
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('subscriptionTier');
+      }
+    } else {
+      console.log('AuthContext: No stored user/token found, user needs to login');
     }
     setLoading(false);
   }, []);
@@ -81,6 +97,18 @@ export const AuthProvider = ({ children }) => {
       console.log('Login response:', response.status, response.data);
 
       if (response.data.token) {
+        // Auto-determine subscription tier based on role if not provided by backend
+        let subscriptionTier = response.data.subscriptionTier;
+        if (!subscriptionTier) {
+          const role = response.data.role;
+          if (role === 'STUDENT') subscriptionTier = 'STUDENT_FREE';
+          else if (role === 'TEACHER') subscriptionTier = 'TEACHER_FREE';
+          else if (role === 'PARENT') subscriptionTier = 'FAMILY_PLAN';
+          else if (role === 'SCHOOL_ADMIN') subscriptionTier = 'SCHOOL_STANDARD';
+          else if (role === 'DISTRICT_ADMIN') subscriptionTier = 'DISTRICT_ENTERPRISE';
+          else subscriptionTier = 'STUDENT_FREE'; // Default for all other logged-in users
+        }
+
         const userData = {
           id: response.data.id, // Add user ID
           username: response.data.username,
@@ -92,7 +120,7 @@ export const AuthProvider = ({ children }) => {
           status: response.data.status,
           permissions: response.data.permissions,
           linkedAccounts: response.data.linkedAccounts || [], // For parents linked to children
-          subscriptionTier: response.data.subscriptionTier || 'DISTRICT_ENTERPRISE' // Default for admins
+          subscriptionTier: subscriptionTier
         };
 
         setUser(userData);
@@ -102,6 +130,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('activeRole', userData.role);
         localStorage.setItem('authMethod', AUTH_METHODS.PASSWORD);
+        localStorage.setItem('subscriptionTier', subscriptionTier); // Save subscription tier separately for SubscriptionContext
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
 
         return response.data;
@@ -265,6 +294,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('activeRole');
     localStorage.removeItem('authMethod');
+    localStorage.removeItem('subscriptionTier'); // Clear subscription tier on logout
     delete axios.defaults.headers.common['Authorization'];
   };
 

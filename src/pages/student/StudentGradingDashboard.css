@@ -6,6 +6,27 @@
   animation: fadeIn 0.3s ease-in;
 }
 
+.back-to-dashboard-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: #f7fafc;
+  color: #2d3748;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 20px;
+}
+
+.back-to-dashboard-btn:hover {
+  background: #edf2f7;
+  border-color: #cbd5e0;
+  transform: translateX(-4px);
+}
+
 /* Header Section */
 .dashboard-header {
   display: flex;
@@ -112,7 +133,7 @@
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
 }
 
@@ -121,10 +142,14 @@
   border-radius: 12px;
   padding: 24px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
   border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
+  min-height: 160px;
 }
 
 .stat-card:hover {
@@ -133,28 +158,32 @@
 }
 
 .stat-icon-wrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.stat-content {
-  flex: 1;
-}
-
-.stat-value {
-  font-size: 2rem;
-  font-weight: 800;
-  color: #1e293b;
-  line-height: 1;
   margin-bottom: 8px;
 }
 
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+}
+
 .stat-label {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #64748b;
   font-weight: 600;
   text-transform: uppercase;
@@ -361,6 +390,12 @@
   }
 }
 
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .grading-dashboard-container {
     padding: 16px;
@@ -375,7 +410,22 @@
   }
 
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .stat-card {
+    padding: 16px;
+    min-height: 140px;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+
+  .stat-icon-wrapper {
+    width: 56px;
+    height: 56px;
   }
 
   .subjects-grid {
@@ -410,7 +460,15 @@
     width: 100%;
   }
 
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
   .stat-value {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
+  }
+
+  .stat-card {
+    min-height: 120px;
   }
 }
