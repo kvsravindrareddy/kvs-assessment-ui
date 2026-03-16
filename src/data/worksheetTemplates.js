@@ -17,6 +17,105 @@ export const WORKSHEET_TEMPLATES = {
     { id: 10, name: 'Tables 10-20', from: 10, to: 20, description: 'Higher numbers' }
   ],
 
+  simpleAddition: [
+    { id: 1, name: 'Simple Addition 1-10 (20 problems)', count: 20, max: 10, description: 'Single digit vertical format' },
+    { id: 2, name: 'Simple Addition 1-20 (30 problems)', count: 30, max: 20, description: 'Numbers up to 20' },
+    { id: 3, name: 'Simple Addition 1-20 (40 problems)', count: 40, max: 20, description: 'Extended practice' },
+    { id: 4, name: 'Simple Addition 1-50 (25 problems)', count: 25, max: 50, description: 'Two-digit addition' },
+    { id: 5, name: 'Simple Addition 1-100 (30 problems)', count: 30, max: 100, description: 'Larger numbers' },
+    { id: 6, name: 'Simple Addition 1-100 (50 problems)', count: 50, max: 100, description: 'Comprehensive practice' }
+  ],
+
+  simpleSubtraction: [
+    { id: 1, name: 'Simple Subtraction 1-10 (20 problems)', count: 20, max: 10, description: 'Single digit vertical format' },
+    { id: 2, name: 'Simple Subtraction 1-20 (30 problems)', count: 30, max: 20, description: 'Numbers up to 20' },
+    { id: 3, name: 'Simple Subtraction 1-20 (40 problems)', count: 40, max: 20, description: 'Extended practice' },
+    { id: 4, name: 'Simple Subtraction 1-50 (25 problems)', count: 25, max: 50, description: 'Two-digit subtraction' },
+    { id: 5, name: 'Simple Subtraction 1-100 (30 problems)', count: 30, max: 100, description: 'Larger numbers' },
+    { id: 6, name: 'Simple Subtraction 1-100 (50 problems)', count: 50, max: 100, description: 'Comprehensive practice' }
+  ],
+
+  simpleMultiplication: [
+    { id: 1, name: 'Simple Multiplication 1-5 (20 problems)', count: 20, max: 5, description: 'Easy tables vertical format' },
+    { id: 2, name: 'Simple Multiplication 1-10 (30 problems)', count: 30, max: 10, description: 'Standard tables' },
+    { id: 3, name: 'Simple Multiplication 1-10 (40 problems)', count: 40, max: 10, description: 'Extended practice' },
+    { id: 4, name: 'Simple Multiplication 1-12 (25 problems)', count: 25, max: 12, description: 'Complete tables' },
+    { id: 5, name: 'Simple Multiplication 1-15 (30 problems)', count: 30, max: 15, description: 'Advanced practice' },
+    { id: 6, name: 'Simple Multiplication 1-20 (40 problems)', count: 40, max: 20, description: 'Expert level' }
+  ],
+
+  simpleDivision: [
+    { id: 1, name: 'Simple Division up to 50 (20 problems)', count: 20, max: 50, description: 'Long division format' },
+    { id: 2, name: 'Simple Division up to 100 (30 problems)', count: 30, max: 100, description: 'Two-digit dividends' },
+    { id: 3, name: 'Simple Division up to 100 (40 problems)', count: 40, max: 100, description: 'Extended practice' },
+    { id: 4, name: 'Simple Division up to 144 (25 problems)', count: 25, max: 144, description: 'Tables up to 12' },
+    { id: 5, name: 'Simple Division up to 200 (30 problems)', count: 30, max: 200, description: 'Larger dividends' },
+    { id: 6, name: 'Simple Division up to 500 (40 problems)', count: 40, max: 500, description: 'Three-digit division' }
+  ],
+
+  romanNumeralsBasic: [
+    { id: 1, name: 'Roman Numerals I-X (15 problems)', count: 15, description: 'Basic 1-10 conversion' },
+    { id: 2, name: 'Roman Numerals I-X (20 problems)', count: 20, description: 'Standard practice' },
+    { id: 3, name: 'Roman Numerals I-X (30 problems)', count: 30, description: 'Extended practice' },
+    { id: 4, name: 'Roman Numerals I-X (40 problems)', count: 40, description: 'Comprehensive' }
+  ],
+
+  romanNumeralsAdvanced: [
+    { id: 1, name: 'Roman Numerals X-C (15 problems)', count: 15, description: 'Numbers 10-100' },
+    { id: 2, name: 'Roman Numerals X-C (20 problems)', count: 20, description: 'Two-digit Roman' },
+    { id: 3, name: 'Roman Numerals X-D (25 problems)', count: 25, description: 'Up to 500' },
+    { id: 4, name: 'Roman Numerals X-M (30 problems)', count: 30, description: 'Up to 1000' },
+    { id: 5, name: 'Roman Numerals Challenge (40 problems)', count: 40, description: 'Mixed difficulty' }
+  ],
+
+  romanToArabic: [
+    { id: 1, name: 'Roman to Arabic 1-20 (15 problems)', count: 15, max: 20, description: 'Basic conversion' },
+    { id: 2, name: 'Roman to Arabic 1-50 (20 problems)', count: 20, max: 50, description: 'Standard practice' },
+    { id: 3, name: 'Roman to Arabic 1-100 (25 problems)', count: 25, max: 100, description: 'Two-digit numbers' },
+    { id: 4, name: 'Roman to Arabic 1-500 (30 problems)', count: 30, max: 500, description: 'Large numbers' },
+    { id: 5, name: 'Roman to Arabic 1-1000 (35 problems)', count: 35, max: 1000, description: 'Expert level' }
+  ],
+
+  arabicToRoman: [
+    { id: 1, name: 'Arabic to Roman 1-20 (15 problems)', count: 15, max: 20, description: 'Basic conversion' },
+    { id: 2, name: 'Arabic to Roman 1-50 (20 problems)', count: 20, max: 50, description: 'Standard practice' },
+    { id: 3, name: 'Arabic to Roman 1-100 (25 problems)', count: 25, max: 100, description: 'Two-digit numbers' },
+    { id: 4, name: 'Arabic to Roman 1-500 (30 problems)', count: 30, max: 500, description: 'Large numbers' },
+    { id: 5, name: 'Arabic to Roman 1-1000 (35 problems)', count: 35, max: 1000, description: 'Expert level' }
+  ],
+
+  timeClock: [
+    { id: 1, name: 'Time Reading Easy (15 problems)', count: 15, difficulty: 'easy', description: 'Quarter hours only' },
+    { id: 2, name: 'Time Reading Easy (20 problems)', count: 20, difficulty: 'easy', description: 'Basic clock reading' },
+    { id: 3, name: 'Time Reading Medium (20 problems)', count: 20, difficulty: 'medium', description: 'Any minute' },
+    { id: 4, name: 'Time Reading Medium (30 problems)', count: 30, difficulty: 'medium', description: 'Standard practice' },
+    { id: 5, name: 'Time Reading Hard (25 problems)', count: 25, difficulty: 'hard', description: 'Complex times' }
+  ],
+
+  moneyCurrency: [
+    { id: 1, name: 'Money Easy (15 problems)', count: 15, difficulty: 'easy', description: 'Simple addition/subtraction' },
+    { id: 2, name: 'Money Easy (20 problems)', count: 20, difficulty: 'easy', description: 'Up to $20' },
+    { id: 3, name: 'Money Medium (20 problems)', count: 20, difficulty: 'medium', description: 'Up to $100' },
+    { id: 4, name: 'Money Medium (30 problems)', count: 30, difficulty: 'medium', description: 'Standard practice' },
+    { id: 5, name: 'Money Hard (25 problems)', count: 25, difficulty: 'hard', description: 'Up to $500' }
+  ],
+
+  measurements: [
+    { id: 1, name: 'Measurements Easy (15 problems)', count: 15, difficulty: 'easy', description: 'Basic conversions' },
+    { id: 2, name: 'Measurements Easy (20 problems)', count: 20, difficulty: 'easy', description: 'cm, m, km' },
+    { id: 3, name: 'Measurements Medium (20 problems)', count: 20, difficulty: 'medium', description: 'Multiple units' },
+    { id: 4, name: 'Measurements Medium (30 problems)', count: 30, difficulty: 'medium', description: 'Standard practice' },
+    { id: 5, name: 'Measurements Hard (25 problems)', count: 25, difficulty: 'hard', description: 'Complex conversions' }
+  ],
+
+  patterns: [
+    { id: 1, name: 'Patterns Easy (15 problems)', count: 15, difficulty: 'easy', description: 'Simple sequences' },
+    { id: 2, name: 'Patterns Easy (20 problems)', count: 20, difficulty: 'easy', description: 'Basic patterns' },
+    { id: 3, name: 'Patterns Medium (20 problems)', count: 20, difficulty: 'medium', description: 'Skip counting' },
+    { id: 4, name: 'Patterns Medium (30 problems)', count: 30, difficulty: 'medium', description: 'Standard practice' },
+    { id: 5, name: 'Patterns Hard (25 problems)', count: 25, difficulty: 'hard', description: 'Complex sequences' }
+  ],
+
   addition: [
     // Beginner Level (1-20)
     { id: 1, name: 'Addition 1-10 (20 problems)', count: 20, max: 10, difficulty: 'beginner', description: 'Single digit addition' },

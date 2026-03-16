@@ -11,7 +11,8 @@ import {
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
-  FolderIcon
+  FolderIcon,
+  AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';
 
 /**
@@ -121,7 +122,7 @@ const Dashboard = () => {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <StatCard
           title="Total Questions"
           value={stats.totalQuestions.toLocaleString()}
@@ -153,6 +154,21 @@ const Dashboard = () => {
           color="text-orange-600"
           bgColor="bg-orange-50"
         />
+        <div
+          onClick={() => navigate('/admin/feature-access')}
+          className="bg-white rounded-xl shadow-sm p-6 hover:shadow-lg transition-shadow cursor-pointer border-2 border-purple-500"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Access Control</p>
+              <p className="text-3xl font-bold text-purple-600 mt-2">Settings</p>
+              <p className="text-xs text-gray-500 mt-2">Manage user permissions</p>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <AdjustmentsHorizontalIcon className="w-8 h-8 text-purple-600" />
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -224,7 +240,7 @@ const Dashboard = () => {
       {/* Quick Actions */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg p-8 text-white">
         <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <button
             onClick={() => navigate('/admin/content-library')}
             className="bg-white text-gray-900 rounded-lg p-4 hover:shadow-lg transition-shadow text-left"
@@ -232,6 +248,14 @@ const Dashboard = () => {
             <FolderIcon className="w-8 h-8 text-indigo-600 mb-2" />
             <h3 className="font-semibold">Content Library</h3>
             <p className="text-sm text-gray-600 mt-1">Manage questions, stories & worksheets</p>
+          </button>
+          <button
+            onClick={() => navigate('/admin/feature-access')}
+            className="bg-white text-gray-900 rounded-lg p-4 hover:shadow-lg transition-shadow text-left border-2 border-purple-300"
+          >
+            <AdjustmentsHorizontalIcon className="w-8 h-8 text-purple-600 mb-2" />
+            <h3 className="font-semibold">Access Control & Permissions</h3>
+            <p className="text-sm text-gray-600 mt-1">Give elevated access to users & features</p>
           </button>
           <button
             onClick={() => navigate('/admin/questions')}

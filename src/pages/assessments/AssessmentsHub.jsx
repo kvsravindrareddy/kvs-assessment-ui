@@ -37,9 +37,9 @@ export default function AssessmentsHub() {
 
     const categories = [
         {
-            id: 'simple-math',
+            id: 'speed-math',
             title: 'Speed Math Challenge',
-            description: 'Test your calculation speed with dynamically generated math problems.',
+            description: 'Test your calculation speed with timed math problems. Improve mental math skills.',
             icon: '⚡',
             gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
             path: '/assessments/speed-math',
@@ -51,24 +51,72 @@ export default function AssessmentsHub() {
             title: 'Math by Grade',
             description: 'Structured mathematics assessments tailored to your specific grade level.',
             icon: '📐',
-            gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+            gradient: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
             path: '/assessments/math-by-grade'
         },
         {
-            id: 'subject-assessment',
-            title: 'Subject Assessments',
-            description: 'Comprehensive tests across various subjects including Science, English, and more.',
+            id: 'reading-comprehension',
+            title: 'Reading Comprehension',
+            description: 'Test reading skills with passages and questions. Build critical thinking.',
+            icon: '📖',
+            gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            path: '/assessments/reading-comprehension'
+        },
+        {
+            id: 'vocabulary-spelling',
+            title: 'Vocabulary & Spelling',
+            description: 'Master word meanings, spellings, and usage. Expand your language skills.',
+            icon: '📝',
+            gradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+            path: '/assessments/vocabulary-spelling'
+        },
+        {
+            id: 'science-lab',
+            title: 'Science Lab',
+            description: 'Explore scientific concepts with interactive questions and experiments.',
+            icon: '🔬',
+            gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+            path: '/assessments/science-lab'
+        },
+        {
+            id: 'grammar-language',
+            title: 'Grammar & Language',
+            description: 'Master grammar rules, sentence structure, and proper language usage.',
+            icon: '✍️',
+            gradient: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
+            path: '/assessments/grammar-language'
+        },
+        {
+            id: 'critical-thinking',
+            title: 'Critical Thinking',
+            description: 'Solve puzzles, riddles, and logic problems. Develop reasoning skills.',
+            icon: '🧠',
+            gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            path: '/assessments/critical-thinking'
+        },
+        {
+            id: 'subject-tests',
+            title: 'Subject Tests',
+            description: 'Comprehensive tests across Math, Science, English, Social Studies.',
             icon: '📚',
-            gradient: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+            gradient: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
             path: '/assessments/subject-assessments'
         },
         {
             id: 'challenge-arena',
-            title: '⚔️ Challenge Arena',
-            description: 'Compete with peers in timed skill challenges. Test your speed and accuracy!',
+            title: 'Challenge Arena',
+            description: 'Compete with classmates in real-time challenges. Race against the clock!',
             icon: '🏆',
-            gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
             path: '/assessments/challenge-arena'
+        },
+        {
+            id: 'it-learning-hub',
+            title: 'IT Learning Hub',
+            description: 'Learn programming, computer science, and digital skills with videos & assessments.',
+            icon: '💻',
+            gradient: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)',
+            path: '/it-learning-hub'
         }
     ];
 

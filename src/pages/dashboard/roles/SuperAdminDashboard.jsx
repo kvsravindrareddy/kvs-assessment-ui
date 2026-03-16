@@ -11,6 +11,7 @@ import SessionManagement from '../components/SessionManagement';
 import GradesManagement from '../components/GradesManagement';
 import IncidentManagement from '../components/IncidentManagement';
 import FlashMessageManager from '../../admin/FlashMessageManager'; // <-- Added Import
+import FeatureAccessControl from '../../admin/FeatureAccessControl'; // <-- Access Control Import
 import './SuperAdminDashboard.css';
 
 const SuperAdminDashboard = () => {
@@ -98,6 +99,9 @@ const SuperAdminDashboard = () => {
         </button>
 
         <div className="nav-section-title">⚙️ System</div>
+        <button className={`nav-item ${activeSection === 'access-control' ? 'active' : ''}`} onClick={() => setActiveSection('access-control')}>
+          <span className="nav-icon">🔐</span><span className="nav-label">Access Control</span>
+        </button>
         {/* Added Flash Alerts Button */}
         <button className={`nav-item ${activeSection === 'flash-alerts' ? 'active' : ''}`} onClick={() => setActiveSection('flash-alerts')}>
           <span className="nav-icon">⚡</span><span className="nav-label">Flash Alerts</span>
@@ -182,6 +186,7 @@ const SuperAdminDashboard = () => {
             {activeSection === 'bulk-registration' && '📋 Bulk User Registration'}
             {activeSection === 'content' && '📝 Content Management'}
             {activeSection === 'grades' && '🎓 Grades Management'}
+            {activeSection === 'access-control' && '🔐 Access Control & Permissions'}
             {activeSection === 'flash-alerts' && '⚡ Flash Alerts & Messages'}
             {activeSection === 'sessions' && '🔄 Active Sessions Management'}
             {activeSection === 'incidents' && '🐛 Incident Reports & Tracking'}
@@ -197,6 +202,7 @@ const SuperAdminDashboard = () => {
           {activeSection === 'bulk-registration' && <BulkRegistration />}
           {activeSection === 'content' && <ContentManagement />}
           {activeSection === 'grades' && <GradesManagement />}
+          {activeSection === 'access-control' && <FeatureAccessControl />}
           {activeSection === 'flash-alerts' && <FlashMessageManager />} {/* <-- Render Component Here */}
           {activeSection === 'sessions' && <SessionManagement />}
           {activeSection === 'incidents' && <IncidentManagement />}

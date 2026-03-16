@@ -3,6 +3,7 @@ import { getConfig } from '../../Config';
 import axios from 'axios';
 import { PDFGenerator } from '../../utils/pdfGenerator';
 import { WORKSHEET_TEMPLATES } from '../../data/worksheetTemplates';
+import { loadCurrencyImages } from '../../utils/currencyImageLoader';
 import './WorksheetsHub.css';
 
 /**
@@ -31,13 +32,51 @@ export default function WorksheetsHub() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState(null);
 
+    // Preview Modal State
+    const [previewModal, setPreviewModal] = useState({ open: false, pdfUrl: null, template: null });
+
+    // Format Preferences (horizontal vs vertical)
+    const [formatPreference, setFormatPreference] = useState({
+        simpleAddition: 'vertical',
+        simpleSubtraction: 'vertical',
+        simpleMultiplication: 'vertical',
+        simpleDivision: 'vertical',
+        addition: 'horizontal',
+        subtraction: 'horizontal',
+        multiplication: 'horizontal',
+        division: 'horizontal',
+        romanNumeralsBasic: 'horizontal',
+        romanNumeralsAdvanced: 'horizontal',
+        romanToArabic: 'horizontal',
+        arabicToRoman: 'horizontal',
+        timeClock: 'horizontal',
+        moneyCurrency: 'horizontal',
+        measurements: 'horizontal',
+        patterns: 'horizontal',
+        multiplicationTables: 'vertical',
+        numberWriting: 'horizontal',
+        mixedOperations: 'horizontal'
+    });
+
     // Custom Math Parameters
     const [customParams, setCustomParams] = useState({
         multiplicationTables: { from: 1, to: 10 },
+        simpleAddition: { count: 30, max: 20, difficulty: 'easy' },
+        simpleSubtraction: { count: 30, max: 20, difficulty: 'easy' },
+        simpleMultiplication: { count: 30, max: 10, difficulty: 'easy' },
+        simpleDivision: { count: 30, max: 50, difficulty: 'easy' },
         addition: { count: 20, max: 100, difficulty: 'easy' },
         subtraction: { count: 20, max: 100, difficulty: 'easy' },
         multiplication: { count: 20, max: 12, difficulty: 'easy' },
         division: { count: 20, max: 144, difficulty: 'easy' },
+        romanNumeralsBasic: { count: 20, max: 10, difficulty: 'easy' },
+        romanNumeralsAdvanced: { count: 20, max: 1000, difficulty: 'medium' },
+        romanToArabic: { count: 20, max: 100, difficulty: 'easy' },
+        arabicToRoman: { count: 20, max: 100, difficulty: 'easy' },
+        timeClock: { count: 20, difficulty: 'easy' },
+        moneyCurrency: { count: 20, difficulty: 'easy' },
+        measurements: { count: 20, difficulty: 'easy' },
+        patterns: { count: 20, difficulty: 'easy' },
         numberWriting: { from: 1, to: 100, percentage: 50 },
         mixedOperations: { count: 20, max: 100, difficulty: 'easy' }
     });
@@ -55,10 +94,22 @@ export default function WorksheetsHub() {
     // Math categories
     const categories = [
         { id: 'multiplicationTables', name: 'Multiplication Tables', icon: '📊', color: '#667eea' },
-        { id: 'addition', name: 'Addition', icon: '➕', color: '#56ab2f' },
-        { id: 'subtraction', name: 'Subtraction', icon: '➖', color: '#f093fb' },
-        { id: 'multiplication', name: 'Multiplication', icon: '✖️', color: '#fa709a' },
-        { id: 'division', name: 'Division', icon: '➗', color: '#4facfe' },
+        { id: 'simpleAddition', name: 'Simple Addition (1+2)', icon: '➕', color: '#56ab2f' },
+        { id: 'simpleSubtraction', name: 'Simple Subtraction (5-2)', icon: '➖', color: '#f093fb' },
+        { id: 'simpleMultiplication', name: 'Simple Multiplication (2×3)', icon: '✖️', color: '#fa709a' },
+        { id: 'simpleDivision', name: 'Simple Division (6÷2)', icon: '➗', color: '#4facfe' },
+        { id: 'addition', name: 'Advanced Addition', icon: '➕', color: '#56ab2f' },
+        { id: 'subtraction', name: 'Advanced Subtraction', icon: '➖', color: '#f093fb' },
+        { id: 'multiplication', name: 'Advanced Multiplication', icon: '✖️', color: '#fa709a' },
+        { id: 'division', name: 'Advanced Division', icon: '➗', color: '#4facfe' },
+        { id: 'romanNumeralsBasic', name: 'Roman Numerals (I-X)', icon: 'Ⅰ', color: '#8e44ad' },
+        { id: 'romanNumeralsAdvanced', name: 'Roman Numerals (X-M)', icon: 'Ⅹ', color: '#9b59b6' },
+        { id: 'romanToArabic', name: 'Roman → Number', icon: '🔄', color: '#e74c3c' },
+        { id: 'arabicToRoman', name: 'Number → Roman', icon: '🔃', color: '#c0392b' },
+        { id: 'timeClock', name: 'Time & Clock', icon: '🕐', color: '#3498db' },
+        { id: 'moneyCurrency', name: 'Money & Currency', icon: '💰', color: '#27ae60' },
+        { id: 'measurements', name: 'Measurements', icon: '📏', color: '#16a085' },
+        { id: 'patterns', name: 'Patterns & Sequences', icon: '🔢', color: '#e67e22' },
         { id: 'numberWriting', name: 'Number Writing', icon: '✏️', color: '#43e97b' },
         { id: 'mixedOperations', name: 'Mixed Operations', icon: '🔢', color: '#fa8bff' }
     ];
@@ -78,6 +129,20 @@ export default function WorksheetsHub() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mainMode]);
+
+    // Load real currency images on mount
+    useEffect(() => {
+        const loadImages = async () => {
+            try {
+                const currencyImages = await loadCurrencyImages();
+                PDFGenerator.setCurrencyImages(currencyImages);
+                console.log('Currency images loaded:', Object.keys(currencyImages.bills).length + Object.keys(currencyImages.coins).length, 'images');
+            } catch (error) {
+                console.log('Currency images not available, using drawn versions');
+            }
+        };
+        loadImages();
+    }, []);
 
     const loadGrades = async () => {
         try {
@@ -116,6 +181,14 @@ export default function WorksheetsHub() {
             let doc;
             if (activeCategory === 'multiplicationTables') {
                 doc = PDFGenerator.generateMultiplicationTable(template.from, template.to, includeAnswers);
+            } else if (activeCategory === 'simpleAddition') {
+                doc = PDFGenerator.generateSimpleAdditionWorksheet(template.count, template.max, includeAnswers);
+            } else if (activeCategory === 'simpleSubtraction') {
+                doc = PDFGenerator.generateSimpleSubtractionWorksheet(template.count, template.max, includeAnswers);
+            } else if (activeCategory === 'simpleMultiplication') {
+                doc = PDFGenerator.generateSimpleMultiplicationWorksheet(template.count, template.max, includeAnswers);
+            } else if (activeCategory === 'simpleDivision') {
+                doc = PDFGenerator.generateSimpleDivisionWorksheet(template.count, template.max, includeAnswers);
             } else if (activeCategory === 'addition') {
                 doc = PDFGenerator.generateAdditionWorksheet(template.count, template.max, template.difficulty, includeAnswers);
             } else if (activeCategory === 'subtraction') {
@@ -124,6 +197,22 @@ export default function WorksheetsHub() {
                 doc = PDFGenerator.generateMultiplicationWorksheet(template.count, template.max, template.difficulty, includeAnswers);
             } else if (activeCategory === 'division') {
                 doc = PDFGenerator.generateDivisionWorksheet(template.count, template.max, template.difficulty, includeAnswers);
+            } else if (activeCategory === 'romanNumeralsBasic') {
+                doc = PDFGenerator.generateRomanNumeralsBasicWorksheet(template.count, includeAnswers);
+            } else if (activeCategory === 'romanNumeralsAdvanced') {
+                doc = PDFGenerator.generateRomanNumeralsAdvancedWorksheet(template.count, includeAnswers);
+            } else if (activeCategory === 'romanToArabic') {
+                doc = PDFGenerator.generateRomanToArabicWorksheet(template.count, template.max, includeAnswers);
+            } else if (activeCategory === 'arabicToRoman') {
+                doc = PDFGenerator.generateArabicToRomanWorksheet(template.count, template.max, includeAnswers);
+            } else if (activeCategory === 'timeClock') {
+                doc = PDFGenerator.generateTimeClockWorksheet(template.count, template.difficulty, includeAnswers);
+            } else if (activeCategory === 'moneyCurrency') {
+                doc = PDFGenerator.generateMoneyCurrencyWorksheet(template.count, template.difficulty, includeAnswers);
+            } else if (activeCategory === 'measurements') {
+                doc = PDFGenerator.generateMeasurementsWorksheet(template.count, template.difficulty, includeAnswers);
+            } else if (activeCategory === 'patterns') {
+                doc = PDFGenerator.generatePatternsWorksheet(template.count, template.difficulty, includeAnswers);
             } else if (activeCategory === 'numberWriting') {
                 doc = PDFGenerator.generateNumberWritingWorksheet(template.from, template.to, template.percentage);
             } else if (activeCategory === 'mixedOperations') {
@@ -151,6 +240,14 @@ export default function WorksheetsHub() {
             const params = customParams[activeCategory];
             if (activeCategory === 'multiplicationTables') {
                 doc = PDFGenerator.generateMultiplicationTable(params.from, params.to, includeAnswers);
+            } else if (activeCategory === 'simpleAddition') {
+                doc = PDFGenerator.generateSimpleAdditionWorksheet(params.count, params.max, includeAnswers);
+            } else if (activeCategory === 'simpleSubtraction') {
+                doc = PDFGenerator.generateSimpleSubtractionWorksheet(params.count, params.max, includeAnswers);
+            } else if (activeCategory === 'simpleMultiplication') {
+                doc = PDFGenerator.generateSimpleMultiplicationWorksheet(params.count, params.max, includeAnswers);
+            } else if (activeCategory === 'simpleDivision') {
+                doc = PDFGenerator.generateSimpleDivisionWorksheet(params.count, params.max, includeAnswers);
             } else if (activeCategory === 'addition') {
                 doc = PDFGenerator.generateAdditionWorksheet(params.count, params.max, params.difficulty, includeAnswers);
             } else if (activeCategory === 'subtraction') {
@@ -159,6 +256,22 @@ export default function WorksheetsHub() {
                 doc = PDFGenerator.generateMultiplicationWorksheet(params.count, params.max, params.difficulty, includeAnswers);
             } else if (activeCategory === 'division') {
                 doc = PDFGenerator.generateDivisionWorksheet(params.count, params.max, params.difficulty, includeAnswers);
+            } else if (activeCategory === 'romanNumeralsBasic') {
+                doc = PDFGenerator.generateRomanNumeralsBasicWorksheet(params.count, includeAnswers);
+            } else if (activeCategory === 'romanNumeralsAdvanced') {
+                doc = PDFGenerator.generateRomanNumeralsAdvancedWorksheet(params.count, includeAnswers);
+            } else if (activeCategory === 'romanToArabic') {
+                doc = PDFGenerator.generateRomanToArabicWorksheet(params.count, params.max, includeAnswers);
+            } else if (activeCategory === 'arabicToRoman') {
+                doc = PDFGenerator.generateArabicToRomanWorksheet(params.count, params.max, includeAnswers);
+            } else if (activeCategory === 'timeClock') {
+                doc = PDFGenerator.generateTimeClockWorksheet(params.count, params.difficulty, includeAnswers);
+            } else if (activeCategory === 'moneyCurrency') {
+                doc = PDFGenerator.generateMoneyCurrencyWorksheet(params.count, params.difficulty, includeAnswers);
+            } else if (activeCategory === 'measurements') {
+                doc = PDFGenerator.generateMeasurementsWorksheet(params.count, params.difficulty, includeAnswers);
+            } else if (activeCategory === 'patterns') {
+                doc = PDFGenerator.generatePatternsWorksheet(params.count, params.difficulty, includeAnswers);
             } else if (activeCategory === 'numberWriting') {
                 doc = PDFGenerator.generateNumberWritingWorksheet(params.from, params.to, params.percentage);
             } else if (activeCategory === 'mixedOperations') {
@@ -183,6 +296,98 @@ export default function WorksheetsHub() {
         setCustomParams(prev => ({
             ...prev,
             [activeCategory]: { ...prev[activeCategory], [param]: value }
+        }));
+    };
+
+    // Preview worksheet before downloading
+    const previewWorksheet = (template) => {
+        try {
+            setLoading(true);
+            let doc = generatePDFForTemplate(template, false);
+
+            // Convert PDF to blob URL
+            const pdfBlob = doc.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+
+            setPreviewModal({ open: true, pdfUrl, template });
+            setMessage({ type: 'success', text: '✅ Preview ready!' });
+        } catch (error) {
+            setMessage({ type: 'error', text: '❌ Failed to generate preview' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Generate PDF based on template and format preference
+    const generatePDFForTemplate = (template, includeAnswers) => {
+        const format = formatPreference[activeCategory] || 'vertical';
+        let doc;
+
+        // Simple math - check format preference
+        if (activeCategory === 'simpleAddition') {
+            doc = format === 'vertical'
+                ? PDFGenerator.generateSimpleAdditionWorksheet(template.count, template.max, includeAnswers)
+                : PDFGenerator.generateAdditionWorksheet(template.count, template.max, 'easy', includeAnswers);
+        } else if (activeCategory === 'simpleSubtraction') {
+            doc = format === 'vertical'
+                ? PDFGenerator.generateSimpleSubtractionWorksheet(template.count, template.max, includeAnswers)
+                : PDFGenerator.generateSubtractionWorksheet(template.count, template.max, 'easy', includeAnswers);
+        } else if (activeCategory === 'simpleMultiplication') {
+            doc = format === 'vertical'
+                ? PDFGenerator.generateSimpleMultiplicationWorksheet(template.count, template.max, includeAnswers)
+                : PDFGenerator.generateMultiplicationWorksheet(template.count, template.max, 'easy', includeAnswers);
+        } else if (activeCategory === 'simpleDivision') {
+            doc = format === 'vertical'
+                ? PDFGenerator.generateSimpleDivisionWorksheet(template.count, template.max, includeAnswers)
+                : PDFGenerator.generateDivisionWorksheet(template.count, template.max, 'easy', includeAnswers);
+        } else if (activeCategory === 'multiplicationTables') {
+            doc = PDFGenerator.generateMultiplicationTable(template.from, template.to, includeAnswers);
+        } else if (activeCategory === 'addition') {
+            doc = PDFGenerator.generateAdditionWorksheet(template.count, template.max, template.difficulty, includeAnswers);
+        } else if (activeCategory === 'subtraction') {
+            doc = PDFGenerator.generateSubtractionWorksheet(template.count, template.max, template.difficulty, includeAnswers);
+        } else if (activeCategory === 'multiplication') {
+            doc = PDFGenerator.generateMultiplicationWorksheet(template.count, template.max, template.difficulty, includeAnswers);
+        } else if (activeCategory === 'division') {
+            doc = PDFGenerator.generateDivisionWorksheet(template.count, template.max, template.difficulty, includeAnswers);
+        } else if (activeCategory === 'romanNumeralsBasic') {
+            doc = PDFGenerator.generateRomanNumeralsBasicWorksheet(template.count, includeAnswers);
+        } else if (activeCategory === 'romanNumeralsAdvanced') {
+            doc = PDFGenerator.generateRomanNumeralsAdvancedWorksheet(template.count, includeAnswers);
+        } else if (activeCategory === 'romanToArabic') {
+            doc = PDFGenerator.generateRomanToArabicWorksheet(template.count, template.max, includeAnswers);
+        } else if (activeCategory === 'arabicToRoman') {
+            doc = PDFGenerator.generateArabicToRomanWorksheet(template.count, template.max, includeAnswers);
+        } else if (activeCategory === 'timeClock') {
+            doc = PDFGenerator.generateTimeClockWorksheet(template.count, template.difficulty, includeAnswers);
+        } else if (activeCategory === 'moneyCurrency') {
+            doc = PDFGenerator.generateMoneyCurrencyWorksheet(template.count, template.difficulty, includeAnswers);
+        } else if (activeCategory === 'measurements') {
+            doc = PDFGenerator.generateMeasurementsWorksheet(template.count, template.difficulty, includeAnswers);
+        } else if (activeCategory === 'patterns') {
+            doc = PDFGenerator.generatePatternsWorksheet(template.count, template.difficulty, includeAnswers);
+        } else if (activeCategory === 'numberWriting') {
+            doc = PDFGenerator.generateNumberWritingWorksheet(template.from, template.to, template.percentage);
+        } else if (activeCategory === 'mixedOperations') {
+            doc = PDFGenerator.generateMixedOperationsWorksheet(template.count, template.max, template.difficulty, includeAnswers);
+        }
+
+        return doc;
+    };
+
+    // Close preview modal
+    const closePreview = () => {
+        if (previewModal.pdfUrl) {
+            URL.revokeObjectURL(previewModal.pdfUrl);
+        }
+        setPreviewModal({ open: false, pdfUrl: null, template: null });
+    };
+
+    // Toggle format preference
+    const toggleFormat = () => {
+        setFormatPreference(prev => ({
+            ...prev,
+            [activeCategory]: prev[activeCategory] === 'vertical' ? 'horizontal' : 'vertical'
         }));
     };
 
@@ -376,64 +581,118 @@ export default function WorksheetsHub() {
                     </div>
 
                     {mathMode === 'templates' && (
-                        <div className="templates-grid">
-                            {WORKSHEET_TEMPLATES[activeCategory]?.map(template => (
-                                <div key={template.id} className="template-card">
-                                    <div className="template-header">
-                                        <h3>{template.name}</h3>
-                                        <span
-                                            className="template-id"
-                                            style={{ background: categories.find(c => c.id === activeCategory)?.color }}
-                                        >
-                                            #{template.id}
+                        <>
+                            {/* Format Toggle for math categories */}
+                            {['simpleAddition', 'simpleSubtraction', 'simpleMultiplication', 'simpleDivision', 'addition', 'subtraction', 'multiplication', 'division'].includes(activeCategory) && (
+                                <div className="format-toggle-container">
+                                    <div className="format-info">
+                                        <span className="format-label">Problem Layout:</span>
+                                        <span className="format-default">
+                                            {['simpleAddition', 'simpleSubtraction', 'simpleMultiplication', 'simpleDivision'].includes(activeCategory)
+                                                ? '(Default: Vertical ⬇️)'
+                                                : '(Default: Horizontal ➡️)'}
                                         </span>
                                     </div>
-                                    <p className="template-description">{template.description}</p>
-                                    <div className="template-details">
-                                        {template.from !== undefined && (
-                                            <span className="detail-badge">📊 {template.from}-{template.to}</span>
-                                        )}
-                                        {template.count !== undefined && (
-                                            <span className="detail-badge">📝 {template.count} problems</span>
-                                        )}
-                                        {template.difficulty && (
-                                            <span className={`detail-badge difficulty-${template.difficulty}`}>
-                                                {template.difficulty.toUpperCase()}
-                                            </span>
-                                        )}
-                                        {template.percentage !== undefined && (
-                                            <span className="detail-badge">🎯 {template.percentage}% blank</span>
-                                        )}
-                                    </div>
-                                    <div className="template-actions">
+                                    <div className="format-toggle-buttons">
                                         <button
-                                            className="btn-download worksheet-btn"
-                                            onClick={() => generateFromTemplate(template, false)}
-                                            disabled={loading}
+                                            className={`format-option ${formatPreference[activeCategory] === 'vertical' ? 'active' : ''}`}
+                                            onClick={() => setFormatPreference(prev => ({ ...prev, [activeCategory]: 'vertical' }))}
+                                            title="Column/Stacked format - Traditional method"
                                         >
-                                            📄 Download
+                                            <div className="format-icon">📐</div>
+                                            <div className="format-name">Vertical</div>
+                                            <div className="format-preview-mini">
+                                                <pre>  123{'\n'}+ 456{'\n'}-----</pre>
+                                            </div>
                                         </button>
                                         <button
-                                            className="btn-download print-btn"
-                                            onClick={() => generateFromTemplate(template, false, true)}
-                                            disabled={loading}
-                                            title="Print worksheet"
+                                            className={`format-option ${formatPreference[activeCategory] === 'horizontal' ? 'active' : ''}`}
+                                            onClick={() => setFormatPreference(prev => ({ ...prev, [activeCategory]: 'horizontal' }))}
+                                            title="Row/Table format - Compact layout"
                                         >
-                                            🖨️ Print
+                                            <div className="format-icon">➡️</div>
+                                            <div className="format-name">Horizontal</div>
+                                            <div className="format-preview-mini">
+                                                <span>123 + 456 = ___</span>
+                                            </div>
                                         </button>
-                                        {activeCategory !== 'numberWriting' && (
-                                            <button
-                                                className="btn-download answer-btn"
-                                                onClick={() => generateFromTemplate(template, true)}
-                                                disabled={loading}
-                                            >
-                                                ✅ Answers
-                                            </button>
-                                        )}
                                     </div>
                                 </div>
-                            ))}
-                        </div>
+                            )}
+
+                            <div className="templates-grid">
+                                {WORKSHEET_TEMPLATES[activeCategory]?.map(template => (
+                                    <div key={template.id} className="template-card">
+                                        <div className="template-header">
+                                            <h3>{template.name}</h3>
+                                            <span
+                                                className="template-id"
+                                                style={{ background: categories.find(c => c.id === activeCategory)?.color }}
+                                            >
+                                                #{template.id}
+                                            </span>
+                                        </div>
+                                        <p className="template-description">{template.description}</p>
+                                        <div className="template-details">
+                                            {template.from !== undefined && (
+                                                <span className="detail-badge">📊 {template.from}-{template.to}</span>
+                                            )}
+                                            {template.count !== undefined && (
+                                                <span className="detail-badge">📝 {template.count} problems</span>
+                                            )}
+                                            {template.difficulty && (
+                                                <span className={`detail-badge difficulty-${template.difficulty}`}>
+                                                    {template.difficulty.toUpperCase()}
+                                                </span>
+                                            )}
+                                            {template.percentage !== undefined && (
+                                                <span className="detail-badge">🎯 {template.percentage}% blank</span>
+                                            )}
+                                        </div>
+                                        <div className="template-actions">
+                                            <button
+                                                className="btn-icon preview-btn"
+                                                onClick={() => previewWorksheet(template)}
+                                                disabled={loading}
+                                                title="Preview worksheet"
+                                                aria-label="Preview"
+                                            >
+                                                👁️
+                                            </button>
+                                            <button
+                                                className="btn-icon download-btn"
+                                                onClick={() => generateFromTemplate(template, false)}
+                                                disabled={loading}
+                                                title="Download worksheet"
+                                                aria-label="Download"
+                                            >
+                                                📥
+                                            </button>
+                                            <button
+                                                className="btn-icon print-btn"
+                                                onClick={() => generateFromTemplate(template, false, true)}
+                                                disabled={loading}
+                                                title="Print worksheet"
+                                                aria-label="Print"
+                                            >
+                                                🖨️
+                                            </button>
+                                            {activeCategory !== 'numberWriting' && (
+                                                <button
+                                                    className="btn-icon answer-btn"
+                                                    onClick={() => generateFromTemplate(template, true)}
+                                                    disabled={loading}
+                                                    title="Download with answers"
+                                                    aria-label="Answers"
+                                                >
+                                                    ✅
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
                     )}
 
                     {mathMode === 'custom' && (
@@ -788,6 +1047,56 @@ export default function WorksheetsHub() {
                 <div className="loading-overlay">
                     <div className="spinner-large"></div>
                     <p>Processing...</p>
+                </div>
+            )}
+
+            {/* Preview Modal */}
+            {previewModal.open && (
+                <div className="preview-modal-overlay" onClick={closePreview}>
+                    <div className="preview-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="preview-modal-header">
+                            <h2>📄 Worksheet Preview</h2>
+                            <button className="preview-close-btn" onClick={closePreview}>✕</button>
+                        </div>
+                        <div className="preview-modal-body">
+                            {previewModal.pdfUrl && (
+                                <iframe
+                                    src={previewModal.pdfUrl}
+                                    title="Worksheet Preview"
+                                    className="preview-pdf-iframe"
+                                />
+                            )}
+                        </div>
+                        <div className="preview-modal-footer">
+                            <button
+                                className="preview-action-btn download-btn"
+                                onClick={() => {
+                                    generateFromTemplate(previewModal.template, false);
+                                    closePreview();
+                                }}
+                            >
+                                📥 Download Worksheet
+                            </button>
+                            <button
+                                className="preview-action-btn answer-btn"
+                                onClick={() => {
+                                    generateFromTemplate(previewModal.template, true);
+                                    closePreview();
+                                }}
+                            >
+                                ✅ Download with Answers
+                            </button>
+                            <button
+                                className="preview-action-btn print-btn"
+                                onClick={() => {
+                                    generateFromTemplate(previewModal.template, false, true);
+                                    closePreview();
+                                }}
+                            >
+                                🖨️ Print
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

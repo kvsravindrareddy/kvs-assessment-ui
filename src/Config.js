@@ -7,7 +7,8 @@ const CONFIG = {
         ADMIN_QUESTIONS_URL: 'http://localhost:9000/v1/questions',
         AI_ASSESSMENT_BASE_URL: 'http://localhost:9000',
         ASSESSMENT_BASE_URL: 'http://localhost:9000',
-        ADMIN_SUPPORT_BASE_URL: 'http://localhost:9000'
+        ADMIN_SUPPORT_BASE_URL: 'http://localhost:9000',
+        AUTH_SERVICE_URL: 'http://localhost:9000' // Auth service for feature access control
     },
     staging: {
         GATEWAY_URL: 'http://localhost:9000',
@@ -16,7 +17,8 @@ const CONFIG = {
         ADMIN_QUESTIONS_URL: 'http://localhost:9000/v1/questions',
         AI_ASSESSMENT_BASE_URL: 'http://localhost:9000',
         ASSESSMENT_BASE_URL: 'http://localhost:9000',
-        ADMIN_SUPPORT_BASE_URL: 'http://localhost:9000'
+        ADMIN_SUPPORT_BASE_URL: 'http://localhost:9000',
+        AUTH_SERVICE_URL: 'http://localhost:9000'
     },
     production: {
         GATEWAY_URL: 'http://localhost:9000',
@@ -25,7 +27,8 @@ const CONFIG = {
         ADMIN_QUESTIONS_URL: 'http://localhost:9000/v1/questions',
         AI_ASSESSMENT_BASE_URL: 'http://localhost:9000',
         ASSESSMENT_BASE_URL: 'http://localhost:9000',
-        ADMIN_SUPPORT_BASE_URL: 'http://localhost:9000'
+        ADMIN_SUPPORT_BASE_URL: 'http://localhost:9000',
+        AUTH_SERVICE_URL: 'http://localhost:9000'
     }
 };
 

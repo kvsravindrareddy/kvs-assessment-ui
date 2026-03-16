@@ -23,6 +23,7 @@ import Settings from './pages/admin/Settings';
 import FlashMessageManager from './pages/admin/FlashMessageManager';
 import ContentLibrary from './pages/admin/ContentLibrary';
 import WorksheetManager from './pages/admin/WorksheetManager';
+import FeatureAccessControl from './pages/admin/FeatureAccessControl';
 import AboutUs from './pages/admin/AboutUs';
 import PrivacyPolicy from './pages/admin/PrivacyPolicy';
 import TermsOfService from './pages/admin/TermsOfService';
@@ -39,6 +40,7 @@ import AssessmentsHub from './pages/assessments/AssessmentsHub'; // <-- Added Im
 import MathByGrade from './pages/assessments/MathByGrade'; // <-- Math By Grade Import
 import ChallengeArena from './pages/assessments/ChallengeArena'; // <-- Challenge Arena Import
 import LeaderboardView from './pages/assessments/LeaderboardView'; // <-- Leaderboard View Import
+import ITLearningHub from './pages/it-learning/ITLearningHub'; // <-- IT Learning Hub Import
 
 // Parent Pages
 import ParentMoments from './pages/parent/ParentMoments';
@@ -164,6 +166,16 @@ export const router = createBrowserRouter([
     )
   },
   {
+    path: '/it-learning-hub',
+    element: (
+      <ProtectedRoute>
+        <UnifiedDashboard>
+          <ITLearningHub />
+        </UnifiedDashboard>
+      </ProtectedRoute>
+    )
+  },
+  {
     path: '/parent/moments',
     element: (
       <ProtectedRoute requiredRole={['PARENT']}>
@@ -212,6 +224,10 @@ export const router = createBrowserRouter([
       {
         path: 'flash-messages',
         element: <FlashMessageManager />
+      },
+      {
+        path: 'feature-access',
+        element: <FeatureAccessControl />
       },
       {
         path: 'content-library',

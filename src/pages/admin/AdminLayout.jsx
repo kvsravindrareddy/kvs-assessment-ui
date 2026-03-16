@@ -14,7 +14,8 @@ import {
   BellIcon,
   MagnifyingGlassIcon,
   MegaphoneIcon, // <-- Added Icon for Flash Alerts
-  FolderIcon // <-- Added Icon for Content Library
+  FolderIcon, // <-- Added Icon for Content Library
+  AdjustmentsHorizontalIcon // <-- Added Icon for Feature Access Control
 } from '@heroicons/react/24/outline';
 
 /**
@@ -28,13 +29,39 @@ const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const menuItems = [
-    { path: '/admin/dashboard', icon: HomeIcon, label: 'Dashboard', color: 'text-blue-600' },
-    { path: '/admin/content-library', icon: FolderIcon, label: 'Content Library', color: 'text-indigo-600' }, // <-- Content Library Hub
-    { path: '/admin/users', icon: UserGroupIcon, label: 'Users', color: 'text-orange-600' },
-    { path: '/admin/analytics', icon: ChartBarIcon, label: 'Analytics', color: 'text-pink-600' },
-    { path: '/admin/flash-messages', icon: MegaphoneIcon, label: 'Flash Alerts', color: 'text-yellow-500' },
-    { path: '/admin/settings', icon: Cog6ToothIcon, label: 'Settings', color: 'text-gray-600' },
+  const menuSections = [
+    {
+      title: 'Overview',
+      items: [
+        { path: '/admin/dashboard', icon: HomeIcon, label: 'Dashboard', color: 'text-blue-600' },
+      ]
+    },
+    {
+      title: 'Content Management',
+      items: [
+        { path: '/admin/content-library', icon: FolderIcon, label: 'Content Library', color: 'text-indigo-600' },
+      ]
+    },
+    {
+      title: 'System Administration',
+      items: [
+        { path: '/admin/users', icon: UserGroupIcon, label: 'User Management', color: 'text-orange-600' },
+        { path: '/admin/feature-access', icon: AdjustmentsHorizontalIcon, label: 'Access Control & Permissions', color: 'text-purple-600' },
+        { path: '/admin/flash-messages', icon: MegaphoneIcon, label: 'Announcements', color: 'text-yellow-500' },
+      ]
+    },
+    {
+      title: 'Insights',
+      items: [
+        { path: '/admin/analytics', icon: ChartBarIcon, label: 'Analytics', color: 'text-pink-600' },
+      ]
+    },
+    {
+      title: 'Configuration',
+      items: [
+        { path: '/admin/settings', icon: Cog6ToothIcon, label: 'Settings', color: 'text-gray-600' },
+      ]
+    }
   ];
 
   const handleLogout = () => {
@@ -80,33 +107,44 @@ const AdminLayout = () => {
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
+        <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
+          {menuSections.map((section, idx) => (
+            <div key={idx}>
+              {sidebarOpen && (
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-3">
+                  {section.title}
+                </h3>
+              )}
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.path);
 
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`
-                  flex items-center space-x-3 p-3 rounded-lg transition-all
-                  ${active
-                    ? 'bg-blue-50 text-blue-600 shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-50'
-                  }
-                  ${!sidebarOpen && 'justify-center'}
-                `}
-              >
-                <Icon className={`w-6 h-6 ${active ? item.color : 'text-gray-400'}`} />
-                {sidebarOpen && (
-                  <span className={`font-medium ${active ? 'font-semibold' : ''}`}>
-                    {item.label}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`
+                        flex items-center space-x-3 p-3 rounded-lg transition-all
+                        ${active
+                          ? 'bg-blue-50 text-blue-600 shadow-sm'
+                          : 'text-gray-700 hover:bg-gray-50'
+                        }
+                        ${!sidebarOpen && 'justify-center'}
+                      `}
+                    >
+                      <Icon className={`w-6 h-6 ${active ? item.color : 'text-gray-400'}`} />
+                      {sidebarOpen && (
+                        <span className={`font-medium ${active ? 'font-semibold' : ''}`}>
+                          {item.label}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         {/* User Profile */}
@@ -151,29 +189,38 @@ const AdminLayout = () => {
                 <XMarkIcon className="w-6 h-6 text-gray-600" />
               </button>
             </div>
-            <nav className="p-4 space-y-2">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.path);
+            <nav className="p-4 space-y-4">
+              {menuSections.map((section, idx) => (
+                <div key={idx}>
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-3">
+                    {section.title}
+                  </h3>
+                  <div className="space-y-1">
+                    {section.items.map((item) => {
+                      const Icon = item.icon;
+                      const active = isActive(item.path);
 
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`
-                      flex items-center space-x-3 p-3 rounded-lg
-                      ${active
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'text-gray-700 hover:bg-gray-50'
-                      }
-                    `}
-                  >
-                    <Icon className={`w-6 h-6 ${active ? item.color : 'text-gray-400'}`} />
-                    <span className="font-medium">{item.label}</span>
-                  </Link>
-                );
-              })}
+                      return (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`
+                            flex items-center space-x-3 p-3 rounded-lg
+                            ${active
+                              ? 'bg-blue-50 text-blue-600'
+                              : 'text-gray-700 hover:bg-gray-50'
+                            }
+                          `}
+                        >
+                          <Icon className={`w-6 h-6 ${active ? item.color : 'text-gray-400'}`} />
+                          <span className="font-medium">{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </nav>
           </aside>
         </div>
