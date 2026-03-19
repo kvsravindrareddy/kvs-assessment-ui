@@ -29,16 +29,27 @@ export const getLocation = (setLocation, user = null) => {
 
   const fetchLocationData = async (browserLat = null, browserLon = null) => {
     try {
-      const geoResponse = await fetch('https://ipapi.co/json/');
-      const geoData = await geoResponse.json();
-
+      // Use ipify for IP address (CORS-friendly)
       let ipv4Address = 'Unknown';
+      let geoData = {};
+
       try {
-        const ipv4Response = await fetch('https://api4.ipify.org?format=json');
+        const ipv4Response = await fetch('https://api.ipify.org?format=json');
         const ipv4Data = await ipv4Response.json();
         ipv4Address = ipv4Data.ip;
       } catch (e) {
-        console.warn('Could not fetch explicit IPv4');
+        console.warn('Could not fetch IPv4 address');
+      }
+
+      // Try to get geolocation data from ip-api.com (CORS-friendly, free)
+      try {
+        const geoResponse = await fetch(`http://ip-api.com/json/${ipv4Address}?fields=status,country,countryCode,region,regionName,city,zip,lat,lon,timezone`);
+        const data = await geoResponse.json();
+        if (data.status === 'success') {
+          geoData = data;
+        }
+      } catch (e) {
+        console.warn('Could not fetch geolocation data from IP');
       }
 
       let fullAddress = {};
@@ -47,16 +58,16 @@ export const getLocation = (setLocation, user = null) => {
       }
 
       const finalData = {
-        latitude: browserLat || geoData.latitude,
-        longitude: browserLon || geoData.longitude,
+        latitude: browserLat || geoData.lat || 0,
+        longitude: browserLon || geoData.lon || 0,
         city: fullAddress.city || fullAddress.town || geoData.city || 'Unknown',
-        state: fullAddress.state || geoData.region || 'Unknown',
-        country: fullAddress.country || geoData.country_name || 'Unknown',
-        zipCode: fullAddress.postcode || geoData.postal || 'Unknown',
+        state: fullAddress.state || geoData.regionName || 'Unknown',
+        country: fullAddress.country || geoData.country || 'Unknown',
+        zipCode: fullAddress.postcode || geoData.zip || 'Unknown',
         street: fullAddress.road || 'Unknown',
         neighborhood: fullAddress.suburb || fullAddress.neighbourhood || 'Unknown',
-        defaultIp: geoData.ip || 'Unknown', 
-        ipv4: ipv4Address                   
+        defaultIp: ipv4Address,
+        ipv4: ipv4Address
       };
 
       // Set the UI state

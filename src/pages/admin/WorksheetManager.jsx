@@ -40,6 +40,8 @@ export default function WorksheetManager() {
     const [loadedQuestions, setLoadedQuestions] = useState([]);
     const [loadedStories, setLoadedStories] = useState([]);
     const [responseTime, setResponseTime] = useState(null);
+    const [imageGenerating, setImageGenerating] = useState({});
+    const [batchImageGenerating, setBatchImageGenerating] = useState(false);
 
     const categories = getAllCategories();
     const difficulties = ['BEGINNER', 'EASY', 'MEDIUM', 'HARD', 'ADVANCED', 'EXPERT'];
@@ -292,6 +294,92 @@ export default function WorksheetManager() {
         }
         alert('Story worksheet PDF generation coming soon! Stories loaded: ' + loadedStories.length);
         // TODO: Integrate with PDFGenerator to create worksheet from stories
+    };
+
+    // AI Image Generation Functions
+    const generateImageForStory = async (storyId, provider = 'DALL_E_3') => {
+        setImageGenerating(prev => ({ ...prev, [storyId]: true }));
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.post(
+                `${CONFIG.development.ADMIN_API_URL}/v1/stories/images/generate/${storyId}?provider=${provider}`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (response.data.success) {
+                alert(`✅ Image generated successfully! URL: ${response.data.imageUrl}`);
+                // Refresh the stories to show the new image
+                loadStoriesFromBackend();
+            } else {
+                alert(`❌ Failed to generate image: ${response.data.error}`);
+            }
+        } catch (error) {
+            console.error('Error generating image:', error);
+            alert('❌ Failed to generate image: ' + (error.response?.data?.error || error.message));
+        } finally {
+            setImageGenerating(prev => ({ ...prev, [storyId]: false }));
+        }
+    };
+
+    const batchGenerateImages = async (provider = 'DALL_E_3') => {
+        if (loadedStories.length === 0) {
+            alert('Please load stories first');
+            return;
+        }
+
+        setBatchImageGenerating(true);
+        try {
+            const token = localStorage.getItem('token');
+            const storyIds = loadedStories.map(s => s.id);
+
+            const response = await axios.post(
+                `${CONFIG.development.ADMIN_API_URL}/v1/stories/images/batch-generate`,
+                {
+                    storyIds: storyIds,
+                    provider: provider
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (response.data.success) {
+                alert(`✅ Batch generation complete!\nSuccessful: ${response.data.successful}\nFailed: ${response.data.failed}\nTotal: ${response.data.total}`);
+                // Refresh the stories to show the new images
+                loadStoriesFromBackend();
+            } else {
+                alert(`❌ Batch generation failed: ${response.data.error}`);
+            }
+        } catch (error) {
+            console.error('Error in batch generation:', error);
+            alert('❌ Batch generation failed: ' + (error.response?.data?.error || error.message));
+        } finally {
+            setBatchImageGenerating(false);
+        }
+    };
+
+    const removeStoryImage = async (storyId) => {
+        if (!window.confirm('Are you sure you want to remove this image?')) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.delete(
+                `${CONFIG.development.ADMIN_API_URL}/v1/stories/images/${storyId}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (response.data.success === 'true') {
+                alert('✅ Image removed successfully!');
+                // Refresh the stories
+                loadStoriesFromBackend();
+            } else {
+                alert(`❌ Failed to remove image: ${response.data.error}`);
+            }
+        } catch (error) {
+            console.error('Error removing image:', error);
+            alert('❌ Failed to remove image: ' + (error.response?.data?.error || error.message));
+        }
     };
 
     const renderCategoryForm = () => {
@@ -721,10 +809,156 @@ export default function WorksheetManager() {
                     {loadedStories.length > 0 && (
                         <div className="loaded-content" style={{ background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)' }}>
                             <h3 style={{ marginBottom: '16px' }}>✅ Loaded {loadedStories.length} Stories</h3>
+
+                            {/* Batch Image Generation Controls */}
+                            <div style={{ marginBottom: '20px', padding: '16px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '8px' }}>
+                                <h4 style={{ color: 'white', marginBottom: '12px' }}>🎨 AI Image Generation</h4>
+                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                                    <button
+                                        onClick={() => batchGenerateImages('DALL_E_3')}
+                                        disabled={batchImageGenerating}
+                                        style={{
+                                            padding: '10px 20px',
+                                            background: batchImageGenerating ? '#9ca3af' : '#10b981',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '6px',
+                                            fontSize: '14px',
+                                            fontWeight: '600',
+                                            cursor: batchImageGenerating ? 'not-allowed' : 'pointer',
+                                            opacity: batchImageGenerating ? 0.6 : 1
+                                        }}
+                                    >
+                                        {batchImageGenerating ? '⏳ Generating...' : '🖼️ Batch Generate Images (DALL-E 3)'}
+                                    </button>
+                                    <button
+                                        onClick={() => batchGenerateImages('GEMINI')}
+                                        disabled={batchImageGenerating}
+                                        style={{
+                                            padding: '10px 20px',
+                                            background: batchImageGenerating ? '#9ca3af' : '#8b5cf6',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '6px',
+                                            fontSize: '14px',
+                                            fontWeight: '600',
+                                            cursor: batchImageGenerating ? 'not-allowed' : 'pointer',
+                                            opacity: batchImageGenerating ? 0.6 : 1
+                                        }}
+                                    >
+                                        {batchImageGenerating ? '⏳ Generating...' : '🎨 Batch Generate Images (Gemini)'}
+                                    </button>
+                                </div>
+                                <p style={{ color: 'white', fontSize: '12px', marginTop: '8px', opacity: 0.9 }}>
+                                    💡 Batch generation will create images for all stories without existing images. Rate-limited to 1 image every 2 seconds.
+                                </p>
+                            </div>
+
                             <div style={{ maxHeight: '400px', overflowY: 'auto', marginBottom: '20px' }}>
                                 {loadedStories.map((s, idx) => (
-                                    <div key={idx} style={{ padding: '12px', background: '#f8fafc', marginBottom: '10px', borderRadius: '8px', borderLeft: '4px solid #f093fb' }}>
-                                        <strong>Story {idx + 1}:</strong> {s.title || s.name || JSON.stringify(s).substring(0, 100)}
+                                    <div key={idx} style={{
+                                        padding: '16px',
+                                        background: '#f8fafc',
+                                        marginBottom: '12px',
+                                        borderRadius: '8px',
+                                        borderLeft: '4px solid #f093fb',
+                                        display: 'flex',
+                                        gap: '16px',
+                                        alignItems: 'flex-start'
+                                    }}>
+                                        {/* Story Image Preview */}
+                                        {s.imageUrl && (
+                                            <div style={{
+                                                width: '120px',
+                                                height: '120px',
+                                                borderRadius: '8px',
+                                                overflow: 'hidden',
+                                                flexShrink: 0,
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                            }}>
+                                                <img
+                                                    src={s.imageUrl}
+                                                    alt={s.title}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        objectFit: 'cover'
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* Story Details */}
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ marginBottom: '8px' }}>
+                                                <strong>Story {idx + 1}:</strong> {s.title || s.name || JSON.stringify(s).substring(0, 100)}
+                                            </div>
+
+                                            {s.imageUrl && (
+                                                <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>
+                                                    ✅ Image: {s.imageSource || 'Generated'} |
+                                                    {s.imagePrompt && ` Prompt: ${s.imagePrompt.substring(0, 60)}...`}
+                                                </div>
+                                            )}
+
+                                            {/* Image Action Buttons */}
+                                            <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+                                                {!s.imageUrl ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() => generateImageForStory(s.id, 'DALL_E_3')}
+                                                            disabled={imageGenerating[s.id]}
+                                                            style={{
+                                                                padding: '6px 12px',
+                                                                background: imageGenerating[s.id] ? '#9ca3af' : '#3b82f6',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                fontSize: '12px',
+                                                                fontWeight: '500',
+                                                                cursor: imageGenerating[s.id] ? 'not-allowed' : 'pointer',
+                                                                opacity: imageGenerating[s.id] ? 0.6 : 1
+                                                            }}
+                                                        >
+                                                            {imageGenerating[s.id] ? '⏳ Generating...' : '🖼️ Generate Image (DALL-E)'}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => generateImageForStory(s.id, 'GEMINI')}
+                                                            disabled={imageGenerating[s.id]}
+                                                            style={{
+                                                                padding: '6px 12px',
+                                                                background: imageGenerating[s.id] ? '#9ca3af' : '#8b5cf6',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                fontSize: '12px',
+                                                                fontWeight: '500',
+                                                                cursor: imageGenerating[s.id] ? 'not-allowed' : 'pointer',
+                                                                opacity: imageGenerating[s.id] ? 0.6 : 1
+                                                            }}
+                                                        >
+                                                            {imageGenerating[s.id] ? '⏳ Generating...' : '🎨 Generate Image (Gemini)'}
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => removeStoryImage(s.id)}
+                                                        style={{
+                                                            padding: '6px 12px',
+                                                            background: '#ef4444',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '4px',
+                                                            fontSize: '12px',
+                                                            fontWeight: '500',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        🗑️ Remove Image
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 ))}
                             </div>

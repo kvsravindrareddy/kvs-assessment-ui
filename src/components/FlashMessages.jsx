@@ -34,6 +34,12 @@ export default function FlashMessages() {
                     signal: abortController.signal
                 });
 
+                // If endpoint not implemented yet, exit silently
+                if (response.status === 404 || response.status === 500) {
+                    console.debug('Flash message stream not available');
+                    return;
+                }
+
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let buffer = '';
@@ -77,8 +83,8 @@ export default function FlashMessages() {
                 }
             } catch (err) {
                 if (err.name !== 'AbortError') {
-                    // Auto-reconnect on network failure
-                    setTimeout(connectStream, 5000);
+                    console.debug('Flash message stream error:', err.message);
+                    // Don't retry - endpoint not implemented yet
                 }
             }
         };

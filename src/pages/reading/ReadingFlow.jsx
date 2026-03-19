@@ -449,20 +449,27 @@ export default function ReadingFlow() {
               ) : displayedStories.length > 0 ? (
                 <>
                   <div className="story-grid small-cards">
-                    {displayedStories.map(story => (
-                      <div key={story.id} className="timeless-card" onClick={() => fetchStoryDetails(story.id)}>
-                        <div className="card-graphic">
-                           <span className="graphic-icon">✨</span>
+                    {displayedStories.map((story, index) => {
+                      return (
+                        <div key={story.id} className="timeless-card story-card-enhanced" onClick={() => fetchStoryDetails(story.id)}>
+                          {story.imageUrl && (
+                            <div className="story-card-image">
+                              <img src={story.imageUrl} alt={story.title} />
+                            </div>
+                          )}
+                          <div className="card-content story-content-clean">
+                            <h4 className="story-title">{story.title}</h4>
+                            {story.storyType && (
+                              <span className="story-type-badge">{story.storyType}</span>
+                            )}
+                          </div>
+                          <div className="card-footer story-footer">
+                            <span className="read-text">Start Reading</span>
+                            <span className="arrow">→</span>
+                          </div>
                         </div>
-                        <div className="card-content">
-                          <h4>{story.title}</h4>
-                        </div>
-                        <div className="card-footer">
-                          <span>Read</span>
-                          <span className="arrow">→</span>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {totalPages > 1 && (
@@ -498,33 +505,82 @@ export default function ReadingFlow() {
           </main>
         </div>
       ) : (
-        <div className="focus-reading-mode">
-          <button className="back-btn" onClick={() => { 
-              window.speechSynthesis.cancel(); 
-              setStoryDetails(null); 
+        <div className="focus-reading-mode world-class-reader">
+          <button className="back-btn-elegant" onClick={() => {
+              window.speechSynthesis.cancel();
+              setStoryDetails(null);
               navigate('/reading');
           }}>
-            ← Back to Library
+            <span className="back-icon">←</span>
+            <span>Back to Library</span>
           </button>
-          
-          <div className="reading-canvas">
-            <h2 className="reading-title">{storyDetails.title}</h2>
-            <div className="reading-content">{storyDetails.content}</div>
 
-            <div className="action-bar">
-              <button className="tool-btn" onClick={playAll}>🔊 Read Aloud</button>
-              <button className="tool-btn" onClick={exportPDF}>📄 Download PDF</button>
-              <button className="tool-btn" onClick={previewPDF}>🖨 Preview PDF</button>
+          <div className="reading-canvas-premium">
+            <div className="story-header-elegant">
+              <div className="story-icon-large">📖</div>
+              <div className="story-header-content">
+                <h1 className="reading-title-elegant">{storyDetails.title}</h1>
+                <div className="story-metadata">
+                  <span className="metadata-item">
+                    <span className="meta-icon">📝</span>
+                    {storyDetails.questions?.length || 0} Questions
+                  </span>
+                  <span className="metadata-item">
+                    <span className="meta-icon">⏱️</span>
+                    {Math.ceil((storyDetails.content?.split(' ').length || 0) / 200)} min read
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="reading-content-elegant">
+              <div className="content-text">
+                {storyDetails.content}
+              </div>
+            </div>
+
+            <div className="action-bar-elegant">
+              <button className="tool-btn-elegant primary" onClick={playAll}>
+                <span className="btn-icon">🔊</span>
+                <span>Read Aloud</span>
+              </button>
+              <button className="tool-btn-elegant secondary" onClick={exportPDF}>
+                <span className="btn-icon">📄</span>
+                <span>Download PDF</span>
+              </button>
+              <button className="tool-btn-elegant secondary" onClick={previewPDF}>
+                <span className="btn-icon">🖨</span>
+                <span>Preview</span>
+              </button>
             </div>
 
             <div className="assessment-section">
               {completed ? (
                 <div className="assessment-done-card">
                   <div className="done-icon">🏆</div>
-                  <h3>Assessment Complete</h3>
+                  <h3>Assessment Complete!</h3>
                   <div className="score-display">
-                    <span className="score-number">{score}</span> / {storyDetails.questions.length}
+                    <div className="score-label">Your Score</div>
+                    <div className="score-numbers">
+                      <span className="score-earned">{score}</span>
+                      <span className="score-divider">/</span>
+                      <span className="score-total">{storyDetails.questions.length}</span>
+                    </div>
+                    <div className="score-percentage">
+                      {Math.round((score / storyDetails.questions.length) * 100)}%
+                    </div>
                   </div>
+                  <button
+                    className="modern-submit-btn"
+                    onClick={() => {
+                      window.speechSynthesis.cancel();
+                      setStoryDetails(null);
+                      navigate('/reading');
+                    }}
+                    style={{ marginTop: '20px' }}
+                  >
+                    Return to Library
+                  </button>
                 </div>
               ) : (
                 storyDetails.questions && storyDetails.questions.length > 0 && (
