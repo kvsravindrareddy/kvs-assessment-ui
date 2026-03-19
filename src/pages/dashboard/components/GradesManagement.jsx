@@ -58,7 +58,7 @@ const GradesManagement = () => {
     }
   };
 
-  // --- 1. GRADES INITIALIZATION (Brought back!) ---
+  // --- 1. GRADES INITIALIZATION ---
   const initializeDefaultGrades = async () => {
     if (!window.confirm('Initialize default grades (PRE_K through XII)? This will not affect existing grades.')) return;
     try {
@@ -68,6 +68,10 @@ const GradesManagement = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      
+      // --- CLEAR CACHE ---
+      localStorage.removeItem('kivo_dynamic_grades_cache');
+      
       alert('Default grades initialized successfully');
       loadInitialData(); // Refresh everything
     } catch (error) {
@@ -128,6 +132,9 @@ const GradesManagement = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
+      // --- CLEAR CACHE ---
+      localStorage.removeItem('kivo_dynamic_grades_cache');
+      
       // Optimistic update using returned GradeEntity
       setGrades(grades.map(g => g.id === gradeId ? response.data : g));
     } catch (error) {
@@ -144,6 +151,10 @@ const GradesManagement = () => {
         `${CONFIG.development.GATEWAY_URL}/admin-assessment/v1/grade-subjects/${gradeId}/subjects/${subjectId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      
+      // --- CLEAR CACHE ---
+      localStorage.removeItem('kivo_dynamic_grades_cache');
+
       // Optimistic update using returned GradeEntity
       setGrades(grades.map(g => g.id === gradeId ? response.data : g));
     } catch (error) {
@@ -171,6 +182,9 @@ const GradesManagement = () => {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
 
+      // --- CLEAR CACHE ---
+      localStorage.removeItem('kivo_dynamic_grades_cache');
+
       alert(`Grade ${editingGrade ? 'updated' : 'created'} successfully`);
       handleCloseModal();
       loadGrades();
@@ -187,6 +201,10 @@ const GradesManagement = () => {
         `${CONFIG.development.GATEWAY_URL}/admin-assessment/v1/grades/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      
+      // --- CLEAR CACHE ---
+      localStorage.removeItem('kivo_dynamic_grades_cache');
+      
       loadGrades();
     } catch (error) {
       alert('Failed to delete grade. It may be in use.');
@@ -201,6 +219,10 @@ const GradesManagement = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      
+      // --- CLEAR CACHE ---
+      localStorage.removeItem('kivo_dynamic_grades_cache');
+
       loadGrades();
     } catch (error) {
       alert('Failed to toggle status');
@@ -256,7 +278,6 @@ const GradesManagement = () => {
           <div className="pool-chips">
             {subjectPool.map(subject => (
               <span key={subject.id} className="pool-chip">
-                {/* FIX: Using subjectName from DB */}
                 <span className="pool-icon">📚</span> {subject.subjectName.replace(/_/g, ' ')}
               </span>
             ))}
@@ -310,7 +331,6 @@ const GradesManagement = () => {
                     <div className="assigned-chips">
                       {(grade.subjects || []).map(sub => (
                         <span key={sub.id} className="assigned-chip">
-                          {/* FIX: Using subjectName from DB */}
                           {sub.subjectName.replace(/_/g, ' ')}
                           <button className="chip-remove" onClick={() => handleRemoveSubject(grade.id, sub.id, sub.subjectName)}>×</button>
                         </span>

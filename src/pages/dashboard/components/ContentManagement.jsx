@@ -55,9 +55,12 @@ const ContentManagement = () => {
 
   const loadStatistics = useCallback(async () => {
     try {
+      const token = localStorage.getItem('token');
+      const headers = { Authorization: `Bearer ${token}` };
+      
       const [questionsRes, storiesRes] = await Promise.all([
-        axios.get(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/listallquestions`),
-        axios.get(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/listAllStories`)
+        axios.get(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/listallquestions`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/listAllStories`, { headers }).catch(() => ({ data: [] }))
       ]);
 
       setStatistics({
@@ -76,7 +79,6 @@ const ContentManagement = () => {
     loadGradesAndSubjects();
   }, [loadStatistics]);
 
-  // --- FIX: Use the /grade-subjects endpoint to get Grades + Nested Subjects ---
   const loadGradesAndSubjects = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -168,6 +170,9 @@ const ContentManagement = () => {
     const startTime = Date.now();
 
     try {
+      const token = localStorage.getItem('token');
+      const headers = { Authorization: `Bearer ${token}` };
+      
       let endpoint = '';
       let payload = {
         grade: worksheetForm.grade,
@@ -187,7 +192,7 @@ const ContentManagement = () => {
         endpoint = `${config.ADMIN_BASE_URL}/admin-assessment/v1/content-library/worksheets/load-by-grade`;
       }
 
-      const response = await axios.post(endpoint, payload);
+      const response = await axios.post(endpoint, payload, { headers });
       const data = response.data;
       const clientResponseTime = Date.now() - startTime;
 
@@ -230,6 +235,7 @@ const ContentManagement = () => {
     setMessage(null);
 
     try {
+      const token = localStorage.getItem('token');
       const payload = {
         ...questionForm,
         expectedResponseStructure: [
@@ -247,7 +253,10 @@ const ContentManagement = () => {
         ]
       };
 
-      await axios.post(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/loadquestions`, payload);
+      // RESTORED ORIGINAL URL
+      await axios.post(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/loadquestions`, payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
       setMessage({ type: 'success', text: `Successfully loaded ${questionForm.numberOfQuestions} questions!` });
       setTimeout(() => loadStatistics(), 1000);
@@ -269,6 +278,7 @@ const ContentManagement = () => {
     setMessage(null);
 
     try {
+      const token = localStorage.getItem('token');
       const payload = {
         numberOfStories: storyForm.numberOfStories,
         loadAssessmentStoryRequest: {
@@ -285,7 +295,10 @@ const ContentManagement = () => {
         }
       };
 
-      await axios.post(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/loadstories`, payload);
+      // RESTORED ORIGINAL URL
+      await axios.post(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/loadstories`, payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
       setMessage({ type: 'success', text: `Successfully loaded ${storyForm.numberOfStories} stories!` });
       setTimeout(() => loadStatistics(), 1000);

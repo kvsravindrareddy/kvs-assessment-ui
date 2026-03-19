@@ -8,12 +8,15 @@ import { useAuth } from '../../context/AuthContext';
 import UpgradePrompt from '../../components/UpgradePrompt';
 import UsageIndicator from '../../components/UsageIndicator';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useGrades } from '../../hooks/useGrades';
 
 const STORIES_PER_PAGE = 16; 
 
+// --- DYNAMIC SMART ICON GENERATOR ---
 const getSubjectIcon = (subjectName) => {
+  if (!subjectName) return '📝';
   const s = subjectName.toUpperCase();
+  
+  // Keep semantic mapping for common subjects for best UX
   if (s.includes('MATH')) return '📐';
   if (s.includes('ENGLISH')) return '📚';
   if (s.includes('SCIENCE')) return '🔬';
@@ -23,7 +26,16 @@ const getSubjectIcon = (subjectName) => {
   if (s.includes('COMPUTER') || s.includes('IT')) return '💻';
   if (s.includes('HINDI') || s.includes('TELUGU') || s.includes('LANGUAGE')) return '🗣️';
   if (s.includes('KNOWLEDGE') || s.includes('GENERAL')) return '💡';
-  return '📝'; 
+  if (s.includes('ART')) return '🎨';
+  if (s.includes('MUSIC')) return '🎵';
+
+  // Fallback: Deterministic Hash for ANY unknown subject added by Admin!
+  const genericIcons = ['📖', '✏️', '🎯', '🧩', '⭐', '🌟', '🧠', '⚡', '🚀', '🔍'];
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) {
+    hash = s.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return genericIcons[Math.abs(hash) % genericIcons.length];
 };
 
 export default function ReadingFlow() {
@@ -32,9 +44,11 @@ export default function ReadingFlow() {
   const navigate = useNavigate();
   const { canPerformAction, trackUsage, getUpgradeMessage } = useSubscription();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const { grades: orderedGrades, loading: gradesLoading } = useGrades();
 
-  const [gradeData, setGradeData] = useState({});
+  const [orderedGrades, setOrderedGrades] = useState([]);
+  const [gradeSubjectMap, setGradeSubjectMap] = useState({});
+  const [gradesLoading, setGradesLoading] = useState(true);
+
   const [stories, setStories] = useState({});
   const [storyDetails, setStoryDetails] = useState(null);
 
@@ -49,30 +63,72 @@ export default function ReadingFlow() {
   const [completed, setCompleted] = useState(false);
   const [voices, setVoices] = useState([]);
 
-  const adminConfigURL = `${CONFIG.development.ADMIN_BASE_URL}/admin-assessment/v1/app-config/subject-types`;
-  const listStoriesURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/load`;
-  const startAssessmentURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/start`;
-  const submitAnswerURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/stories/submit-answer`;
+  const baseUrl = CONFIG.development.GATEWAY_URL || CONFIG.development.ADMIN_BASE_URL;
+  const listStoriesURL = `${baseUrl}/v1/assessment/stories/load`;
+  const startAssessmentURL = `${baseUrl}/v1/assessment/stories/start`;
+  const submitAnswerURL = `${baseUrl}/v1/assessment/stories/submit-answer`;
 
+  // --- UI CACHING IMPLEMENTATION ---
   useEffect(() => {
-    fetch(adminConfigURL)
-      .then(res => res.json())
-      .then(data => {
-        setGradeData(data);
-      })
-      .catch(err => console.error('Failed to load grades:', err));
-  }, [adminConfigURL]);
+    const loadGradesAndSubjects = async () => {
+      try {
+        setGradesLoading(true);
+        const CACHE_KEY = 'kivo_dynamic_grades_cache';
+        const CACHE_TTL_KEY = 'kivo_dynamic_grades_cache_time';
+        const CACHE_DURATION = 1000 * 60 * 60; // 1 Hour
 
-  // Set initial grade and subject when both grades and gradeData are loaded
-  useEffect(() => {
-    if (orderedGrades.length > 0 && !selectedGrade && Object.keys(gradeData).length > 0) {
-      const firstGrade = orderedGrades[0];
-      if (gradeData[firstGrade] && gradeData[firstGrade].length > 0) {
-        setSelectedGrade(firstGrade);
-        handleSelectSubject(firstGrade, gradeData[firstGrade][0]);
+        let activeGrades = [];
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        const cachedTime = localStorage.getItem(CACHE_TTL_KEY);
+
+        // Check if cache exists and is valid
+        if (cachedData && cachedTime && (Date.now() - parseInt(cachedTime) < CACHE_DURATION)) {
+            activeGrades = JSON.parse(cachedData);
+        } else {
+            // Fetch from API if cache expired or doesn't exist
+            const token = localStorage.getItem('token');
+            const response = await axios.get(
+              `${baseUrl}/admin-assessment/v1/grade-subjects`,
+              { headers: { Authorization: token ? `Bearer ${token}` : '' } }
+            );
+            
+            activeGrades = (response.data || []).filter(g => g.isActive);
+            activeGrades.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+            
+            // Save to UI Cache
+            localStorage.setItem(CACHE_KEY, JSON.stringify(activeGrades));
+            localStorage.setItem(CACHE_TTL_KEY, Date.now().toString());
+        }
+        
+        // Process Data
+        const gradesList = activeGrades.map(g => g.gradeCode);
+        const subjMap = {};
+        
+        activeGrades.forEach(g => {
+          subjMap[g.gradeCode] = (g.subjects || []).map(s => s.subjectName);
+        });
+
+        setOrderedGrades(gradesList);
+        setGradeSubjectMap(subjMap);
+
+        if (gradesList.length > 0) {
+          const firstGrade = gradesList[0];
+          setSelectedGrade(firstGrade);
+          
+          if (subjMap[firstGrade] && subjMap[firstGrade].length > 0) {
+             handleSelectSubject(firstGrade, subjMap[firstGrade][0]);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading grades and subjects:', error);
+      } finally {
+        setGradesLoading(false);
       }
-    }
-  }, [orderedGrades, gradeData, selectedGrade]);
+    };
+
+    loadGradesAndSubjects();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const loadVoices = () => setVoices(window.speechSynthesis.getVoices());
@@ -84,7 +140,7 @@ export default function ReadingFlow() {
   const handleSelectGrade = (grade) => {
     setSelectedGrade(grade);
     setCurrentPage(1); 
-    const subjectsForGrade = gradeData[grade] || [];
+    const subjectsForGrade = gradeSubjectMap[grade] || [];
     if (subjectsForGrade.length > 0) {
       handleSelectSubject(grade, subjectsForGrade[0]);
     } else {
@@ -131,7 +187,6 @@ export default function ReadingFlow() {
       setShowUpgradeModal(true);
       return;
     }
-    
     window.speechSynthesis.cancel();
     
     try {
@@ -144,13 +199,10 @@ export default function ReadingFlow() {
       });
       
       trackUsage('story'); 
-      
       const backendData = res.data;
       setStoryDetails(backendData);
-      
       setQuestionIndex(backendData.resumeQuestionIndex || 0);
       setScore(backendData.currentScore || 0);
-      
       setSelectedAnswer(null);
       setCompleted(false);
       
@@ -163,7 +215,6 @@ export default function ReadingFlow() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const urlStoryId = params.get('storyId');
-    
     if (urlStoryId && !storyDetails) {
       fetchStoryDetails(urlStoryId);
     }
@@ -172,18 +223,16 @@ export default function ReadingFlow() {
 
   const submitAnswer = async () => {
     if (!storyDetails) return;
-    
     const isLastQuestion = questionIndex === storyDetails.questions.length - 1;
     const currentUserId = user ? (user.id || user.email || 'GUEST_USER') : 'GUEST_USER';
     const answersList = Array.isArray(selectedAnswer) ? selectedAnswer : [selectedAnswer];
 
     try {
       const token = localStorage.getItem('token');
-      
       const payload = {
         userId: currentUserId,
         storyId: storyDetails.storyId, 
-        questionIndex: storyDetails.questions[questionIndex].sequenceNumber || questionIndex,
+        questionIndex: questionIndex, 
         userAnswer: answersList,
         lastQuestion: isLastQuestion
       };
@@ -196,14 +245,12 @@ export default function ReadingFlow() {
       });
 
       setScore(res.data.currentScore);
-
       if (!isLastQuestion) {
         setQuestionIndex(prev => prev + 1);
         setSelectedAnswer(null);
       } else {
         setCompleted(true);
       }
-      
     } catch (err) {
       console.error("Failed to submit answer:", err);
       alert("Error saving answer. Please check your connection.");
@@ -224,8 +271,12 @@ export default function ReadingFlow() {
     window.speechSynthesis.cancel();
     const queue = [];
     if (storyDetails.content) queue.push(storyDetails.content);
+    
     const currentQ = storyDetails.questions?.[questionIndex];
-    if (currentQ?.name) queue.push(currentQ.name);
+    // FIX: Fallback to either `.question` or `.name` for Read Aloud 
+    const questionText = currentQ?.question || currentQ?.name;
+    if (questionText) queue.push(questionText);
+    
     if (currentQ?.options) {
       Object.entries(currentQ.options).forEach(([key, value]) => queue.push(`${key}: ${value}`));
     }
@@ -243,43 +294,33 @@ export default function ReadingFlow() {
     speakNext(0);
   };
 
-  // 🌟 NEW: Advanced PDF Generation with Borders, Logos, and Page Numbers
   const generatePDF = (preview = false) => {
     if (!storyDetails) return;
-    
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 15;
     const contentWidth = pageWidth - (margin * 2);
-    
-    // We start rendering content BELOW the header (which is approx 35px tall)
     let y = 45; 
     
-    // --- 1. RENDER MAIN CONTENT (Title + Story + Questions) ---
-    
-    // Title & Grade (Grade formatted nicely)
     const formattedGrade = selectedGrade ? selectedGrade.replace('_', ' ') : 'Unknown';
     doc.setFontSize(18);
-    doc.setTextColor(15, 23, 42); // Dark Slate
+    doc.setTextColor(15, 23, 42); 
     doc.setFont(undefined, 'bold');
     
-    // Split title if it's too long
     const titleLines = doc.splitTextToSize(`Grade ${formattedGrade} - ${storyDetails.title || 'Reading Comprehension'}`, contentWidth);
     doc.text(titleLines, margin, y);
     y += (titleLines.length * 8) + 5;
     
-    // Story Content
     doc.setFontSize(12);
-    doc.setTextColor(51, 65, 85); // Lighter Slate
+    doc.setTextColor(51, 65, 85); 
     doc.setFont(undefined, 'normal');
     const contentLines = doc.splitTextToSize(storyDetails.content || '', contentWidth);
     
     contentLines.forEach(line => {
-      // Check for page overflow (leaving space for bottom border and footer)
       if (y > pageHeight - 30) { 
         doc.addPage();
-        y = 45; // Reset to top of page, right below header
+        y = 45; 
       }
       doc.text(line, margin, y);
       y += 7;
@@ -287,88 +328,59 @@ export default function ReadingFlow() {
     
     y += 10;
     
-    // Questions
     if (storyDetails.questions && storyDetails.questions.length > 0) {
-        if (y > pageHeight - 40) {
-            doc.addPage();
-            y = 45;
-        }
-        
+        if (y > pageHeight - 40) { doc.addPage(); y = 45; }
         doc.setFontSize(16);
         doc.setTextColor(15, 23, 42);
         doc.setFont(undefined, 'bold');
         doc.text("Assessment Questions", margin, y);
         y += 12;
-        
         doc.setFontSize(12);
         doc.setFont(undefined, 'normal');
         doc.setTextColor(51, 65, 85);
         
         storyDetails.questions.forEach((q, index) => {
-            if (y > pageHeight - 30) {
-                doc.addPage();
-                y = 45;
-            }
-            
-            // Question text
-            const qLines = doc.splitTextToSize(`${index + 1}. ${q.name}`, contentWidth);
+            if (y > pageHeight - 30) { doc.addPage(); y = 45; }
+            // FIX: Ensure PDF works regardless of if the property is 'question' or 'name'
+            const questionText = q.question || q.name || "Question text missing";
+            const qLines = doc.splitTextToSize(`${index + 1}. ${questionText}`, contentWidth);
             doc.text(qLines, margin, y);
             y += qLines.length * 7;
-            
-            // Options
             if (q.options) {
                 Object.entries(q.options).forEach(([key, value]) => {
-                    if (y > pageHeight - 25) {
-                        doc.addPage();
-                        y = 45;
-                    }
+                    if (y > pageHeight - 25) { doc.addPage(); y = 45; }
                     const optLines = doc.splitTextToSize(`    ${key}) ${value}`, contentWidth);
                     doc.text(optLines, margin, y);
                     y += optLines.length * 7;
                 });
             }
-            y += 6; // Spacing between questions
+            y += 6; 
         });
     }
 
-    // --- 2. LOOP THROUGH ALL GENERATED PAGES TO ADD HEADER, BORDER, & FOOTER ---
     const totalPages = doc.internal.getNumberOfPages();
-    
     for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
-        
-        // A. Draw Outer Page Border
-        doc.setDrawColor(203, 213, 225); // Slate-300
+        doc.setDrawColor(203, 213, 225); 
         doc.setLineWidth(0.5);
         doc.rect(margin / 2, margin / 2, pageWidth - margin, pageHeight - margin);
-        
-        // B. Draw KiVO Learning Logo Header
-        // Light blue background pill box
-        doc.setFillColor(239, 246, 255); // Blue-50
+        doc.setFillColor(239, 246, 255); 
         doc.roundedRect(margin, margin, 60, 12, 3, 3, 'F');
-
-        // Logo Text inside pill box
         doc.setFontSize(14);
         doc.setFont(undefined, 'bold');
-        doc.setTextColor(37, 99, 235); // Blue-600
+        doc.setTextColor(37, 99, 235); 
         doc.text('KiVO Learning', margin + 8, margin + 8);
-        
-        // Header Divider Line
-        doc.setDrawColor(226, 232, 240); // Slate-200
+        doc.setDrawColor(226, 232, 240); 
         doc.setLineWidth(0.5);
         doc.line(margin, margin + 18, pageWidth - margin, margin + 18);
-        
-        // C. Draw Footer (Page N of M)
         doc.setFontSize(10);
         doc.setFont(undefined, 'normal');
-        doc.setTextColor(100, 116, 139); // Slate-500
+        doc.setTextColor(100, 116, 139); 
         doc.text(`Page ${i} of ${totalPages}`, pageWidth / 2, pageHeight - (margin / 2) - 4, { align: 'center' });
     }
 
-    // --- 3. EXPORT ---
     if (preview) {
-        const blob = doc.output('bloburl');
-        window.open(blob);
+        window.open(doc.output('bloburl'));
     } else {
         const safeTitle = (storyDetails.title || 'Worksheet').replace(/[^a-zA-Z0-9]/g, '_');
         doc.save(`KiVOLearning_${safeTitle}.pdf`);
@@ -384,13 +396,12 @@ export default function ReadingFlow() {
   const startIndex = (currentPage - 1) * STORIES_PER_PAGE;
   const displayedStories = currentStories.slice(startIndex, startIndex + STORIES_PER_PAGE);
 
-  // Show loading state while grades are loading
-  if (gradesLoading || orderedGrades.length === 0) {
+  if (gradesLoading) {
     return (
       <div className="timeless-layout">
         <div style={{ textAlign: 'center', padding: '60px 20px' }}>
           <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📚</div>
-          <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Loading stories...</p>
+          <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Loading curriculum...</p>
         </div>
       </div>
     );
@@ -424,16 +435,16 @@ export default function ReadingFlow() {
                 <p className="grade-subtitle">Select a subject to discover new stories and challenges.</p>
               </div>
               
-              {gradeData[selectedGrade] && gradeData[selectedGrade].length > 0 && (
+              {gradeSubjectMap[selectedGrade] && gradeSubjectMap[selectedGrade].length > 0 && (
                 <div className="innovative-subject-dock">
-                  {gradeData[selectedGrade].map(subject => (
+                  {gradeSubjectMap[selectedGrade].map(subject => (
                     <button
                       key={subject}
                       className={`subject-tab ${selectedSubject === subject ? 'active' : ''}`}
                       onClick={() => handleSelectSubject(selectedGrade, subject)}
                     >
                       <span className="subject-icon">{getSubjectIcon(subject)}</span>
-                      <span className="subject-name">{subject.replace('_', ' ')}</span>
+                      <span className="subject-name">{subject.replace(/_/g, ' ')}</span>
                     </button>
                   ))}
                 </div>
@@ -449,7 +460,7 @@ export default function ReadingFlow() {
               ) : displayedStories.length > 0 ? (
                 <>
                   <div className="story-grid small-cards">
-                    {displayedStories.map((story, index) => {
+                    {displayedStories.map((story) => {
                       return (
                         <div key={story.id} className="timeless-card story-card-enhanced" onClick={() => fetchStoryDetails(story.id)}>
                           {story.imageUrl && (
@@ -474,23 +485,9 @@ export default function ReadingFlow() {
 
                   {totalPages > 1 && (
                     <div className="pagination-controls">
-                      <button 
-                        className="page-btn" 
-                        disabled={currentPage === 1} 
-                        onClick={() => setCurrentPage(prev => prev - 1)}
-                      >
-                        ← Prev
-                      </button>
-                      <span className="page-info">
-                        Page <strong>{currentPage}</strong> of {totalPages}
-                      </span>
-                      <button 
-                        className="page-btn" 
-                        disabled={currentPage === totalPages} 
-                        onClick={() => setCurrentPage(prev => prev + 1)}
-                      >
-                        Next →
-                      </button>
+                      <button className="page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>← Prev</button>
+                      <span className="page-info">Page <strong>{currentPage}</strong> of {totalPages}</span>
+                      <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>Next →</button>
                     </div>
                   )}
                 </>
@@ -534,23 +531,18 @@ export default function ReadingFlow() {
             </div>
 
             <div className="reading-content-elegant">
-              <div className="content-text">
-                {storyDetails.content}
-              </div>
+              <div className="content-text">{storyDetails.content}</div>
             </div>
 
             <div className="action-bar-elegant">
               <button className="tool-btn-elegant primary" onClick={playAll}>
-                <span className="btn-icon">🔊</span>
-                <span>Read Aloud</span>
+                <span className="btn-icon">🔊</span><span>Read Aloud</span>
               </button>
               <button className="tool-btn-elegant secondary" onClick={exportPDF}>
-                <span className="btn-icon">📄</span>
-                <span>Download PDF</span>
+                <span className="btn-icon">📄</span><span>Download PDF</span>
               </button>
               <button className="tool-btn-elegant secondary" onClick={previewPDF}>
-                <span className="btn-icon">🖨</span>
-                <span>Preview</span>
+                <span className="btn-icon">🖨</span><span>Preview</span>
               </button>
             </div>
 
@@ -588,7 +580,11 @@ export default function ReadingFlow() {
                     <div className="question-header">
                       <span className="q-badge">Question {questionIndex + 1} of {storyDetails.questions.length}</span>
                     </div>
-                    <h3 className="q-text">{storyDetails.questions[questionIndex].name}</h3>
+                    
+                    {/* FIX: Explicitly fallback to .question OR .name based on Backend Schema! */}
+                    <h3 className="q-text">
+                      {storyDetails.questions[questionIndex].question || storyDetails.questions[questionIndex].name}
+                    </h3>
 
                     <div className="modern-options">
                       {Object.entries(storyDetails.questions[questionIndex].options).map(([key, value]) => {
