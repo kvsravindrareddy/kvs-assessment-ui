@@ -23,25 +23,23 @@ const QuestionManagement = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
 
-  // --- NEW: State for dynamic Grades & Subjects ---
+  // State for dynamic API Grades & Subjects
   const [gradesData, setGradesData] = useState([]);
   const [availableSubjects, setAvailableSubjects] = useState([]);
 
-  // Filters
   const [filters, setFilters] = useState({
     category: 'ALL',
     complexity: 'ALL',
-    type: 'ALL',
+    type: 'ALL', 
     source: 'ALL'
   });
 
-  // Import Form
   const [importForm, setImportForm] = useState({
     source: 'CHATGPT',
     complexity: 'MEDIUM',
-    type: '', // Will hold the dynamic Subject Name
+    type: '', // Dynamic Subject Name
     answerType: 'SINGLE',
-    category: '', // Will hold the dynamic Grade Code
+    category: '', // Dynamic Grade Code
     numberOfQuestions: 10
   });
 
@@ -67,25 +65,26 @@ const QuestionManagement = () => {
 
   const loadQuestions = async () => {
     try {
-      const response = await axios.get(`${config.ADMIN_BASE_URL}/listallquestions`);
+      const response = await axios.get(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/listallquestions`);
       setQuestions(response.data || []);
     } catch (error) {
       console.error('Error loading questions:', error);
+      setQuestions([]);
     }
   };
 
-  // --- NEW: Fetch Grades & Subjects from the DB ---
+  // --- FIX: Using the requested available-grades endpoint ---
   const loadGradesAndSubjects = async () => {
     try {
       const token = localStorage.getItem('token');
-      // Using GATEWAY_URL or ADMIN_BASE_URL depending on your setup
       const baseUrl = config.GATEWAY_URL || config.ADMIN_BASE_URL;
       const response = await axios.get(
-        `${baseUrl}/admin-assessment/v1/grade-subjects`,
+        `${baseUrl}/admin-assessment/v1/content-library/worksheets/available-grades`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
       const activeGrades = (response.data || []).filter(g => g.isActive);
+      activeGrades.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
       setGradesData(activeGrades);
       
       if (activeGrades.length > 0) {
@@ -101,7 +100,6 @@ const QuestionManagement = () => {
     }
   };
 
-  // --- NEW: Cascade Dropdown Logic ---
   const handleGradeChange = (e) => {
     const selectedGradeCode = e.target.value;
     const selectedGrade = gradesData.find(g => g.gradeCode === selectedGradeCode);
@@ -158,15 +156,20 @@ const QuestionManagement = () => {
 
     try {
       const payload = {
-        ...importForm,
+        source: importForm.source,
+        complexity: importForm.complexity,
+        type: importForm.type, 
+        answerType: importForm.answerType,
+        category: importForm.category, 
+        numberOfQuestions: importForm.numberOfQuestions,
         expectedResponseStructure: [
           {
-            category: importForm.category, // Dynamic Grade
+            category: importForm.category, 
             complexity: importForm.complexity,
-            type: importForm.type, // Dynamic Subject
+            type: importForm.type, 
             isActive: true,
             question: {
-              name: "Sample question",
+              name: "Sample question generated dynamically",
               options: { A: "Option A", B: "Option B", C: "Option C", D: "Option D" }
             },
             answer: { type: importForm.answerType, values: ["A"] }
@@ -174,7 +177,7 @@ const QuestionManagement = () => {
         ]
       };
 
-      await axios.post(`${config.ADMIN_BASE_URL}/loadquestions`, payload);
+      await axios.post(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/loadquestions`, payload);
 
       setImportMessage({
         type: 'success',
@@ -208,9 +211,9 @@ const QuestionManagement = () => {
     return colors[complexity] || 'bg-gray-100 text-gray-800';
   };
 
-  // Generate dynamic filters based on the loaded questions
-  const uniqueSubjectsInBank = ['ALL', ...new Set(questions.map(q => q.type))].filter(Boolean);
-  const uniqueGradesInBank = ['ALL', ...new Set(questions.map(q => q.category))].filter(Boolean);
+  const allGlobalSubjects = Array.from(
+    new Set(gradesData.flatMap(g => g.subjects?.map(s => s.subjectName) || []))
+  );
 
   if (loading) {
     return (
@@ -259,8 +262,8 @@ const QuestionManagement = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="ALL">All Grades</option>
-            {uniqueGradesInBank.filter(c => c !== 'ALL').map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
+            {gradesData.map(g => (
+              <option key={g.id} value={g.gradeCode}>{g.gradeName}</option>
             ))}
           </select>
 
@@ -280,8 +283,8 @@ const QuestionManagement = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
              <option value="ALL">All Subjects</option>
-            {uniqueSubjectsInBank.filter(t => t !== 'ALL').map(type => (
-              <option key={type} value={type}>{type}</option>
+            {allGlobalSubjects.map(subject => (
+              <option key={subject} value={subject}>{subject.replace(/_/g, ' ')}</option>
             ))}
           </select>
         </div>
@@ -393,7 +396,6 @@ const QuestionManagement = () => {
                   />
                 </div>
 
-                {/* --- DYNAMIC GRADE SELECTION --- */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Grade Level</label>
                   <select
@@ -409,7 +411,6 @@ const QuestionManagement = () => {
                   </select>
                 </div>
 
-                {/* --- DYNAMIC SUBJECT SELECTION --- */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
                   <select
@@ -520,15 +521,15 @@ const QuestionManagement = () => {
                   </div>
                 </div>
               )}
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-4 mt-4">
                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  {selectedQuestion.category}
+                  Grade: {selectedQuestion.category}
+                </span>
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                  Sub: {selectedQuestion.type}
                 </span>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${getComplexityColor(selectedQuestion.complexity)}`}>
                   {selectedQuestion.complexity}
-                </span>
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                  {selectedQuestion.type}
                 </span>
               </div>
             </div>

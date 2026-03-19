@@ -9,7 +9,7 @@ import {
   EyeIcon,
   PencilIcon,
   TrashIcon,
-  ArrowPathIcon // <-- ADDED TO PREVENT COMPILATION ERROR
+  ArrowPathIcon 
 } from '@heroicons/react/24/outline';
 
 const StoryManagement = () => {
@@ -20,14 +20,14 @@ const StoryManagement = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [selectedStory, setSelectedStory] = useState(null);
 
-  // --- NEW: State for dynamic Grades & Subjects ---
+  // State for dynamic API Grades & Subjects
   const [gradesData, setGradesData] = useState([]);
   const [availableSubjects, setAvailableSubjects] = useState([]);
 
   const [importForm, setImportForm] = useState({
     numberOfStories: 10,
-    category: '', // Will hold the Grade Code
-    storyType: '', // Will hold the Subject Name
+    category: '', 
+    storyType: '', 
     storyLength: 'MEDIUM',
     source: 'CHATGPT'
   });
@@ -59,17 +59,18 @@ const StoryManagement = () => {
     }
   };
 
-  // --- NEW: Fetch Grades & Subjects from the DB ---
+  // --- FIX: Using the requested available-grades endpoint ---
   const loadGradesAndSubjects = async () => {
     try {
       const token = localStorage.getItem('token');
       const baseUrl = config.GATEWAY_URL || config.ADMIN_BASE_URL;
       const response = await axios.get(
-        `${baseUrl}/admin-assessment/v1/grade-subjects`,
+        `${baseUrl}/admin-assessment/v1/content-library/worksheets/available-grades`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
       const activeGrades = (response.data || []).filter(g => g.isActive);
+      activeGrades.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
       setGradesData(activeGrades);
       
       if (activeGrades.length > 0) {
@@ -85,7 +86,6 @@ const StoryManagement = () => {
     }
   };
 
-  // --- NEW: Cascade Dropdown Logic ---
   const handleGradeChange = (e) => {
     const selectedGradeCode = e.target.value;
     const selectedGrade = gradesData.find(g => g.gradeCode === selectedGradeCode);
@@ -118,8 +118,8 @@ const StoryManagement = () => {
           isActive: true,
           title: "Sample Story Title",
           storyLength: importForm.storyLength,
-          category: importForm.category, // Dynamic Grade
-          storyType: importForm.storyType, // Dynamic Subject
+          category: importForm.category, 
+          storyType: importForm.storyType, 
           content: "A well-written story appropriate for students...",
           source: importForm.source,
           howManyQuestions: "MCQ",
@@ -131,7 +131,7 @@ const StoryManagement = () => {
         }
       };
 
-      await axios.post(`${config.ADMIN_BASE_URL}/loadstories`, payload);
+      await axios.post(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/loadstories`, payload);
 
       setImportMessage({
         type: 'success',
@@ -211,7 +211,9 @@ const StoryManagement = () => {
             <h3 className="text-lg font-bold text-gray-900 mb-2">{story.title || 'Untitled Story'}</h3>
             <p className="text-sm text-gray-600 mb-4 line-clamp-3">{story.content?.substring(0, 150)}...</p>
             <div className="flex items-center justify-between pt-4 border-t">
-              <span className="text-xs text-gray-500">{story.storyType}</span>
+              <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                {story.storyType}
+              </span>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setSelectedStory(story)}
@@ -250,7 +252,6 @@ const StoryManagement = () => {
                 />
               </div>
               
-              {/* --- DYNAMIC GRADE SELECTION --- */}
               <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Grade Level</label>
                   <select
@@ -266,9 +267,8 @@ const StoryManagement = () => {
                   </select>
               </div>
 
-              {/* --- DYNAMIC SUBJECT SELECTION --- */}
               <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Subject (Story Type)</label>
                   <select
                     value={importForm.storyType}
                     onChange={(e) => setImportForm({ ...importForm, storyType: e.target.value })}
