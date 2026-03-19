@@ -3,17 +3,31 @@ import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import CONFIG from '../../Config';
-import { useGrades } from '../../hooks/useGrades';
 
+// --- DYNAMIC SMART ICON GENERATOR ---
 const getSubjectIcon = (subjectName) => {
+  if (!subjectName) return '📝';
   const s = subjectName.toUpperCase();
+  
   if (s.includes('MATH')) return '📐';
   if (s.includes('ENGLISH')) return '📚';
   if (s.includes('SCIENCE')) return '🔬';
   if (s.includes('HISTORY')) return '🏛️';
   if (s.includes('GEOGRAPHY')) return '🌍';
+  if (s.includes('SOCIAL')) return '🤝';
   if (s.includes('COMPUTER') || s.includes('IT')) return '💻';
-  return '📝'; 
+  if (s.includes('HINDI') || s.includes('TELUGU') || s.includes('LANGUAGE')) return '🗣️';
+  if (s.includes('KNOWLEDGE') || s.includes('GENERAL')) return '💡';
+  if (s.includes('ART')) return '🎨';
+  if (s.includes('MUSIC')) return '🎵';
+
+  // Fallback: Deterministic Hash for ANY unknown subject added by Admin!
+  const genericIcons = ['📖', '✏️', '🎯', '🧩', '⭐', '🌟', '🧠', '⚡', '🚀', '🔍'];
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) {
+    hash = s.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return genericIcons[Math.abs(hash) % genericIcons.length];
 };
 
 export default function SubjectAssessments() {
@@ -21,11 +35,14 @@ export default function SubjectAssessments() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const resumeAssessmentId = searchParams.get('resumeId');
-  const { grades: orderedGrades, loading: gradesLoading } = useGrades();
 
   const currentUserId = user ? (user.id || user.email || 'GUEST_USER') : 'GUEST_USER';
 
-  const [gradeData, setGradeData] = useState({});
+  // --- DYNAMIC GRADES & SUBJECTS STATE ---
+  const [orderedGrades, setOrderedGrades] = useState([]);
+  const [gradeSubjectMap, setGradeSubjectMap] = useState({});
+  const [gradesLoading, setGradesLoading] = useState(true);
+
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [showConfigDialog, setShowConfigDialog] = useState(false);
@@ -52,19 +69,17 @@ export default function SubjectAssessments() {
   // Bookmarks
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState(new Set());
 
-  const adminConfigURL = `${CONFIG.development.ADMIN_BASE_URL}/admin-assessment/v1/app-config/subject-types`;
-  const loadAssessmentURL = `${CONFIG.development.GATEWAY_URL}/v1/assessment/questions/load`;
-  const startAssessmentURL = `${CONFIG.development.GATEWAY_URL}/v1/assessment/questions/start`;
-  const submitAnswerURL = `${CONFIG.development.GATEWAY_URL}/v1/assessment/questions/submit-answer`;
+  const baseUrl = CONFIG.development.GATEWAY_URL || CONFIG.development.ADMIN_BASE_URL;
+  const loadAssessmentURL = `${baseUrl}/v1/assessment/questions/load`;
+  const startAssessmentURL = `${baseUrl}/v1/assessment/questions/start`;
+  const submitAnswerURL = `${baseUrl}/v1/assessment/questions/submit-answer`;
 
-  // Format time helper
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Toggle bookmark
   const toggleBookmark = () => {
     setBookmarkedQuestions(prev => {
       const newSet = new Set(prev);
@@ -77,21 +92,66 @@ export default function SubjectAssessments() {
     });
   };
 
+  // --- UI CACHING IMPLEMENTATION ---
   useEffect(() => {
-    fetch(adminConfigURL)
-      .then(res => res.json())
-      .then(data => setGradeData(data))
-      .catch(err => console.error('Failed to load grades:', err));
-  }, [adminConfigURL]);
+    const loadGradesAndSubjects = async () => {
+      try {
+        setGradesLoading(true);
+        const CACHE_KEY = 'kivo_dynamic_grades_cache';
+        const CACHE_TTL_KEY = 'kivo_dynamic_grades_cache_time';
+        const CACHE_DURATION = 1000 * 60 * 60; // 1 Hour
 
-  // Set default grade when grades are loaded
-  useEffect(() => {
-    if (orderedGrades.length > 0 && !selectedGrade) {
-      setSelectedGrade(orderedGrades[6] || orderedGrades[0]); // Default to grade V or first grade
-    }
-  }, [orderedGrades, selectedGrade]);
+        let activeGrades = [];
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        const cachedTime = localStorage.getItem(CACHE_TTL_KEY);
 
-  // Timer effect
+        // Check if cache exists and is valid
+        if (cachedData && cachedTime && (Date.now() - parseInt(cachedTime) < CACHE_DURATION)) {
+            activeGrades = JSON.parse(cachedData);
+        } else {
+            // Fetch from API if cache expired or doesn't exist
+            const token = localStorage.getItem('token');
+            const response = await axios.get(
+              `${baseUrl}/admin-assessment/v1/grade-subjects`,
+              { headers: { Authorization: token ? `Bearer ${token}` : '' } }
+            );
+            
+            activeGrades = (response.data || []).filter(g => g.isActive);
+            activeGrades.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+            
+            // Save to UI Cache
+            localStorage.setItem(CACHE_KEY, JSON.stringify(activeGrades));
+            localStorage.setItem(CACHE_TTL_KEY, Date.now().toString());
+        }
+        
+        // Process Data
+        const gradesList = activeGrades.map(g => g.gradeCode);
+        const subjMap = {};
+        
+        activeGrades.forEach(g => {
+          subjMap[g.gradeCode] = (g.subjects || []).map(s => s.subjectName);
+        });
+
+        setOrderedGrades(gradesList);
+        setGradeSubjectMap(subjMap);
+
+        // Auto-select Default Grade (Prefer V if exists, else first available)
+        if (gradesList.length > 0) {
+          const defaultGrade = gradesList.includes('V') ? 'V' : gradesList[0];
+          setSelectedGrade(defaultGrade);
+        }
+
+      } catch (error) {
+        console.error('Error loading grades and subjects:', error);
+      } finally {
+        setGradesLoading(false);
+      }
+    };
+
+    loadGradesAndSubjects();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     let interval;
     if (isTimerRunning && !completed) {
@@ -102,61 +162,36 @@ export default function SubjectAssessments() {
     return () => clearInterval(interval);
   }, [isTimerRunning, completed]);
 
-  // Handle resume on mount
   useEffect(() => {
     if (resumeAssessmentId && currentUserId) {
-      console.log('Resuming assessment:', resumeAssessmentId);
       resumeAssessment(resumeAssessmentId);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resumeAssessmentId, currentUserId]);
 
   const resumeAssessment = async (assId) => {
     setLoading(true);
-    console.log('Resume function called with ID:', assId);
-
     try {
       const token = localStorage.getItem('token');
-
-      // Fetch session info from dashboard API to get lastAttemptedIndex and score
       const dashboardURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/dashboard/student?userId=${encodeURIComponent(currentUserId)}`;
-      console.log('Fetching dashboard from:', dashboardURL);
-
-      const dashboardRes = await axios.get(dashboardURL, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      console.log('Dashboard response:', dashboardRes.data);
-
-      // Find the session in continueLearning
+      const dashboardRes = await axios.get(dashboardURL, { headers: { 'Authorization': `Bearer ${token}` } });
       const session = dashboardRes.data.continueLearning?.find(s => s.assessmentId === assId);
-      console.log('Found session:', session);
 
       if (!session) {
-        console.error('Session not found in continueLearning list');
         setErrorMessage('Assessment session not found. Please start a new assessment.');
         setLoading(false);
         return;
       }
 
-      // Resume from next question after lastAttemptedIndex
       const nextQuestionIndex = (session.lastAttemptedIndex || 0) + 1;
-      console.log('Resuming from question index:', nextQuestionIndex);
-
-      // Fetch the next question
       const res = await axios.post(startAssessmentURL, {
         userId: currentUserId,
         email: user?.email || '',
         assessmentId: assId,
         questionIndex: nextQuestionIndex
-      }, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      }, { headers: { 'Authorization': `Bearer ${token}` } });
 
-      console.log('Question fetch response:', res.data);
-
-      // Extract question data
       const questionData = res.data?.question?.question || res.data;
-      console.log('Extracted question data:', questionData);
 
       setAssessmentId(assId);
       setTotalQuestions(session.totalQuestions);
@@ -166,16 +201,11 @@ export default function SubjectAssessments() {
       setSelectedAnswer('');
       setCompleted(false);
 
-      // Set the subject from session data for proper display
       if (session.assessmentType) {
         setSelectedSubject(session.assessmentType);
       }
 
-      // Resume timer
       setIsTimerRunning(true);
-
-      console.log('Resume successful!');
-
     } catch (err) {
       console.error('Error resuming assessment:', err);
       setErrorMessage('Unable to resume assessment. Please start a new one.');
@@ -187,8 +217,7 @@ export default function SubjectAssessments() {
   const openConfigDialog = () => {
     if (!selectedGrade || !selectedSubject) return;
     setShowConfigDialog(true);
-    setErrorMessage(''); // Clear any previous errors
-    // Reset configuration
+    setErrorMessage('');
     setNumberOfQuestions(10);
     setComplexity('SIMPLE');
   };
@@ -202,8 +231,6 @@ export default function SubjectAssessments() {
 
     try {
       const token = localStorage.getItem('token');
-
-      // Step 1: LOAD the assessment with user-selected configuration
       const loadRes = await axios.post(loadAssessmentURL, {
         userId: currentUserId,
         email: user?.email || '',
@@ -211,24 +238,18 @@ export default function SubjectAssessments() {
         type: selectedSubject,
         complexity: complexity,
         numberOfQuestions: numberOfQuestions
-      }, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      }, { headers: { 'Authorization': `Bearer ${token}` } });
 
       const newAssessmentId = loadRes.data.assessmentId;
       const totalQs = loadRes.data.numberOfQuestions || numberOfQuestions;
 
       setAssessmentId(newAssessmentId);
       setTotalQuestions(totalQs);
-
-      // Step 2: START by fetching Question #1
       await fetchQuestion(newAssessmentId, 1);
-
+      
       setScore(0);
       setSelectedAnswer('');
       setCompleted(false);
-
-      // Start timer
       setTimeElapsed(0);
       setIsTimerRunning(true);
       setBookmarkedQuestions(new Set());
@@ -237,7 +258,7 @@ export default function SubjectAssessments() {
       console.error('Error starting subject assessment:', err);
       const errorMsg = err.response?.data?.message || 'Could not load questions. Ensure the Admin has loaded questions for this Subject & Grade.';
       setErrorMessage(errorMsg);
-      setShowConfigDialog(true); // Stay on config dialog to show error
+      setShowConfigDialog(true); 
     } finally {
       setLoading(false);
     }
@@ -250,14 +271,9 @@ export default function SubjectAssessments() {
           email: user?.email || '',
           assessmentId: assId,
           questionIndex: index
-      }, {
-          headers: { 'Authorization': `Bearer ${token}` }
-      });
+      }, { headers: { 'Authorization': `Bearer ${token}` } });
 
-      // Extract the nested question object: res.data.question.question
       const questionData = res.data?.question?.question || res.data;
-      console.log('Question data:', questionData);
-
       setCurrentQuestion(questionData);
       setQuestionIndex(index);
   };
@@ -269,7 +285,6 @@ export default function SubjectAssessments() {
 
     try {
       const token = localStorage.getItem('token');
-      
       const payload = {
         userId: currentUserId,
         email: user?.email || '',
@@ -278,21 +293,16 @@ export default function SubjectAssessments() {
         userAnswer: [selectedAnswer]
       };
 
-      const res = await axios.post(submitAnswerURL, payload, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await axios.post(submitAnswerURL, payload, { headers: { 'Authorization': `Bearer ${token}` } });
 
       if (res.data && res.data.score !== undefined) {
           setScore(res.data.score);
       }
-
       setSelectedAnswer('');
 
       if (!isLastQuestion) {
-          // Fetch the next question
           await fetchQuestion(assessmentId, questionIndex + 1);
       } else {
-          // Finish the assessment
           setCompleted(true);
           setIsTimerRunning(false);
       }
@@ -321,7 +331,18 @@ export default function SubjectAssessments() {
     }
   };
 
-  // Show loading while resuming
+  if (gradesLoading) {
+    return (
+      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ background: '#ffffff', borderRadius: '24px', padding: '60px 20px', boxShadow: '0 10px 40px rgba(0,0,0,0.08)', textAlign: 'center' }}>
+          <div style={{ fontSize: '4rem', marginBottom: '20px' }}>📚</div>
+          <h2 style={{ fontSize: '1.8rem', color: '#1e293b', margin: '0 0 10px 0' }}>Loading Curriculum...</h2>
+          <p style={{ color: '#64748b', fontSize: '1rem' }}>Please wait while we sync grades and subjects</p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading && resumeAssessmentId) {
     return (
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px', fontFamily: 'system-ui, sans-serif' }}>
@@ -345,7 +366,7 @@ export default function SubjectAssessments() {
             <h2 style={{ textAlign: 'center', fontSize: '2.2rem', color: '#1e293b', margin: '0 0 5px 0', fontWeight: '800' }}>Subject Assessments 📚</h2>
             <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '30px', fontSize: '1.1rem' }}>Select your Grade and Subject to begin.</p>
 
-            {/* Grade Selector */}
+            {/* DYNAMIC Grade Selector */}
             <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '20px', marginBottom: '20px' }}>
                 {orderedGrades.map(grade => (
                     <button 
@@ -358,10 +379,10 @@ export default function SubjectAssessments() {
                 ))}
             </div>
 
-            {/* Subject Selector */}
-            {gradeData[selectedGrade] && gradeData[selectedGrade].length > 0 ? (
+            {/* DYNAMIC Subject Selector */}
+            {gradeSubjectMap[selectedGrade] && gradeSubjectMap[selectedGrade].length > 0 ? (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '40px' }}>
-                    {gradeData[selectedGrade].map(subject => (
+                    {gradeSubjectMap[selectedGrade].map(subject => (
                         <div 
                             key={subject} 
                             onClick={() => setSelectedSubject(subject)}
@@ -374,7 +395,7 @@ export default function SubjectAssessments() {
                 </div>
             ) : (
                 <div style={{ textAlign: 'center', padding: '40px', background: '#f8fafc', borderRadius: '16px', color: '#64748b', marginBottom: '40px' }}>
-                    No subjects loaded for this grade yet.
+                    No subjects assigned to this grade yet.
                 </div>
             )}
 
@@ -398,7 +419,6 @@ export default function SubjectAssessments() {
                 {getSubjectIcon(selectedSubject)} {selectedSubject} - Grade {selectedGrade.replace('_', ' ')}
             </p>
 
-            {/* Error Message */}
             {errorMessage && (
                 <div style={{ background: '#fef2f2', border: '2px solid #fca5a5', borderRadius: '12px', padding: '16px 20px', marginBottom: '30px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                     <span style={{ fontSize: '1.5rem' }}>⚠️</span>
@@ -409,7 +429,6 @@ export default function SubjectAssessments() {
                 </div>
             )}
 
-            {/* Number of Questions */}
             <div style={{ marginBottom: '30px' }}>
                 <label style={{ display: 'block', fontWeight: 'bold', color: '#1e293b', marginBottom: '12px', fontSize: '1.1rem' }}>
                     📊 Number of Questions
@@ -428,7 +447,6 @@ export default function SubjectAssessments() {
                 </select>
             </div>
 
-            {/* Complexity Level */}
             <div style={{ marginBottom: '40px' }}>
                 <label style={{ display: 'block', fontWeight: 'bold', color: '#1e293b', marginBottom: '12px', fontSize: '1.1rem' }}>
                     🎯 Difficulty Level
@@ -448,7 +466,6 @@ export default function SubjectAssessments() {
                 </div>
             </div>
 
-            {/* Start Button */}
             <button
                 onClick={startAssessment}
                 disabled={loading}
@@ -492,7 +509,6 @@ export default function SubjectAssessments() {
                 </div>
             </div>
 
-            {/* Bookmark button */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <button
                     onClick={toggleBookmark}
@@ -509,7 +525,6 @@ export default function SubjectAssessments() {
                 {currentQuestion.name}
             </h3>
 
-            {/* Error Message during assessment */}
             {errorMessage && (
                 <div style={{ background: '#fef2f2', border: '2px solid #fca5a5', borderRadius: '12px', padding: '12px 16px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <span style={{ fontSize: '1.2rem' }}>⚠️</span>
