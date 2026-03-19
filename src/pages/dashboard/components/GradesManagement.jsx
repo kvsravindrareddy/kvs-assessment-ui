@@ -70,7 +70,7 @@ const GradesManagement = () => {
       setFormData({
         gradeCode: '',
         gradeName: '',
-        displayOrder: grades.length + 1,
+        displayOrder: (grades?.length || 0) + 1, // Added safe fallback
         description: '',
         isActive: true
       });
@@ -100,9 +100,11 @@ const GradesManagement = () => {
 
     try {
       const token = localStorage.getItem('token');
+      
+      // FIX: Ensure all traffic routes through the GATEWAY_URL for Access Management
       const url = editingGrade
-        ? `${CONFIG.development.ADMIN_BASE_URL}/admin-assessment/v1/grades/${editingGrade.id}`
-        : `${CONFIG.development.ADMIN_BASE_URL}/admin-assessment/v1/grades`;
+        ? `${CONFIG.development.GATEWAY_URL}/admin-assessment/v1/grades/${editingGrade.id}`
+        : `${CONFIG.development.GATEWAY_URL}/admin-assessment/v1/grades`;
 
       const method = editingGrade ? 'put' : 'post';
 
@@ -124,10 +126,13 @@ const GradesManagement = () => {
 
     try {
       const token = localStorage.getItem('token');
+      
+      // FIX: Ensure delete traffic routes through the GATEWAY_URL
       await axios.delete(
-        `${CONFIG.development.ADMIN_BASE_URL}/admin-assessment/v1/grades/${id}`,
+        `${CONFIG.development.GATEWAY_URL}/admin-assessment/v1/grades/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      
       alert('Grade deleted successfully');
       loadGrades();
     } catch (error) {

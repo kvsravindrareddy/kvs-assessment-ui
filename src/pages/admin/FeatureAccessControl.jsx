@@ -83,6 +83,17 @@ export default function FeatureAccessControl() {
         }
     };
 
+    // NEW: Quick toggle for Guest Access
+    const handleGuestToggle = async (feature) => {
+        const isCurrentlyGuestAllowed = feature.allowedAccessModes === 'ALL' || feature.allowedAccessModes === 'GUEST';
+        const newAccessMode = isCurrentlyGuestAllowed ? 'REGISTERED' : 'ALL';
+        
+        await updateFeature(feature.id, {
+            ...feature,
+            allowedAccessModes: newAccessMode
+        });
+    };
+
     const toggleLaunchMode = async (featureId, currentState, durationDays = null) => {
         try {
             const token = localStorage.getItem('token');
@@ -262,8 +273,8 @@ export default function FeatureAccessControl() {
                         <tr>
                             <th>Feature</th>
                             <th>Category</th>
-                            <th>Status</th>
-                            <th>Access Mode</th>
+                            <th>Global Status</th>
+                            <th>Guest Access</th>
                             <th>Tiers</th>
                             <th>Roles</th>
                             <th>Launch Mode</th>
@@ -271,7 +282,10 @@ export default function FeatureAccessControl() {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredFeatures.map(feature => (
+                        {filteredFeatures.map(feature => {
+                            const isGuestAllowed = feature.allowedAccessModes === 'ALL' || feature.allowedAccessModes === 'GUEST';
+                            
+                            return (
                             <tr key={feature.id} className={!feature.isEnabled ? 'fac-disabled' : ''}>
                                 <td>
                                     <div className="fac-feature-cell">
@@ -302,7 +316,21 @@ export default function FeatureAccessControl() {
                                     </div>
                                 </td>
                                 <td>
-                                    <span className="fac-access-mode">{feature.allowedAccessModes}</span>
+                                    {/* NEW: Guest Access Toggle */}
+                                    <div className="fac-toggle-cell">
+                                        <label className="fac-switch">
+                                            <input
+                                                type="checkbox"
+                                                checked={isGuestAllowed}
+                                                onChange={() => handleGuestToggle(feature)}
+                                                disabled={!feature.isEnabled}
+                                            />
+                                            <span className="fac-switch-slider"></span>
+                                        </label>
+                                        <span className={`fac-status ${isGuestAllowed ? 'active' : 'inactive'}`}>
+                                            {isGuestAllowed ? 'Guests Allowed' : 'Login Required'}
+                                        </span>
+                                    </div>
                                 </td>
                                 <td>
                                     <span className="fac-tiers">{feature.allowedTiers}</span>
@@ -341,7 +369,7 @@ export default function FeatureAccessControl() {
                                     </div>
                                 </td>
                             </tr>
-                        ))}
+                        )})}
                     </tbody>
                 </table>
             </div>

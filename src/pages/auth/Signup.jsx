@@ -60,7 +60,12 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
         onSwitchToLogin();
       }, 3000);
     } catch (err) {
-      setError(err.response?.data || 'Signup failed. Please try again.');
+      // FIX: Safely extract the message whether it's an object or a plain string
+      const responseData = err.response?.data;
+      const errorMessage = responseData?.message || 
+                          (typeof responseData === 'string' ? responseData : 'Signup failed. Please try again.');
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
