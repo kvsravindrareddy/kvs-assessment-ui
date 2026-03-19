@@ -1,5 +1,10 @@
 .grades-management {
   padding: 20px;
+  /* FIX: Ensure the container takes up available space and allows scrolling */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 .grades-header {
@@ -9,6 +14,8 @@
   margin-bottom: 24px;
   flex-wrap: wrap;
   gap: 16px;
+  /* FIX: Prevent header from shrinking when scrolling */
+  flex-shrink: 0; 
 }
 
 .header-info h2 {
@@ -57,11 +64,89 @@
   background: #2563eb;
 }
 
+/* --- NEW: GLOBAL SUBJECT POOL PANEL --- */
+.subject-pool-panel {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.pool-header h3 {
+  margin: 0 0 5px 0;
+  color: #1e293b;
+  font-size: 1.25rem;
+}
+
+.pool-header p {
+  margin: 0 0 15px 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.pool-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.pool-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pool-chip {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.add-pool-form {
+  display: flex;
+  gap: 10px;
+  max-width: 400px;
+}
+
+.add-pool-form input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.add-pool-form button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.add-pool-form button:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
 .loading-state,
 .empty-state {
   padding: 60px 20px;
   text-align: center;
   color: #64748b;
+  flex-grow: 1;
 }
 
 .empty-state h3 {
@@ -94,8 +179,10 @@
 
 .grades-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Slightly wider for subject chips */
+  gap: 24px;
+  /* FIX: Ensure the grid has padding at the bottom so the last card isn't cut off */
+  padding-bottom: 40px; 
 }
 
 .grade-card {
@@ -104,6 +191,8 @@
   border-radius: 12px;
   padding: 20px;
   transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
 }
 
 .grade-card:hover {
@@ -124,10 +213,6 @@
   margin-bottom: 16px;
 }
 
-.grade-icon {
-  font-size: 2.5rem;
-}
-
 .grade-badge {
   background: #eff6ff;
   color: #2563eb;
@@ -139,24 +224,26 @@
 
 .grade-card-body {
   margin-bottom: 16px;
+  flex-grow: 1; /* Pushes the footer/actions to the bottom */
 }
 
 .grade-card-body h3 {
   margin: 0 0 8px;
   color: #0f172a;
   font-size: 1.2rem;
+  display: flex;
+  align-items: center;
 }
 
-.grade-code {
-  display: inline-block;
-  background: #f1f5f9;
-  color: #475569;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-family: monospace;
-  font-size: 0.85rem;
-  font-weight: 700;
-  margin-bottom: 8px;
+.grade-code-pill {
+  font-size: 0.75rem;
+  background: #e0e7ff;
+  color: #1d4ed8;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 8px;
+  vertical-align: middle;
+  font-weight: normal;
 }
 
 .grade-description {
@@ -166,43 +253,81 @@
   line-height: 1.4;
 }
 
-.grade-card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 16px;
-  border-top: 1px solid #f1f5f9;
+/* --- SUBJECT ASSIGNMENT STYLES --- */
+.grade-subjects-section {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px dashed #e2e8f0;
 }
 
-.status-badge {
+.grade-subjects-section h4 {
+  margin: 0 0 10px 0;
+  font-size: 0.85rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.assigned-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  min-height: 30px;
+}
+
+.assigned-chip {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #047857;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.chip-remove {
+  background: none;
+  border: none;
+  color: #059669;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.chip-remove:hover {
+  color: #ef4444;
+}
+
+.subject-assign-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #475569;
   font-size: 0.85rem;
-  font-weight: 600;
-  color: #64748b;
+  cursor: pointer;
+  outline: none;
 }
 
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+.subject-assign-select:hover, .subject-assign-select:focus {
+  border-color: #3b82f6;
+  background: white;
 }
 
-.status-dot.active {
-  background: #10b981;
-}
-
-.status-dot.inactive {
-  background: #64748b;
-}
-
-.grade-actions {
+/* Actions */
+.grade-actions-mini {
   display: flex;
   gap: 8px;
 }
 
-.action-btn {
+.grade-actions-mini button {
   width: 32px;
   height: 32px;
   border: none;
@@ -213,32 +338,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.action-btn.toggle {
   background: #f1f5f9;
 }
 
-.action-btn.toggle:hover {
+.grade-actions-mini button:hover {
   background: #e2e8f0;
-  transform: scale(1.1);
-}
-
-.action-btn.edit {
-  background: #dbeafe;
-}
-
-.action-btn.edit:hover {
-  background: #bfdbfe;
-  transform: scale(1.1);
-}
-
-.action-btn.delete {
-  background: #fee2e2;
-}
-
-.action-btn.delete:hover {
-  background: #fecaca;
   transform: scale(1.1);
 }
 
@@ -335,13 +439,6 @@
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-group small {
-  display: block;
-  margin-top: 4px;
-  font-size: 0.8rem;
-  color: #64748b;
 }
 
 .form-group.checkbox {

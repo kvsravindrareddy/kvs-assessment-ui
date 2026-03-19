@@ -8,12 +8,10 @@ import {
   CloudArrowUpIcon,
   EyeIcon,
   PencilIcon,
-  TrashIcon
+  TrashIcon,
+  ArrowPathIcon // <-- ADDED TO PREVENT COMPILATION ERROR
 } from '@heroicons/react/24/outline';
 
-/**
- * Story Management Module
- */
 const StoryManagement = () => {
   const config = getConfig();
   const [stories, setStories] = useState([]);
@@ -22,10 +20,14 @@ const StoryManagement = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [selectedStory, setSelectedStory] = useState(null);
 
+  // --- NEW: State for dynamic Grades & Subjects ---
+  const [gradesData, setGradesData] = useState([]);
+  const [availableSubjects, setAvailableSubjects] = useState([]);
+
   const [importForm, setImportForm] = useState({
     numberOfStories: 10,
-    category: 'V',
-    storyType: 'ENGLISH',
+    category: '', // Will hold the Grade Code
+    storyType: '', // Will hold the Subject Name
     storyLength: 'MEDIUM',
     source: 'CHATGPT'
   });
@@ -34,25 +36,80 @@ const StoryManagement = () => {
   const [importMessage, setImportMessage] = useState(null);
 
   useEffect(() => {
-    loadStories();
+    loadInitialData();
   }, []);
+
+  const loadInitialData = async () => {
+    try {
+      setLoading(true);
+      await Promise.all([loadStories(), loadGradesAndSubjects()]);
+    } catch (error) {
+      console.error("Error loading initial data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadStories = async () => {
     try {
-      setLoading(true);
       const response = await axios.get(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/listAllStories`);
       setStories(response.data || []);
     } catch (error) {
       console.error('Error loading stories:', error);
-    } finally {
-      setLoading(false);
     }
+  };
+
+  // --- NEW: Fetch Grades & Subjects from the DB ---
+  const loadGradesAndSubjects = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const baseUrl = config.GATEWAY_URL || config.ADMIN_BASE_URL;
+      const response = await axios.get(
+        `${baseUrl}/admin-assessment/v1/grade-subjects`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      const activeGrades = (response.data || []).filter(g => g.isActive);
+      setGradesData(activeGrades);
+      
+      if (activeGrades.length > 0) {
+        setImportForm(prev => ({
+          ...prev, 
+          category: activeGrades[0].gradeCode,
+          storyType: activeGrades[0].subjects?.[0]?.subjectName || ''
+        }));
+        setAvailableSubjects(activeGrades[0].subjects || []);
+      }
+    } catch (error) {
+      console.error('Error loading grades configuration:', error);
+    }
+  };
+
+  // --- NEW: Cascade Dropdown Logic ---
+  const handleGradeChange = (e) => {
+    const selectedGradeCode = e.target.value;
+    const selectedGrade = gradesData.find(g => g.gradeCode === selectedGradeCode);
+    
+    const subjectsForGrade = selectedGrade?.subjects || [];
+    setAvailableSubjects(subjectsForGrade);
+    
+    setImportForm({
+      ...importForm,
+      category: selectedGradeCode,
+      storyType: subjectsForGrade.length > 0 ? subjectsForGrade[0].subjectName : ''
+    });
   };
 
   const handleImport = async (e) => {
     e.preventDefault();
     setImporting(true);
     setImportMessage(null);
+
+    if (!importForm.category || !importForm.storyType) {
+        setImportMessage({ type: 'error', text: 'Please select a valid Grade and Subject.' });
+        setImporting(false);
+        return;
+    }
 
     try {
       const payload = {
@@ -61,8 +118,8 @@ const StoryManagement = () => {
           isActive: true,
           title: "Sample Story Title",
           storyLength: importForm.storyLength,
-          category: importForm.category,
-          storyType: importForm.storyType,
+          category: importForm.category, // Dynamic Grade
+          storyType: importForm.storyType, // Dynamic Subject
           content: "A well-written story appropriate for students...",
           source: importForm.source,
           howManyQuestions: "MCQ",
@@ -113,7 +170,6 @@ const StoryManagement = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Story Management</h1>
@@ -130,7 +186,6 @@ const StoryManagement = () => {
         </button>
       </div>
 
-      {/* Search */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="relative">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -144,7 +199,6 @@ const StoryManagement = () => {
         </div>
       </div>
 
-      {/* Stories Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredStories.map((story, idx) => (
           <div key={idx} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6">
@@ -177,7 +231,6 @@ const StoryManagement = () => {
         ))}
       </div>
 
-      {/* Import Modal */}
       {showImportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4">
@@ -196,18 +249,43 @@ const StoryManagement = () => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
+              
+              {/* --- DYNAMIC GRADE SELECTION --- */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                <select
-                  value={importForm.category}
-                  onChange={(e) => setImportForm({ ...importForm, category: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="V">Vowels</option>
-                  <option value="C">Consonants</option>
-                  <option value="G">General</option>
-                </select>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Grade Level</label>
+                  <select
+                    value={importForm.category}
+                    onChange={handleGradeChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                  >
+                    <option value="" disabled>Select Grade</option>
+                    {gradesData.map(g => (
+                      <option key={g.id} value={g.gradeCode}>{g.gradeName} ({g.gradeCode})</option>
+                    ))}
+                  </select>
               </div>
+
+              {/* --- DYNAMIC SUBJECT SELECTION --- */}
+              <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                  <select
+                    value={importForm.storyType}
+                    onChange={(e) => setImportForm({ ...importForm, storyType: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    disabled={availableSubjects.length === 0}
+                    required
+                  >
+                    {availableSubjects.length === 0 ? (
+                        <option value="">No subjects assigned to this grade</option>
+                    ) : (
+                        availableSubjects.map(sub => (
+                        <option key={sub.id} value={sub.subjectName}>{sub.subjectName.replace(/_/g, ' ')}</option>
+                        ))
+                    )}
+                  </select>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Story Length</label>
                 <select
@@ -230,10 +308,6 @@ const StoryManagement = () => {
                   <option value="CHATGPT">ChatGPT</option>
                   <option value="GOOGLE">Google/Gemini</option>
                   <option value="MANUAL">Manual</option>
-                  <option value="FILE_UPLOAD">File Upload</option>
-                  <option value="EXTERNAL_API">External API</option>
-                  <option value="DATABASE">Database</option>
-                  <option value="OTHER">Other</option>
                 </select>
               </div>
 
@@ -256,10 +330,11 @@ const StoryManagement = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={importing}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  disabled={importing || !importForm.category || availableSubjects.length === 0}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 disabled:opacity-50"
                 >
-                  {importing ? 'Importing...' : 'Import Stories'}
+                  {importing && <ArrowPathIcon className="w-5 h-5 animate-spin" />}
+                  <span>{importing ? 'Importing...' : 'Import Stories'}</span>
                 </button>
               </div>
             </form>
@@ -267,12 +342,19 @@ const StoryManagement = () => {
         </div>
       )}
 
-      {/* Story Detail Modal */}
       {selectedStory && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b">
+            <div className="p-6 border-b flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">{selectedStory.title}</h2>
+              <div className="flex gap-2">
+                 <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold">
+                    {selectedStory.category}
+                 </span>
+                 <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">
+                    {selectedStory.storyType}
+                 </span>
+              </div>
             </div>
             <div className="p-6">
               <p className="text-gray-700 whitespace-pre-wrap">{selectedStory.content}</p>

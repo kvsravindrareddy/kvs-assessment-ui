@@ -13,10 +13,6 @@ import {
   DocumentArrowDownIcon
 } from '@heroicons/react/24/outline';
 
-/**
- * Question Management Module
- * Comprehensive interface for managing assessment questions
- */
 const QuestionManagement = () => {
   const config = getConfig();
 
@@ -26,6 +22,10 @@ const QuestionManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showImportModal, setShowImportModal] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
+
+  // --- NEW: State for dynamic Grades & Subjects ---
+  const [gradesData, setGradesData] = useState([]);
+  const [availableSubjects, setAvailableSubjects] = useState([]);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -39,45 +39,90 @@ const QuestionManagement = () => {
   const [importForm, setImportForm] = useState({
     source: 'CHATGPT',
     complexity: 'MEDIUM',
-    type: 'JAVA',
+    type: '', // Will hold the dynamic Subject Name
     answerType: 'SINGLE',
-    category: 'PROFESSIONAL',
+    category: '', // Will hold the dynamic Grade Code
     numberOfQuestions: 10
   });
 
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState(null);
 
-  // Categories and options
-  const categories = ['ALL', 'PROFESSIONAL', 'ACADEMIC', 'TECHNICAL', 'GENERAL'];
   const complexities = ['ALL', 'EASY', 'MEDIUM', 'HARD', 'EXPERT'];
-  const types = ['ALL', 'JAVA', 'PYTHON', 'JAVASCRIPT', 'SQL', 'OTHER'];
-  const sources = ['ALL', 'CHATGPT', 'GEMINI', 'MANUAL', 'EXCEL'];
 
   useEffect(() => {
-    loadQuestions();
+    loadInitialData();
   }, []);
 
-  useEffect(() => {
-    filterQuestions();
-  }, [questions, searchTerm, filters]);
-
-  const loadQuestions = async () => {
+  const loadInitialData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${config.ADMIN_BASE_URL}/listallquestions`);
-      setQuestions(response.data || []);
+      await Promise.all([loadQuestions(), loadGradesAndSubjects()]);
     } catch (error) {
-      console.error('Error loading questions:', error);
+      console.error("Error loading initial data:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  const loadQuestions = async () => {
+    try {
+      const response = await axios.get(`${config.ADMIN_BASE_URL}/listallquestions`);
+      setQuestions(response.data || []);
+    } catch (error) {
+      console.error('Error loading questions:', error);
+    }
+  };
+
+  // --- NEW: Fetch Grades & Subjects from the DB ---
+  const loadGradesAndSubjects = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      // Using GATEWAY_URL or ADMIN_BASE_URL depending on your setup
+      const baseUrl = config.GATEWAY_URL || config.ADMIN_BASE_URL;
+      const response = await axios.get(
+        `${baseUrl}/admin-assessment/v1/grade-subjects`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      const activeGrades = (response.data || []).filter(g => g.isActive);
+      setGradesData(activeGrades);
+      
+      if (activeGrades.length > 0) {
+        setImportForm(prev => ({
+          ...prev, 
+          category: activeGrades[0].gradeCode,
+          type: activeGrades[0].subjects?.[0]?.subjectName || ''
+        }));
+        setAvailableSubjects(activeGrades[0].subjects || []);
+      }
+    } catch (error) {
+      console.error('Error loading grades configuration:', error);
+    }
+  };
+
+  // --- NEW: Cascade Dropdown Logic ---
+  const handleGradeChange = (e) => {
+    const selectedGradeCode = e.target.value;
+    const selectedGrade = gradesData.find(g => g.gradeCode === selectedGradeCode);
+    
+    const subjectsForGrade = selectedGrade?.subjects || [];
+    setAvailableSubjects(subjectsForGrade);
+    
+    setImportForm({
+      ...importForm,
+      category: selectedGradeCode,
+      type: subjectsForGrade.length > 0 ? subjectsForGrade[0].subjectName : ''
+    });
+  };
+
+  useEffect(() => {
+    filterQuestions();
+  }, [questions, searchTerm, filters]);
+
   const filterQuestions = () => {
     let filtered = [...questions];
 
-    // Search filter
     if (searchTerm) {
       filtered = filtered.filter(q =>
         q.question?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -85,24 +130,16 @@ const QuestionManagement = () => {
       );
     }
 
-    // Category filter
     if (filters.category !== 'ALL') {
       filtered = filtered.filter(q => q.category === filters.category);
     }
 
-    // Complexity filter
     if (filters.complexity !== 'ALL') {
       filtered = filtered.filter(q => q.complexity === filters.complexity);
     }
 
-    // Type filter
     if (filters.type !== 'ALL') {
       filtered = filtered.filter(q => q.type === filters.type);
-    }
-
-    // Source filter
-    if (filters.source !== 'ALL') {
-      filtered = filtered.filter(q => q.source === filters.source);
     }
 
     setFilteredQuestions(filtered);
@@ -113,14 +150,20 @@ const QuestionManagement = () => {
     setImporting(true);
     setImportMessage(null);
 
+    if (!importForm.category || !importForm.type) {
+        setImportMessage({ type: 'error', text: 'Please select a valid Grade and Subject.' });
+        setImporting(false);
+        return;
+    }
+
     try {
       const payload = {
         ...importForm,
         expectedResponseStructure: [
           {
-            category: importForm.category,
+            category: importForm.category, // Dynamic Grade
             complexity: importForm.complexity,
-            type: importForm.type,
+            type: importForm.type, // Dynamic Subject
             isActive: true,
             question: {
               name: "Sample question",
@@ -138,10 +181,8 @@ const QuestionManagement = () => {
         text: `Successfully imported ${importForm.numberOfQuestions} questions!`
       });
 
-      // Reload questions
       await loadQuestions();
 
-      // Close modal after 2 seconds
       setTimeout(() => {
         setShowImportModal(false);
         setImportMessage(null);
@@ -167,15 +208,9 @@ const QuestionManagement = () => {
     return colors[complexity] || 'bg-gray-100 text-gray-800';
   };
 
-  const getCategoryColor = (category) => {
-    const colors = {
-      PROFESSIONAL: 'bg-blue-100 text-blue-800',
-      ACADEMIC: 'bg-purple-100 text-purple-800',
-      TECHNICAL: 'bg-indigo-100 text-indigo-800',
-      GENERAL: 'bg-gray-100 text-gray-800'
-    };
-    return colors[category] || 'bg-gray-100 text-gray-800';
-  };
+  // Generate dynamic filters based on the loaded questions
+  const uniqueSubjectsInBank = ['ALL', ...new Set(questions.map(q => q.type))].filter(Boolean);
+  const uniqueGradesInBank = ['ALL', ...new Set(questions.map(q => q.category))].filter(Boolean);
 
   if (loading) {
     return (
@@ -187,7 +222,6 @@ const QuestionManagement = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Question Management</h1>
@@ -204,10 +238,8 @@ const QuestionManagement = () => {
         </button>
       </div>
 
-      {/* Search and Filters */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          {/* Search */}
           <div className="md:col-span-2">
             <div className="relative">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -221,13 +253,13 @@ const QuestionManagement = () => {
             </div>
           </div>
 
-          {/* Filters */}
           <select
             value={filters.category}
             onChange={(e) => setFilters({ ...filters, category: e.target.value })}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {categories.map(cat => (
+            <option value="ALL">All Grades</option>
+            {uniqueGradesInBank.filter(c => c !== 'ALL').map(cat => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
@@ -247,31 +279,16 @@ const QuestionManagement = () => {
             onChange={(e) => setFilters({ ...filters, type: e.target.value })}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {types.map(type => (
+             <option value="ALL">All Subjects</option>
+            {uniqueSubjectsInBank.filter(t => t !== 'ALL').map(type => (
               <option key={type} value={type}>{type}</option>
             ))}
           </select>
         </div>
 
-        {/* Active Filters */}
         {(filters.category !== 'ALL' || filters.complexity !== 'ALL' || filters.type !== 'ALL' || searchTerm) && (
           <div className="mt-4 flex items-center space-x-2">
             <span className="text-sm text-gray-600">Active filters:</span>
-            {filters.category !== 'ALL' && (
-              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                {filters.category}
-              </span>
-            )}
-            {filters.complexity !== 'ALL' && (
-              <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
-                {filters.complexity}
-              </span>
-            )}
-            {filters.type !== 'ALL' && (
-              <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                {filters.type}
-              </span>
-            )}
             <button
               onClick={() => {
                 setFilters({ category: 'ALL', complexity: 'ALL', type: 'ALL', source: 'ALL' });
@@ -285,30 +302,17 @@ const QuestionManagement = () => {
         )}
       </div>
 
-      {/* Questions List */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Question
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Complexity
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Type
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Source
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Question</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Complexity</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -327,7 +331,7 @@ const QuestionManagement = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(q.category)}`}>
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                         {q.category}
                       </span>
                     </td>
@@ -340,19 +344,9 @@ const QuestionManagement = () => {
                     <td className="px-6 py-4 text-sm text-gray-600">{q.source || 'N/A'}</td>
                     <td className="px-6 py-4 text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
-                        <button
-                          onClick={() => setSelectedQuestion(q)}
-                          className="text-blue-600 hover:text-blue-900"
-                          title="View"
-                        >
-                          <EyeIcon className="w-5 h-5" />
-                        </button>
-                        <button className="text-green-600 hover:text-green-900" title="Edit">
-                          <PencilIcon className="w-5 h-5" />
-                        </button>
-                        <button className="text-red-600 hover:text-red-900" title="Delete">
-                          <TrashIcon className="w-5 h-5" />
-                        </button>
+                        <button onClick={() => setSelectedQuestion(q)} className="text-blue-600 hover:text-blue-900"><EyeIcon className="w-5 h-5" /></button>
+                        <button className="text-green-600 hover:text-green-900"><PencilIcon className="w-5 h-5" /></button>
+                        <button className="text-red-600 hover:text-red-900"><TrashIcon className="w-5 h-5" /></button>
                       </div>
                     </td>
                   </tr>
@@ -363,7 +357,6 @@ const QuestionManagement = () => {
         </div>
       </div>
 
-      {/* Import Modal */}
       {showImportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -379,15 +372,12 @@ const QuestionManagement = () => {
                   <select
                     value={importForm.source}
                     onChange={(e) => setImportForm({ ...importForm, source: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="CHATGPT">ChatGPT</option>
                     <option value="GOOGLE">Google/Gemini</option>
                     <option value="MANUAL">Manual</option>
                     <option value="FILE_UPLOAD">File Upload</option>
-                    <option value="EXTERNAL_API">External API</option>
-                    <option value="DATABASE">Database</option>
-                    <option value="OTHER">Other</option>
                   </select>
                 </div>
 
@@ -399,21 +389,43 @@ const QuestionManagement = () => {
                     max="100"
                     value={importForm.numberOfQuestions}
                     onChange={(e) => setImportForm({ ...importForm, numberOfQuestions: parseInt(e.target.value) })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
 
+                {/* --- DYNAMIC GRADE SELECTION --- */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Grade Level</label>
                   <select
                     value={importForm.category}
-                    onChange={(e) => setImportForm({ ...importForm, category: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={handleGradeChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    required
                   >
-                    <option value="PROFESSIONAL">Professional</option>
-                    <option value="ACADEMIC">Academic</option>
-                    <option value="TECHNICAL">Technical</option>
-                    <option value="GENERAL">General</option>
+                    <option value="" disabled>Select Grade</option>
+                    {gradesData.map(g => (
+                      <option key={g.id} value={g.gradeCode}>{g.gradeName} ({g.gradeCode})</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* --- DYNAMIC SUBJECT SELECTION --- */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                  <select
+                    value={importForm.type}
+                    onChange={(e) => setImportForm({ ...importForm, type: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    disabled={availableSubjects.length === 0}
+                    required
+                  >
+                    {availableSubjects.length === 0 ? (
+                        <option value="">No subjects assigned to this grade</option>
+                    ) : (
+                        availableSubjects.map(sub => (
+                        <option key={sub.id} value={sub.subjectName}>{sub.subjectName.replace(/_/g, ' ')}</option>
+                        ))
+                    )}
                   </select>
                 </div>
 
@@ -422,7 +434,7 @@ const QuestionManagement = () => {
                   <select
                     value={importForm.complexity}
                     onChange={(e) => setImportForm({ ...importForm, complexity: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="EASY">Easy</option>
                     <option value="MEDIUM">Medium</option>
@@ -432,26 +444,11 @@ const QuestionManagement = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
-                  <select
-                    value={importForm.type}
-                    onChange={(e) => setImportForm({ ...importForm, type: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="JAVA">Java</option>
-                    <option value="PYTHON">Python</option>
-                    <option value="JAVASCRIPT">JavaScript</option>
-                    <option value="SQL">SQL</option>
-                    <option value="OTHER">Other</option>
-                  </select>
-                </div>
-
-                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Answer Type</label>
                   <select
                     value={importForm.answerType}
                     onChange={(e) => setImportForm({ ...importForm, answerType: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="SINGLE">Single Choice</option>
                     <option value="MULTIPLE">Multiple Choice</option>
@@ -478,7 +475,7 @@ const QuestionManagement = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={importing}
+                  disabled={importing || !importForm.category || availableSubjects.length === 0}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2 disabled:opacity-50"
                 >
                   {importing ? (
@@ -499,7 +496,6 @@ const QuestionManagement = () => {
         </div>
       )}
 
-      {/* Question Detail Modal */}
       {selectedQuestion && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -525,7 +521,7 @@ const QuestionManagement = () => {
                 </div>
               )}
               <div className="flex items-center space-x-4">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(selectedQuestion.category)}`}>
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                   {selectedQuestion.category}
                 </span>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${getComplexityColor(selectedQuestion.complexity)}`}>
