@@ -98,21 +98,17 @@ export const router = createBrowserRouter([
   {
     path: '/assessments/speed-math',
     element: (
-      <ProtectedRoute>
-        <UnifiedDashboard>
-          <SpeedMathChallenge />
-        </UnifiedDashboard>
-      </ProtectedRoute>
+      <UnifiedDashboard>
+        <SpeedMathChallenge />
+      </UnifiedDashboard>
     )
   },
   {
     path: '/assessments/subject-assessments',
     element: (
-      <ProtectedRoute>
-        <UnifiedDashboard>
-          <SubjectAssessments />
-        </UnifiedDashboard>
-      </ProtectedRoute>
+      <UnifiedDashboard>
+        <SubjectAssessments />
+      </UnifiedDashboard>
     )
   },
   {
@@ -128,6 +124,10 @@ export const router = createBrowserRouter([
   {
     path: '/reading',
     element: <App /> // Handled by App.js routing
+  },
+  {
+    path: '/stories',
+    element: <App /> // NEW: Handled by App.js routing
   },
   {
     path: '/games',
@@ -148,11 +148,9 @@ export const router = createBrowserRouter([
   {
     path: '/assessments/math-by-grade',
     element: (
-      <ProtectedRoute>
-        <UnifiedDashboard>
-          <MathByGrade />
-        </UnifiedDashboard>
-      </ProtectedRoute>
+      <UnifiedDashboard>
+        <MathByGrade />
+      </UnifiedDashboard>
     )
   },
   {
@@ -162,21 +160,17 @@ export const router = createBrowserRouter([
   {
     path: '/assessments/leaderboard',
     element: (
-      <ProtectedRoute>
-        <UnifiedDashboard>
-          <LeaderboardView />
-        </UnifiedDashboard>
-      </ProtectedRoute>
+      <UnifiedDashboard>
+        <LeaderboardView />
+      </UnifiedDashboard>
     )
   },
   {
     path: '/it-learning-hub',
     element: (
-      <ProtectedRoute>
-        <UnifiedDashboard>
-          <ITLearningHub />
-        </UnifiedDashboard>
-      </ProtectedRoute>
+      <UnifiedDashboard>
+        <ITLearningHub />
+      </UnifiedDashboard>
     )
   },
   {
@@ -290,15 +284,15 @@ export const router = createBrowserRouter([
   },
   {
     path: '/assessments/science-lab',
-    element: <ProtectedRoute><UnifiedDashboard><ScienceLab /></UnifiedDashboard></ProtectedRoute>
+    element: <UnifiedDashboard><ScienceLab /></UnifiedDashboard>
   },
   {
     path: '/assessments/grammar-hub',
-    element: <ProtectedRoute><UnifiedDashboard><GrammarHub /></UnifiedDashboard></ProtectedRoute>
+    element: <UnifiedDashboard><GrammarHub /></UnifiedDashboard>
   },
   {
     path: '/assessments/vocabulary-hub',
-    element: <ProtectedRoute><UnifiedDashboard><VocabularyHub /></UnifiedDashboard></ProtectedRoute>
+    element: <UnifiedDashboard><VocabularyHub /></UnifiedDashboard>
   }
 ], {
   future: {

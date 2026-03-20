@@ -221,10 +221,10 @@ export default function WorksheetsHub() {
 
             if (print) {
                 PDFGenerator.printPDF(doc);
-                setMessage({ type: 'success', text: '✅ Opening print dialog...' });
+                setMessage({ type: 'success'});
             } else {
                 PDFGenerator.downloadPDF(doc, `${template.name.replace(/\s+/g, '_')}_${includeAnswers ? 'answers' : 'worksheet'}.pdf`);
-                setMessage({ type: 'success', text: '✅ PDF downloaded successfully!' });
+                setMessage({ type: 'success'});
             }
         } catch (error) {
             setMessage({ type: 'error', text: '❌ Failed to generate worksheet' });
@@ -280,10 +280,8 @@ export default function WorksheetsHub() {
 
             if (print) {
                 PDFGenerator.printPDF(doc);
-                setMessage({ type: 'success', text: '✅ Opening print dialog...' });
             } else {
                 PDFGenerator.downloadPDF(doc, `custom_${activeCategory}_${includeAnswers ? 'answers' : 'worksheet'}.pdf`);
-                setMessage({ type: 'success', text: '✅ Custom worksheet downloaded!' });
             }
         } catch (error) {
             setMessage({ type: 'error', text: '❌ Failed to generate custom worksheet' });
@@ -473,17 +471,9 @@ export default function WorksheetsHub() {
 
             if (print) {
                 PDFGenerator.printPDF(doc);
-                setMessage({
-                    type: 'success',
-                    text: '✅ Opening print dialog...'
-                });
             } else {
                 const filename = `worksheet_${worksheetForm.grade}_${Date.now()}_${includeAnswers ? 'answers' : 'questions'}.pdf`;
                 PDFGenerator.downloadPDF(doc, filename);
-                setMessage({
-                    type: 'success',
-                    text: `✅ ${includeAnswers ? 'Answer key' : 'Worksheet'} downloaded!`
-                });
             }
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -531,16 +521,6 @@ export default function WorksheetsHub() {
                     </div>
                 </button>
             </div>
-
-            {/* Message Display */}
-            {message && (
-                <div className={`message-box ${message.type}`}>
-                    <span className="message-icon">
-                        {message.type === 'success' ? '✓' : message.type === 'warning' ? '⚠' : '⚠'}
-                    </span>
-                    {message.text}
-                </div>
-            )}
 
             {/* ==================== CUSTOM MATH MODE ==================== */}
             {mainMode === 'custom-math' && (

@@ -54,10 +54,9 @@ function AppContent() {
 
   useEffect(() => {
     const path = location.pathname;
-    if (path.includes('/reading')) setActiveSection('Reading');
+    if (path.includes('/reading') || path.includes('/stories')) setActiveSection('Reading');
     else if (path.includes('/dashboard')) setActiveSection('Dashboard');
     else if (path.includes('/games')) setActiveSection('Games');
-    // Combine all assessment hubs into the Assessments Nav Highlight!
     else if (path.includes('/assessments') || path.includes('/it-learning-hub') || path.includes('/science-lab') || path.includes('/grammar-hub') || path.includes('/vocabulary-hub')) {
         setActiveSection('AssessmentsHub');
     }

@@ -77,37 +77,6 @@
   font-size: 0.875rem;
 }
 
-/* Message Box */
-.message-box {
-  max-width: 1400px;
-  margin: 0 auto 20px auto;
-  padding: 16px 20px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 500;
-  backdrop-filter: blur(10px);
-}
-
-.message-box.success {
-  background: rgba(16, 185, 129, 0.2);
-  border: 2px solid #10b981;
-  color: white;
-}
-
-.message-box.warning {
-  background: rgba(245, 158, 11, 0.2);
-  border: 2px solid #f59e0b;
-  color: white;
-}
-
-.message-box.error {
-  background: rgba(239, 68, 68, 0.2);
-  border: 2px solid #ef4444;
-  color: white;
-}
-
 /* ==================== CUSTOM MATH SECTION ==================== */
 
 .custom-math-section {
@@ -194,6 +163,7 @@
   padding: 5px; /* Space for card shadow */
 }
 
+/* Update this block (Remove overflow: hidden) */
 .template-card {
   position: relative;
   background: white;
@@ -201,10 +171,10 @@
   padding: 0;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
   border: 1px solid #f0f0f0;
 }
 
+/* Update this block (Add border-radius) */
 .template-card::before {
   content: '';
   position: absolute;
@@ -215,6 +185,7 @@
   background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
   opacity: 0;
   transition: opacity 0.3s;
+  border-radius: 16px 16px 0 0; /* <-- ADD THIS */
 }
 
 .template-card:hover::before {
@@ -1461,10 +1432,11 @@
 }
 
 /* Tooltip enhancement */
+/* REPLACE the old Tooltip enhancement blocks with this: */
 .btn-icon[title]:hover::after {
   content: attr(title);
   position: absolute;
-  bottom: -35px;
+  bottom: calc(100% + 10px); /* Positions tooltip ABOVE the button */
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.9);
@@ -1475,7 +1447,28 @@
   white-space: nowrap;
   z-index: 1000;
   pointer-events: none;
-  animation: fadeIn 0.2s;
+  animation: fadeInTooltip 0.2s ease-out forwards;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Add a beautiful little triangle pointing down to the button */
+.btn-icon[title]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px 6px 0;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+  z-index: 1000;
+  pointer-events: none;
+  animation: fadeInTooltip 0.2s ease-out forwards;
+}
+
+@keyframes fadeInTooltip {
+  from { opacity: 0; transform: translateX(-50%) translateY(5px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 @keyframes fadeIn {
@@ -1491,6 +1484,7 @@
   padding: 16px 20px 20px 20px;
   background: #fafbfc;
   border-top: 1px solid #f0f0f0;
+  border-radius: 0 0 16px 16px;
 }
 
 /* ==================== Enhanced Format Toggle ==================== */

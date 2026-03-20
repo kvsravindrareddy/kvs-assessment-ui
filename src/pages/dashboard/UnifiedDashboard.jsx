@@ -10,57 +10,123 @@ import ContentCreatorDashboard from './roles/ContentCreatorDashboard';
 import './UnifiedDashboard.css';
 
 const UnifiedDashboard = ({ children }) => {
-  const { user, activeRole, switchRole, getAccessibleRoles, ROLES } = useAuth();
+  // FIX: Destructure 'loading' (not isLoading) from AuthContext
+  const { user, activeRole, switchRole, getAccessibleRoles, ROLES, loading } = useAuth();
   const [showRoleSwitcher, setShowRoleSwitcher] = useState(false);
-  const accessibleRoles = getAccessibleRoles();
+  
+  // Safely check for accessible roles only if the user exists
+  const accessibleRoles = user && getAccessibleRoles ? getAccessibleRoles() : [];
+  
   const navigate = useNavigate();
   const location = useLocation();
 
   const isProfileView = location.pathname === '/profile';
 
+  // 1. FIX: Handle Loading State properly
+  // This prevents logged-in users from seeing "Not Authenticated" on refresh
+  if (loading) {
+    return (
+      <div className="unified-dashboard-container">
+        <div className="dashboard-content" style={{ display: 'flex', justifyContent: 'center', padding: '3rem', alignItems: 'center' }}>
+          <div className="spinner"></div>
+          <p style={{ marginLeft: '1rem', color: '#666' }}>Loading workspace...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. --- GUEST VIEW ---
+  // If no user is logged in, show the guest layout and render the tool (children)
+  if (!user) {
+    return (
+      <div className="unified-dashboard-container">
+        <div className="dashboard-header">
+          <div className="dashboard-header-left">
+            <h1 className="dashboard-title">
+              <span className="dashboard-icon">⚡</span>
+              Guest Access
+            </h1>
+            <p className="dashboard-subtitle">
+              Create a free account to save your progress and earn rewards!
+            </p>
+          </div>
+
+          <div className="dashboard-header-right">
+            <button className="profile-action-button" onClick={() => navigate('/login')} title="Login">
+              <span className="profile-icon">🔑</span>
+              <span className="profile-text">Login</span>
+            </button>
+            <button className="profile-action-button" onClick={() => navigate('/')} title="Back to Home">
+              <span className="profile-icon">🏠</span>
+              <span className="profile-text">Home</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="dashboard-content">
+          {/* If they are accessing a specific tool (like Science Lab), render it. Otherwise, prompt login. */}
+          {children ? children : (
+            <div className="dashboard-error">
+              <h2>⚠️ Dashboard Access Restricted</h2>
+              <p>Please log in to access your personalized dashboard.</p>
+              <button 
+                onClick={() => navigate('/login')} 
+                style={{ marginTop: '1rem', padding: '0.5rem 1rem', background: '#3b82f6', color: 'white', borderRadius: '0.5rem', border: 'none', cursor: 'pointer' }}
+              >
+                Go to Login
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // 3. --- LOGGED IN USER VIEW ---
+
   const dashboardComponents = {
-    [ROLES.SUPER_ADMIN]: SuperAdminDashboard,
-    [ROLES.DISTRICT_ADMIN]: SuperAdminDashboard,
-    [ROLES.SCHOOL_ADMIN]: SuperAdminDashboard,
-    [ROLES.TEACHER]: TeacherDashboard,
-    [ROLES.PARENT]: ParentDashboard,
-    [ROLES.STUDENT]: StudentDashboard,
-    [ROLES.COUNSELOR]: CounselorDashboard,
-    [ROLES.CONTENT_CREATOR]: ContentCreatorDashboard,
-    [ROLES.LIBRARIAN]: StudentDashboard,
-    [ROLES.OBSERVER]: StudentDashboard,
-    [ROLES.SUPPORT_STAFF]: StudentDashboard,
-    [ROLES.AI_ASSISTANT]: StudentDashboard
+    [ROLES?.SUPER_ADMIN]: SuperAdminDashboard,
+    [ROLES?.DISTRICT_ADMIN]: SuperAdminDashboard,
+    [ROLES?.SCHOOL_ADMIN]: SuperAdminDashboard,
+    [ROLES?.TEACHER]: TeacherDashboard,
+    [ROLES?.PARENT]: ParentDashboard,
+    [ROLES?.STUDENT]: StudentDashboard,
+    [ROLES?.COUNSELOR]: CounselorDashboard,
+    [ROLES?.CONTENT_CREATOR]: ContentCreatorDashboard,
+    [ROLES?.LIBRARIAN]: StudentDashboard,
+    [ROLES?.OBSERVER]: StudentDashboard,
+    [ROLES?.SUPPORT_STAFF]: StudentDashboard,
+    [ROLES?.AI_ASSISTANT]: StudentDashboard
   };
 
   const roleNames = {
-    [ROLES.SUPER_ADMIN]: 'Super Administrator',
-    [ROLES.DISTRICT_ADMIN]: 'District Administrator',
-    [ROLES.SCHOOL_ADMIN]: 'School Administrator',
-    [ROLES.TEACHER]: 'Teacher',
-    [ROLES.PARENT]: 'Parent',
-    [ROLES.STUDENT]: 'Student',
-    [ROLES.COUNSELOR]: 'Counselor',
-    [ROLES.CONTENT_CREATOR]: 'Content Creator',
-    [ROLES.LIBRARIAN]: 'Librarian',
-    [ROLES.OBSERVER]: 'Observer',
-    [ROLES.SUPPORT_STAFF]: 'Support Staff',
-    [ROLES.AI_ASSISTANT]: 'AI Assistant'
+    [ROLES?.SUPER_ADMIN]: 'Super Administrator',
+    [ROLES?.DISTRICT_ADMIN]: 'District Administrator',
+    [ROLES?.SCHOOL_ADMIN]: 'School Administrator',
+    [ROLES?.TEACHER]: 'Teacher',
+    [ROLES?.PARENT]: 'Parent',
+    [ROLES?.STUDENT]: 'Student',
+    [ROLES?.COUNSELOR]: 'Counselor',
+    [ROLES?.CONTENT_CREATOR]: 'Content Creator',
+    [ROLES?.LIBRARIAN]: 'Librarian',
+    [ROLES?.OBSERVER]: 'Observer',
+    [ROLES?.SUPPORT_STAFF]: 'Support Staff',
+    [ROLES?.AI_ASSISTANT]: 'AI Assistant'
   };
 
   const roleIcons = {
-    [ROLES.SUPER_ADMIN]: '👑',
-    [ROLES.DISTRICT_ADMIN]: '🏛️',
-    [ROLES.SCHOOL_ADMIN]: '🏫',
-    [ROLES.TEACHER]: '👨‍🏫',
-    [ROLES.PARENT]: '👪',
-    [ROLES.STUDENT]: '🎓',
-    [ROLES.COUNSELOR]: '🤝',
-    [ROLES.CONTENT_CREATOR]: '✍️',
-    [ROLES.LIBRARIAN]: '📚',
-    [ROLES.OBSERVER]: '👀',
-    [ROLES.SUPPORT_STAFF]: '🛠️',
-    [ROLES.AI_ASSISTANT]: '🤖'
+    [ROLES?.SUPER_ADMIN]: '👑',
+    [ROLES?.DISTRICT_ADMIN]: '🏛️',
+    [ROLES?.SCHOOL_ADMIN]: '🏫',
+    [ROLES?.TEACHER]: '👨‍🏫',
+    [ROLES?.PARENT]: '👪',
+    [ROLES?.STUDENT]: '🎓',
+    [ROLES?.COUNSELOR]: '🤝',
+    [ROLES?.CONTENT_CREATOR]: '✍️',
+    [ROLES?.LIBRARIAN]: '📚',
+    [ROLES?.OBSERVER]: '👀',
+    [ROLES?.SUPPORT_STAFF]: '🛠️',
+    [ROLES?.AI_ASSISTANT]: '🤖'
   };
 
   const handleRoleSwitch = (newRole) => {
@@ -70,17 +136,6 @@ const UnifiedDashboard = ({ children }) => {
   };
 
   const DashboardComponent = dashboardComponents[activeRole] || StudentDashboard;
-
-  if (!user) {
-    return (
-      <div className="unified-dashboard-container">
-        <div className="dashboard-error">
-          <h2>⚠️ Not Authenticated</h2>
-          <p>Please log in to access your dashboard.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="unified-dashboard-container">
@@ -97,7 +152,6 @@ const UnifiedDashboard = ({ children }) => {
 
         <div className="dashboard-header-right">
           
-          {/* UPDATED: Changed to Home and fixed UI alignment */}
           {isProfileView ? (
             <button className="profile-action-button" onClick={() => navigate('/')} title="Back to Home">
               <span className="profile-icon">🏠</span>

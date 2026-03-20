@@ -69,10 +69,13 @@ export default function SubjectAssessments() {
   // Bookmarks
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState(new Set());
 
-  const baseUrl = CONFIG.development.GATEWAY_URL || CONFIG.development.ADMIN_BASE_URL;
-  const loadAssessmentURL = `${baseUrl}/v1/assessment/questions/load`;
-  const startAssessmentURL = `${baseUrl}/v1/assessment/questions/start`;
-  const submitAnswerURL = `${baseUrl}/v1/assessment/questions/submit-answer`;
+  // 1. FIX: Point URLs correctly to match AssessmentFlow.jsx structure exactly
+  const assessmentUrl = CONFIG.development.ASSESSMENT_BASE_URL;
+  const adminUrl = CONFIG.development.GATEWAY_URL || CONFIG.development.ADMIN_BASE_URL;
+
+  const loadAssessmentURL = `${assessmentUrl}/v1/assessment/load`;
+  const startAssessmentURL = `${assessmentUrl}/v1/assessment/start`;
+  const submitAnswerURL = `${assessmentUrl}/v1/assessment/submit-answer`;
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -112,7 +115,7 @@ export default function SubjectAssessments() {
             // Fetch from API if cache expired or doesn't exist
             const token = localStorage.getItem('token');
             const response = await axios.get(
-              `${baseUrl}/admin-assessment/v1/grade-subjects`,
+              `${adminUrl}/admin-assessment/v1/grade-subjects`,
               { headers: { Authorization: token ? `Bearer ${token}` : '' } }
             );
             
@@ -227,7 +230,9 @@ export default function SubjectAssessments() {
 
     setLoading(true);
     setErrorMessage('');
-    setShowConfigDialog(false);
+    
+    // 2. FIX: Do NOT hide the dialog until the API correctly resolves!
+    // setShowConfigDialog(false); 
 
     try {
       const token = localStorage.getItem('token');
@@ -254,11 +259,14 @@ export default function SubjectAssessments() {
       setIsTimerRunning(true);
       setBookmarkedQuestions(new Set());
 
+      // NOW we safely hide the config dialog and show the assessment
+      setShowConfigDialog(false);
+
     } catch (err) {
       console.error('Error starting subject assessment:', err);
       const errorMsg = err.response?.data?.message || 'Could not load questions. Ensure the Admin has loaded questions for this Subject & Grade.';
       setErrorMessage(errorMsg);
-      setShowConfigDialog(true); 
+      // We don't hide the config dialog on error, allowing the user to read the message.
     } finally {
       setLoading(false);
     }
