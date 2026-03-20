@@ -73,9 +73,9 @@ export default function SubjectAssessments() {
   const assessmentUrl = CONFIG.development.ASSESSMENT_BASE_URL;
   const adminUrl = CONFIG.development.GATEWAY_URL || CONFIG.development.ADMIN_BASE_URL;
 
-  const loadAssessmentURL = `${assessmentUrl}/v1/assessment/load`;
-  const startAssessmentURL = `${assessmentUrl}/v1/assessment/start`;
-  const submitAnswerURL = `${assessmentUrl}/v1/assessment/submit-answer`;
+  const loadAssessmentURL = `${assessmentUrl}/v1/assessment/questions/load`;
+  const startAssessmentURL = `${assessmentUrl}/v1/assessment/questions/start`;
+  const submitAnswerURL = `${assessmentUrl}/v1/assessment/questions/submit-answer`;
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
