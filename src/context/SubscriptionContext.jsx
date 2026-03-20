@@ -42,7 +42,7 @@ const TIER_LIMITS = {
     assessmentsPerDay: 5,
     assessmentsTotal: -1, // unlimited total
     storiesPerDay: 5,
-    gamesPerDay: 3,
+    gamesPerDay: -1, // FIX: Changed from 3 to -1 (unlimited for logged in users)
     aiQuestionsPerMonth: -1, // unlimited for free users
     canSaveProgress: true,
     canDownloadCertificates: false,
@@ -393,7 +393,7 @@ export const SubscriptionProvider = ({ children }) => {
     const messages = {
       assessment: `You've reached your assessment limit. Upgrade to get unlimited access!`,
       story: `You've used all your free stories. Upgrade for unlimited reading!`,
-      game: `Game limit reached. Upgrade for unlimited playtime!`,
+      game: `Please sign up or log in for a free account to play unlimited games!`, // Updated copy
       ai: `AI Tutor is only available for paid subscribers. Upgrade now!`,
       certificate: `Download certificates with a paid subscription!`,
       analytics: `Detailed analytics available for paid users only.`,

@@ -239,20 +239,13 @@ const GamesHub = ({ preSelectedGame = null, audioEnabled = true }) => {
 
   const handleGameSelect = (game) => {
     speakText(`Let's play ${game.name}`, audioEnabled);
-    // Super users and admins have access to all games
+    
+    // Any logged-in user can access Premium Games
     if (game.premium && !isAdminUser) {
-      // Check if user has premium subscription
-      const hasPremium = user && (
-        user.subscriptionTier === 'STUDENT_INDIVIDUAL' ||
-        user.subscriptionTier === 'FAMILY_PLAN' ||
-        user.subscriptionTier === 'TEACHER_BASIC' ||
-        user.subscriptionTier === 'SCHOOL_STANDARD' ||
-        user.subscriptionTier === 'SCHOOL_PREMIUM' ||
-        user.subscriptionTier === 'DISTRICT_ENTERPRISE'
-      );
+      const isUserLoggedIn = !!user;
 
-      if (!hasPremium) {
-        alert('🌟 Premium Game! Upgrade to access Word Builder Pro and Math Race Pro with score tracking!');
+      if (!isUserLoggedIn) {
+        alert('🌟 Premium Game! Please log in or sign up for a free account to access this game!');
         setShowUpgradeModal(true);
         return;
       }
@@ -261,39 +254,94 @@ const GamesHub = ({ preSelectedGame = null, audioEnabled = true }) => {
   };
 
   if (selectedGame) {
+    const activeGameData = games.find(g => g.id === selectedGame);
+
     return (
-      <div className="game-container">
-        <button className="back-button" onClick={() => setSelectedGame(null)}>
-          ← Back to Games
-        </button>
-        {selectedGame === 'sudoku' && <Sudoku />}
-        {selectedGame === 'math' && <MathChallenge />}
-        {selectedGame === 'numbermatch' && <NumberMatch />}
-        {selectedGame === 'skipcounting' && <SkipCounting />}
-        {selectedGame === 'compare' && <CompareNumbers />}
-        {selectedGame === 'memory' && <MemoryGame />}
-        {selectedGame === 'drawing' && <DrawingBoard />}
-        {selectedGame === 'wordbuilder' && <WordBuilder />}
-        {selectedGame === 'mathrace' && <MathRace />}
-        {selectedGame === 'gameof24' && <GameOf24 />}
-        {selectedGame === 'fourfours' && <FourFours />}
-        {selectedGame === 'chess' && <Chess />}
-        {selectedGame === 'tictactoe' && <TicTacToe />}
-        {selectedGame === 'simonsays' && <SimonSays />}
-        {selectedGame === 'patternmatch' && <PatternMatch />}
-        {selectedGame === 'yoga' && <YogaInstructor />}
-        {selectedGame === 'dance' && <DanceChallenge />}
+      // Optimized Container: Normal flow, but with protective padding and auto-centering
+      <div className="active-game-wrapper" style={{
+        minHeight: 'calc(100vh - 80px)', // Ensures it fills the screen gracefully
+        display: 'flex',
+        flexDirection: 'column',
+        paddingTop: '25px', // Prevents it from touching the sticky header
+        paddingBottom: '40px',
+        maxWidth: '1200px',
+        margin: '0 auto',
+        width: '100%'
+      }}>
         
-        {/* 👇 NEW GAMES ADDED HERE 👇 */}
-        {selectedGame === 'math-balance' && <MathBalance audioEnabled={audioEnabled} />}
-        {selectedGame === 'next-pattern' && <NextInPattern audioEnabled={audioEnabled} />}
+        {/* Innovative Top Alignment Bar */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px',
+          padding: '0 20px',
+          flexWrap: 'wrap',
+          gap: '15px'
+        }}>
+          <button 
+            className="back-button" 
+            onClick={() => setSelectedGame(null)} 
+            style={{ margin: 0, padding: '8px 20px' }}
+          >
+            ← Back to Games
+          </button>
+
+          {/* Symmetrical Game Data Badge */}
+          {activeGameData && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '6px 18px',
+              backgroundColor: activeGameData.color + '15', // Transparent tint
+              border: `2px solid ${activeGameData.color}`,
+              borderRadius: '30px',
+              fontWeight: 'bold',
+              color: '#1e293b',
+              boxShadow: '0 4px 10px rgba(0,0,0,0.05)'
+            }}>
+              <span style={{ fontSize: '1.4rem' }}>{activeGameData.icon}</span>
+              {activeGameData.name}
+            </div>
+          )}
+        </div>
+
+        {/* Game Play Area - Flex column to perfectly center the child components */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+          padding: '0 10px'
+        }}>
+          {selectedGame === 'sudoku' && <Sudoku />}
+          {selectedGame === 'math' && <MathChallenge />}
+          {selectedGame === 'numbermatch' && <NumberMatch />}
+          {selectedGame === 'skipcounting' && <SkipCounting />}
+          {selectedGame === 'compare' && <CompareNumbers />}
+          {selectedGame === 'memory' && <MemoryGame />}
+          {selectedGame === 'drawing' && <DrawingBoard />}
+          {selectedGame === 'wordbuilder' && <WordBuilder />}
+          {selectedGame === 'mathrace' && <MathRace />}
+          {selectedGame === 'gameof24' && <GameOf24 />}
+          {selectedGame === 'fourfours' && <FourFours />}
+          {selectedGame === 'chess' && <Chess />}
+          {selectedGame === 'tictactoe' && <TicTacToe />}
+          {selectedGame === 'simonsays' && <SimonSays />}
+          {selectedGame === 'patternmatch' && <PatternMatch />}
+          {selectedGame === 'yoga' && <YogaInstructor />}
+          {selectedGame === 'dance' && <DanceChallenge />}
+          {selectedGame === 'math-balance' && <MathBalance audioEnabled={audioEnabled} />}
+          {selectedGame === 'next-pattern' && <NextInPattern audioEnabled={audioEnabled} />}
+        </div>
       </div>
     );
   }
 
   return (
     <div className="games-hub-container">
-      {/* Usage Indicator */}
       {!selectedGame && <UsageIndicator type="game" />}
 
       <div className="games-hub-header">
@@ -301,7 +349,6 @@ const GamesHub = ({ preSelectedGame = null, audioEnabled = true }) => {
         <p>Choose a category to browse games!</p>
       </div>
 
-      {/* Category Navigation Index */}
       <div className="category-index">
         <h2 className="category-index-title">Game Categories</h2>
         <div className="category-nav">
@@ -328,7 +375,6 @@ const GamesHub = ({ preSelectedGame = null, audioEnabled = true }) => {
         </div>
       </div>
 
-      {/* Quick Jump Index Table */}
       <div className="games-index-table">
         <h3 className="index-title">
           {selectedCategory === 'all' ? 'All Games' : categories.find(c => c.id === selectedCategory)?.name}
@@ -355,7 +401,6 @@ const GamesHub = ({ preSelectedGame = null, audioEnabled = true }) => {
         </div>
       </div>
 
-      {/* Game Cards Grid */}
       <div className="games-section">
         <h3 className="section-title">
           {selectedCategory === 'all' ? 'Browse All Games' : `${categories.find(c => c.id === selectedCategory)?.name} Collection`}
@@ -385,7 +430,6 @@ const GamesHub = ({ preSelectedGame = null, audioEnabled = true }) => {
         </div>
       </div>
 
-      {/* Upgrade Modal */}
       {showUpgradeModal && (
         <UpgradePrompt
           message={getUpgradeMessage('game')}

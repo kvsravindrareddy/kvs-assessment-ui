@@ -3,7 +3,11 @@ import { useSubscription } from '../context/SubscriptionContext';
 import './UsageIndicator.css';
 
 const UsageIndicator = ({ type = 'assessment', showInHeader = false }) => {
+  // 1. Hooks MUST be called first, before any conditional returns
   const { getRemainingUsage, getLimits, subscriptionTier, SUBSCRIPTION_TIERS } = useSubscription();
+
+  // 2. NOW we can safely exit if it's a game
+  if (type === 'game') return null;
 
   const remaining = getRemainingUsage(type);
   const limits = getLimits();

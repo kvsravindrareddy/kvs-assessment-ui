@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LandingPage.css';
 import kivoLogo from '../../assets/kivo.png';
+import './HeroSection.css';
 
 const LandingPage = () => {
   const navigate = useNavigate();
