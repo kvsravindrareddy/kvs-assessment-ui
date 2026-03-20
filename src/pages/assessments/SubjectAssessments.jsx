@@ -16,7 +16,7 @@ const getSubjectIcon = (subjectName) => {
   if (s.includes('GEOGRAPHY')) return '🌍';
   if (s.includes('SOCIAL')) return '🤝';
   if (s.includes('COMPUTER') || s.includes('IT')) return '💻';
-  if (s.includes('HINDI') || s.includes('TELUGU') || s.includes('LANGUAGE')) return '🗣️';
+  if (s.includes('HINDI') || s.includes('TELUGU') || s.includes('LANGUAGE') || s.includes('SANSKRIT') || s.includes('TAMIL') || s.includes('URDU')) return '🗣️';
   if (s.includes('KNOWLEDGE') || s.includes('GENERAL')) return '💡';
   if (s.includes('ART')) return '🎨';
   if (s.includes('MUSIC')) return '🎵';
@@ -42,6 +42,7 @@ export default function SubjectAssessments() {
   const [orderedGrades, setOrderedGrades] = useState([]);
   const [gradeSubjectMap, setGradeSubjectMap] = useState({});
   const [gradesLoading, setGradesLoading] = useState(true);
+  const [isRefreshingCache, setIsRefreshingCache] = useState(false);
 
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
@@ -69,7 +70,6 @@ export default function SubjectAssessments() {
   // Bookmarks
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState(new Set());
 
-  // 1. FIX: Point URLs correctly to match AssessmentFlow.jsx structure exactly
   const assessmentUrl = CONFIG.development.ASSESSMENT_BASE_URL;
   const adminUrl = CONFIG.development.GATEWAY_URL || CONFIG.development.ADMIN_BASE_URL;
 
@@ -95,62 +95,68 @@ export default function SubjectAssessments() {
     });
   };
 
-  // --- UI CACHING IMPLEMENTATION ---
-  useEffect(() => {
-    const loadGradesAndSubjects = async () => {
-      try {
-        setGradesLoading(true);
-        const CACHE_KEY = 'kivo_dynamic_grades_cache';
-        const CACHE_TTL_KEY = 'kivo_dynamic_grades_cache_time';
-        const CACHE_DURATION = 1000 * 60 * 60; // 1 Hour
+  // 🚀 FIX: Added "forceRefresh" parameter to bust the cache when needed
+  const loadGradesAndSubjects = async (forceRefresh = false) => {
+    try {
+      if (!forceRefresh) setGradesLoading(true);
+      else setIsRefreshingCache(true);
 
-        let activeGrades = [];
-        const cachedData = localStorage.getItem(CACHE_KEY);
-        const cachedTime = localStorage.getItem(CACHE_TTL_KEY);
+      const CACHE_KEY = 'kivo_dynamic_grades_cache';
+      const CACHE_TTL_KEY = 'kivo_dynamic_grades_cache_time';
+      const CACHE_DURATION = 1000 * 60 * 60; // 1 Hour
 
-        // Check if cache exists and is valid
-        if (cachedData && cachedTime && (Date.now() - parseInt(cachedTime) < CACHE_DURATION)) {
-            activeGrades = JSON.parse(cachedData);
-        } else {
-            // Fetch from API if cache expired or doesn't exist
-            const token = localStorage.getItem('token');
-            const response = await axios.get(
-              `${adminUrl}/admin-assessment/v1/grade-subjects`,
-              { headers: { Authorization: token ? `Bearer ${token}` : '' } }
-            );
-            
-            activeGrades = (response.data || []).filter(g => g.isActive);
-            activeGrades.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
-            
-            // Save to UI Cache
-            localStorage.setItem(CACHE_KEY, JSON.stringify(activeGrades));
-            localStorage.setItem(CACHE_TTL_KEY, Date.now().toString());
-        }
-        
-        // Process Data
-        const gradesList = activeGrades.map(g => g.gradeCode);
-        const subjMap = {};
-        
-        activeGrades.forEach(g => {
-          subjMap[g.gradeCode] = (g.subjects || []).map(s => s.subjectName);
-        });
+      let activeGrades = [];
+      const cachedData = localStorage.getItem(CACHE_KEY);
+      const cachedTime = localStorage.getItem(CACHE_TTL_KEY);
 
-        setOrderedGrades(gradesList);
-        setGradeSubjectMap(subjMap);
-
-        // Auto-select Default Grade (Prefer V if exists, else first available)
-        if (gradesList.length > 0) {
-          const defaultGrade = gradesList.includes('V') ? 'V' : gradesList[0];
-          setSelectedGrade(defaultGrade);
-        }
-
-      } catch (error) {
-        console.error('Error loading grades and subjects:', error);
-      } finally {
-        setGradesLoading(false);
+      // Check if cache exists and is valid, AND we aren't forcing a refresh
+      if (!forceRefresh && cachedData && cachedTime && (Date.now() - parseInt(cachedTime) < CACHE_DURATION)) {
+          activeGrades = JSON.parse(cachedData);
+      } else {
+          // Fetch from API
+          const token = localStorage.getItem('token');
+          const response = await axios.get(
+            `${adminUrl}/admin-assessment/v1/grade-subjects`,
+            { headers: { Authorization: token ? `Bearer ${token}` : '' } }
+          );
+          
+          activeGrades = (response.data || []).filter(g => g.isActive);
+          activeGrades.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+          
+          // Save to UI Cache
+          localStorage.setItem(CACHE_KEY, JSON.stringify(activeGrades));
+          localStorage.setItem(CACHE_TTL_KEY, Date.now().toString());
       }
-    };
+      
+      // Process Data
+      const gradesList = activeGrades.map(g => g.gradeCode);
+      const subjMap = {};
+      
+      activeGrades.forEach(g => {
+        // Filter out Technology subjects (they belong in the IT Learning Hub!)
+        subjMap[g.gradeCode] = (g.subjects || [])
+          .filter(s => !s.isTechnology && !s.technology) 
+          .map(s => s.subjectName);
+      });
 
+      setOrderedGrades(gradesList);
+      setGradeSubjectMap(subjMap);
+
+      // Auto-select Default Grade
+      if (gradesList.length > 0 && !selectedGrade) {
+        const defaultGrade = gradesList.includes('V') ? 'V' : gradesList[0];
+        setSelectedGrade(defaultGrade);
+      }
+
+    } catch (error) {
+      console.error('Error loading grades and subjects:', error);
+    } finally {
+      setGradesLoading(false);
+      setIsRefreshingCache(false);
+    }
+  };
+
+  useEffect(() => {
     loadGradesAndSubjects();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -230,9 +236,6 @@ export default function SubjectAssessments() {
 
     setLoading(true);
     setErrorMessage('');
-    
-    // 2. FIX: Do NOT hide the dialog until the API correctly resolves!
-    // setShowConfigDialog(false); 
 
     try {
       const token = localStorage.getItem('token');
@@ -259,14 +262,12 @@ export default function SubjectAssessments() {
       setIsTimerRunning(true);
       setBookmarkedQuestions(new Set());
 
-      // NOW we safely hide the config dialog and show the assessment
       setShowConfigDialog(false);
 
     } catch (err) {
       console.error('Error starting subject assessment:', err);
       const errorMsg = err.response?.data?.message || 'Could not load questions. Ensure the Admin has loaded questions for this Subject & Grade.';
       setErrorMessage(errorMsg);
-      // We don't hide the config dialog on error, allowing the user to read the message.
     } finally {
       setLoading(false);
     }
@@ -371,7 +372,20 @@ export default function SubjectAssessments() {
 
       {!assessmentId && !showConfigDialog ? (
         <div style={{ background: '#ffffff', borderRadius: '24px', padding: '30px 20px', boxShadow: '0 10px 40px rgba(0,0,0,0.08)' }}>
-            <h2 style={{ textAlign: 'center', fontSize: '2.2rem', color: '#1e293b', margin: '0 0 5px 0', fontWeight: '800' }}>Subject Assessments 📚</h2>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginBottom: '5px' }}>
+              <h2 style={{ fontSize: '2.2rem', color: '#1e293b', margin: 0, fontWeight: '800' }}>Subject Assessments 📚</h2>
+              
+              {/* 🚀 THE CACHE BUSTER BUTTON */}
+              <button 
+                onClick={() => loadGradesAndSubjects(true)} 
+                disabled={isRefreshingCache}
+                title="Force sync latest curriculum"
+                style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isRefreshingCache ? 'not-allowed' : 'pointer', fontSize: '1.2rem', transition: '0.2s', opacity: isRefreshingCache ? 0.5 : 1 }}
+              >
+                {isRefreshingCache ? '⏳' : '🔄'}
+              </button>
+            </div>
+            
             <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '30px', fontSize: '1.1rem' }}>Select your Grade and Subject to begin.</p>
 
             {/* DYNAMIC Grade Selector */}
@@ -380,7 +394,7 @@ export default function SubjectAssessments() {
                     <button 
                         key={grade} 
                         onClick={() => { setSelectedGrade(grade); setSelectedSubject(null); }}
-                        style={{ padding: '10px 20px', borderRadius: '50px', border: 'none', fontWeight: 'bold', whiteSpace: 'nowrap', cursor: 'pointer', background: selectedGrade === grade ? '#0f172a' : '#f1f5f9', color: selectedGrade === grade ? 'white' : '#475569' }}
+                        style={{ padding: '10px 20px', borderRadius: '50px', border: 'none', fontWeight: 'bold', whiteSpace: 'nowrap', cursor: 'pointer', background: selectedGrade === grade ? '#0f172a' : '#f1f5f9', color: selectedGrade === grade ? 'white' : '#475569', transition: 'all 0.2s' }}
                     >
                         {grade.replace('_', ' ')}
                     </button>
@@ -402,15 +416,15 @@ export default function SubjectAssessments() {
                     ))}
                 </div>
             ) : (
-                <div style={{ textAlign: 'center', padding: '40px', background: '#f8fafc', borderRadius: '16px', color: '#64748b', marginBottom: '40px' }}>
-                    No subjects assigned to this grade yet.
+                <div style={{ textAlign: 'center', padding: '40px', background: '#f8fafc', borderRadius: '16px', color: '#64748b', marginBottom: '40px', border: '1px dashed #cbd5e1' }}>
+                    No standard subjects assigned to this grade yet.
                 </div>
             )}
 
             <button
                 onClick={openConfigDialog}
                 disabled={loading || !selectedSubject}
-                style={{ width: '100%', maxWidth: '400px', margin: '0 auto', display: 'block', padding: '20px', fontSize: '1.3rem', fontWeight: 'bold', borderRadius: '50px', background: !selectedSubject ? '#cbd5e1' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', cursor: !selectedSubject ? 'not-allowed' : 'pointer', boxShadow: !selectedSubject ? 'none' : '0 10px 25px rgba(16, 185, 129, 0.4)' }}
+                style={{ width: '100%', maxWidth: '400px', margin: '0 auto', display: 'block', padding: '20px', fontSize: '1.3rem', fontWeight: 'bold', borderRadius: '50px', background: !selectedSubject ? '#cbd5e1' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', cursor: !selectedSubject ? 'not-allowed' : 'pointer', boxShadow: !selectedSubject ? 'none' : '0 10px 25px rgba(16, 185, 129, 0.4)', transition: '0.3s' }}
             >
                 Configure Assessment ⚙️
             </button>
