@@ -3,6 +3,7 @@ import SpeakComponent from './SpeakComponent';
 import StoryGenerator from './StoryGenerator';
 import RhymeFinder from './RhymeFinder';
 import PersonalizedLearning from './PersonalizedLearning';
+import ITLearningHub from '../it-learning/ITLearningHub'; // 🚀 IMPORTED IT HUB
 import '../../css/AIHub.css';
 import { useSubscription } from '../../context/SubscriptionContext';
 import UpgradePrompt from '../../components/UpgradePrompt';
@@ -10,7 +11,6 @@ import UpgradePrompt from '../../components/UpgradePrompt';
 const AIHub = ({ audioEnabled = true }) => {
   const { isFeatureLocked, getUpgradeMessage } = useSubscription();
   const [selectedFeature, setSelectedFeature] = useState(null);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Check if AI is locked
   const aiLocked = isFeatureLocked('ai');
@@ -22,6 +22,15 @@ const AIHub = ({ audioEnabled = true }) => {
       icon: '🎯',
       description: 'AI-powered recommendations based on your emotions, progress & interests',
       color: '#667eea',
+      featured: true
+    },
+    // 🚀 ADDED IT & CODING MATRIX TO THE AI HUB
+    {
+      id: 'it-learning',
+      name: 'IT & Coding Matrix',
+      icon: '💻',
+      description: 'Master programming languages and technical stacks with AI',
+      color: '#38bdf8', // Cyber blue theme
       featured: true
     },
     {
@@ -50,9 +59,26 @@ const AIHub = ({ audioEnabled = true }) => {
   if (selectedFeature) {
     return (
       <div className="ai-feature-container">
-        <button className="back-button" onClick={() => setSelectedFeature(null)}>
-          ← Back to AI Hub
-        </button>
+        {/* We hide the default back button ONLY for IT learning since it has its own futuristic header */}
+        {selectedFeature !== 'it-learning' && (
+          <button className="back-button" onClick={() => setSelectedFeature(null)}>
+            ← Back to AI Hub
+          </button>
+        )}
+        
+        {/* If IT Learning is selected, we inject a custom back button over its header to return to AI Hub */}
+        {selectedFeature === 'it-learning' && (
+           <div style={{ position: 'relative' }}>
+             <button 
+               onClick={() => setSelectedFeature(null)} 
+               style={{ position: 'absolute', top: '23px', left: '200px', zIndex: 10, background: '#1e293b', color: '#38bdf8', border: '1px solid #38bdf8', padding: '6px 15px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+             >
+               ← AI HUB
+             </button>
+             <ITLearningHub />
+           </div>
+        )}
+
         {selectedFeature === 'personalized' && <PersonalizedLearning />}
         {selectedFeature === 'speak' && <SpeakComponent audioEnabled={audioEnabled} />}
         {selectedFeature === 'story' && <StoryGenerator audioEnabled={audioEnabled} />}
