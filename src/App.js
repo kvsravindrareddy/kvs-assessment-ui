@@ -40,7 +40,6 @@ import ErrorReportButton from './components/ErrorReportButton';
 import IdeaSubmitButton from './components/IdeaSubmitButton';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-// NEW: Import the beautiful Assessments Hub
 import AssessmentsHub from './pages/assessments/AssessmentsHub';
 import WorksheetsHub from './pages/worksheets/WorksheetsHub';
 import EnhancedSearch from './components/EnhancedSearch';
@@ -58,8 +57,10 @@ function AppContent() {
     if (path.includes('/reading')) setActiveSection('Reading');
     else if (path.includes('/dashboard')) setActiveSection('Dashboard');
     else if (path.includes('/games')) setActiveSection('Games');
-    // NEW: Tells the nav bar to highlight Assessments when on this URL
-    else if (path.includes('/assessments')) setActiveSection('AssessmentsHub');
+    // Combine all assessment hubs into the Assessments Nav Highlight!
+    else if (path.includes('/assessments') || path.includes('/it-learning-hub') || path.includes('/science-lab') || path.includes('/grammar-hub') || path.includes('/vocabulary-hub')) {
+        setActiveSection('AssessmentsHub');
+    }
     else if (path.includes('/ai-hub')) setActiveSection('AI');
     else if (path.includes('/worksheets')) setActiveSection('Worksheets');
     else if (path === '/' && activeSection !== 'Home') setActiveSection('Home');

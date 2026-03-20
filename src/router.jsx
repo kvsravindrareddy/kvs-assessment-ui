@@ -52,6 +52,10 @@ import SpeedMathChallenge from './pages/assessments/SpeedMathChallenge';
 import SubjectAssessments from './pages/assessments/SubjectAssessments';
 import StudentGradingDashboard from './pages/student/StudentGradingDashboard';
 
+import ScienceLab from './pages/science/ScienceLab';
+import GrammarHub from './pages/language/GrammarHub';
+import VocabularyHub from './pages/language/VocabularyHub';
+
 // Old App Content (existing features)
 import App from './App';
 
@@ -283,6 +287,18 @@ export const router = createBrowserRouter([
   {
     path: '/*',
     element: <App />
+  },
+  {
+    path: '/assessments/science-lab',
+    element: <ProtectedRoute><UnifiedDashboard><ScienceLab /></UnifiedDashboard></ProtectedRoute>
+  },
+  {
+    path: '/assessments/grammar-hub',
+    element: <ProtectedRoute><UnifiedDashboard><GrammarHub /></UnifiedDashboard></ProtectedRoute>
+  },
+  {
+    path: '/assessments/vocabulary-hub',
+    element: <ProtectedRoute><UnifiedDashboard><VocabularyHub /></UnifiedDashboard></ProtectedRoute>
   }
 ], {
   future: {
