@@ -12,6 +12,7 @@ import GradesManagement from '../components/GradesManagement';
 import IncidentManagement from '../components/IncidentManagement';
 import FlashMessageManager from '../../admin/FlashMessageManager';
 import FeatureAccessControl from '../../admin/FeatureAccessControl';
+import Settings from '../../admin/Settings'; // 🚀 IMPORT ADDED HERE
 import './SuperAdminDashboard.css';
 
 const SuperAdminDashboard = () => {
@@ -44,7 +45,7 @@ const SuperAdminDashboard = () => {
       const [usersRes, pendingRes, platformStatsRes] = await Promise.allSettled([
         axios.get(`${config.GATEWAY_URL || config.ADMIN_BASE_URL}/auth/admin/users`, { headers }),
         axios.get(`${config.GATEWAY_URL || config.ADMIN_BASE_URL}/auth/admin/pending-users`, { headers }),
-        // 3. FIX: Call your new StatsController instead of downloading all questions!
+        // 3. Call your new StatsController
         axios.get(`${config.GATEWAY_URL || config.ADMIN_BASE_URL}/admin-assessment/api/stats/platform`, { headers })
       ]);
 
@@ -156,7 +157,6 @@ const SuperAdminDashboard = () => {
         </div>
       </div>
 
-      {/* 5. FIX: Displaying REAL aggregated stats instead of fetching millions of rows */}
       <div className="content-stats-grid">
         <div className="content-stat-card">
           <div className="stat-header"><span className="stat-icon">🎯</span><h3>Assessments</h3></div>
@@ -173,15 +173,6 @@ const SuperAdminDashboard = () => {
           <div className="stat-value">{statistics.loading ? '...' : statistics.totalGamesPlayed.toLocaleString()}</div>
           <div className="stat-footer">Educational games completed</div>
         </div>
-      </div>
-    </div>
-  );
-
-  const renderSettings = () => (
-    <div className="settings-container">
-      <h2 className="section-title">System Settings</h2>
-      <div className="settings-sections">
-        <p>Settings configuration goes here...</p>
       </div>
     </div>
   );
@@ -219,7 +210,9 @@ const SuperAdminDashboard = () => {
           {activeSection === 'sessions' && <SessionManagement />}
           {activeSection === 'incidents' && <IncidentManagement />}
           {activeSection === 'analytics' && <SystemAnalytics />}
-          {activeSection === 'settings' && renderSettings()}
+          
+          {/* 🚀 FIX: Render the actual Settings component here */}
+          {activeSection === 'settings' && <Settings />}
         </div>
       </div>
     </div>
