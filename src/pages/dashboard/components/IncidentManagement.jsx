@@ -11,6 +11,10 @@ export default function IncidentManagement() {
   const [filter, setFilter] = useState('ALL'); // ALL, OPEN, IN_PROGRESS, RESOLVED, CLOSED
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [updateData, setUpdateData] = useState({});
+  
+  // 🌟 NEW: History State
+  const [incidentHistory, setIncidentHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   useEffect(() => {
     loadIncidents();
@@ -54,6 +58,26 @@ export default function IncidentManagement() {
     }
   };
 
+  // 🌟 NEW: Fetch History
+  const loadIncidentHistory = async (incidentId) => {
+    setLoadingHistory(true);
+    try {
+      const token = localStorage.getItem('token');
+      // Fetching up to 50 history records for the timeline
+      const url = `${CONFIG.development.ADMIN_BASE_URL}/admin-assessment/v1/incidents/${incidentId}/history?page=0&size=50`;
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Spring Boot Pageable returns data in the 'content' array
+      setIncidentHistory(response.data.content || []); 
+    } catch (error) {
+      console.error('Error loading incident history:', error);
+      setIncidentHistory([]);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
   const handleViewDetails = (incident) => {
     setSelectedIncident(incident);
     setUpdateData({
@@ -61,9 +85,10 @@ export default function IncidentManagement() {
       priority: incident.priority,
       category: incident.category,
       assignedToUsername: incident.assignedToUsername || '',
-      resolutionNotes: incident.resolutionNotes || ''
+      resolutionNotes: '' // Clear this field so they can type a new comment
     });
     setShowDetailsModal(true);
+    loadIncidentHistory(incident.incidentId); // 🌟 Fetch history on open
   };
 
   const handleUpdateIncident = async () => {
@@ -73,7 +98,6 @@ export default function IncidentManagement() {
       const token = localStorage.getItem('token');
       const url = `${CONFIG.development.ADMIN_BASE_URL}/admin-assessment/v1/incidents/${selectedIncident.incidentId}`;
       
-      // Check if status changed to inform admin about the email
       const statusChanged = updateData.status !== selectedIncident.status;
 
       await axios.put(url, updateData, {
@@ -83,16 +107,21 @@ export default function IncidentManagement() {
         }
       });
 
-      // 🌟 UX FIX: Better success message based on status change
       if (statusChanged && selectedIncident.reportedByEmail) {
           alert(`Incident updated! An email notification has been sent to ${selectedIncident.reportedByEmail}.`);
       } else {
           alert('Incident updated successfully!');
       }
 
-      setShowDetailsModal(false);
+      // Update UI seamlessly
+      setUpdateData(prev => ({ ...prev, resolutionNotes: '' })); // Clear input
       loadIncidents();
       loadStatistics();
+      loadIncidentHistory(selectedIncident.incidentId); // Refresh history log
+
+      // Update the local selected object so status check works
+      setSelectedIncident(prev => ({...prev, status: updateData.status}));
+
     } catch (error) {
       console.error('Error updating incident:', error);
       alert('Failed to update incident');
@@ -144,7 +173,6 @@ export default function IncidentManagement() {
     }
   };
 
-  // 🌟 Helper to check if status is modified
   const isStatusChanged = selectedIncident && updateData.status !== selectedIncident.status;
 
   return (
@@ -286,147 +314,186 @@ export default function IncidentManagement() {
       {/* Details Modal */}
       {showDetailsModal && selectedIncident && (
         <div className="incident-modal-overlay" onClick={() => setShowDetailsModal(false)}>
-          <div className="incident-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+          <div className="incident-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '900px', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+            <div className="modal-header" style={{ flexShrink: 0 }}>
               <h2>Incident Details</h2>
               <button className="modal-close" onClick={() => setShowDetailsModal(false)}>×</button>
             </div>
 
-            <div className="modal-body">
-              {/* Incident Info */}
-              <div className="info-section">
-                <h3>📋 Incident Information</h3>
-                <div className="info-grid">
-                  <div className="info-item">
-                    <label>Incident ID:</label>
-                    <span>{selectedIncident.incidentId}</span>
-                  </div>
-                  <div className="info-item">
-                    <label>Reported At:</label>
-                    <span>{new Date(selectedIncident.reportedAt).toLocaleString()}</span>
-                  </div>
-                  <div className="info-item full-width">
-                    <label>Title:</label>
-                    <span>{selectedIncident.title}</span>
-                  </div>
-                  <div className="info-item full-width">
-                    <label>Description:</label>
-                    <p className="description-text">{selectedIncident.description}</p>
+            <div className="modal-body" style={{ display: 'flex', gap: '20px', overflowY: 'auto' }}>
+              
+              {/* Left Column: Form & Info */}
+              <div style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div className="info-section">
+                  <h3>📋 Incident Information</h3>
+                  <div className="info-grid">
+                    <div className="info-item">
+                      <label>Incident ID:</label>
+                      <span>{selectedIncident.incidentId}</span>
+                    </div>
+                    <div className="info-item">
+                      <label>Reported At:</label>
+                      <span>{new Date(selectedIncident.reportedAt).toLocaleString()}</span>
+                    </div>
+                    <div className="info-item full-width">
+                      <label>Title:</label>
+                      <span>{selectedIncident.title}</span>
+                    </div>
+                    <div className="info-item full-width">
+                      <label>Description:</label>
+                      <p className="description-text">{selectedIncident.description}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* User Info */}
-              <div className="info-section">
-                <h3>👤 Reported By</h3>
-                <div className="info-grid">
-                  <div className="info-item">
-                    <label>Username:</label>
-                    <span>{selectedIncident.reportedByUsername}</span>
-                  </div>
-                  <div className="info-item">
-                    <label>Email:</label>
-                    <span>{selectedIncident.reportedByEmail}</span>
-                  </div>
-                  <div className="info-item full-width">
-                    <label>Page URL:</label>
-                    <a href={selectedIncident.pageUrl} target="_blank" rel="noopener noreferrer">
-                      {selectedIncident.pageUrl}
-                    </a>
+                <div className="info-section">
+                  <h3>👤 Reported By</h3>
+                  <div className="info-grid">
+                    <div className="info-item">
+                      <label>Username:</label>
+                      <span>{selectedIncident.reportedByUsername}</span>
+                    </div>
+                    <div className="info-item">
+                      <label>Email:</label>
+                      <span>{selectedIncident.reportedByEmail}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Update Form */}
-              <div className="info-section">
-                <h3>✏️ Update Incident</h3>
-                <div className="update-form">
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Status:</label>
-                      <select
-                        value={updateData.status}
-                        onChange={(e) => setUpdateData({...updateData, status: e.target.value})}
-                        style={{ border: isStatusChanged ? '2px solid #3b82f6' : '' }} // Highlight if changed
-                      >
-                        <option value="OPEN">Open</option>
-                        <option value="IN_PROGRESS">In Progress</option>
-                        <option value="RESOLVED">Resolved</option>
-                        <option value="CLOSED">Closed</option>
-                      </select>
+                <div className="info-section">
+                  <h3>✏️ Update Incident</h3>
+                  <div className="update-form">
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>Status:</label>
+                        <select
+                          value={updateData.status}
+                          onChange={(e) => setUpdateData({...updateData, status: e.target.value})}
+                          style={{ border: isStatusChanged ? '2px solid #3b82f6' : '' }}
+                        >
+                          <option value="OPEN">Open</option>
+                          <option value="IN_PROGRESS">In Progress</option>
+                          <option value="RESOLVED">Resolved</option>
+                          <option value="CLOSED">Closed</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label>Priority:</label>
+                        <select
+                          value={updateData.priority}
+                          onChange={(e) => setUpdateData({...updateData, priority: e.target.value})}
+                        >
+                          <option value="LOW">Low</option>
+                          <option value="MEDIUM">Medium</option>
+                          <option value="HIGH">High</option>
+                          <option value="CRITICAL">Critical</option>
+                        </select>
+                      </div>
                     </div>
-                    <div className="form-group">
-                      <label>Priority:</label>
-                      <select
-                        value={updateData.priority}
-                        onChange={(e) => setUpdateData({...updateData, priority: e.target.value})}
-                      >
-                        <option value="LOW">Low</option>
-                        <option value="MEDIUM">Medium</option>
-                        <option value="HIGH">High</option>
-                        <option value="CRITICAL">Critical</option>
-                      </select>
-                    </div>
-                  </div>
 
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Category:</label>
-                      <select
-                        value={updateData.category}
-                        onChange={(e) => setUpdateData({...updateData, category: e.target.value})}
-                      >
-                        <option value="BUG">Bug</option>
-                        <option value="FEATURE_REQUEST">Feature Request</option>
-                        <option value="UI_ISSUE">UI Issue</option>
-                        <option value="PERFORMANCE">Performance</option>
-                        <option value="SECURITY">Security</option>
-                        <option value="DATA_ISSUE">Data Issue</option>
-                        <option value="AUTHENTICATION">Authentication</option>
-                        <option value="ASSESSMENT">Assessment</option>
-                        <option value="OTHER">Other</option>
-                      </select>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>Category:</label>
+                        <select
+                          value={updateData.category}
+                          onChange={(e) => setUpdateData({...updateData, category: e.target.value})}
+                        >
+                          <option value="BUG">Bug</option>
+                          <option value="FEATURE_REQUEST">Feature Request</option>
+                          <option value="UI_ISSUE">UI Issue</option>
+                          <option value="PERFORMANCE">Performance</option>
+                          <option value="OTHER">Other</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label>Assigned To:</label>
+                        <input
+                          type="text"
+                          value={updateData.assignedToUsername}
+                          onChange={(e) => setUpdateData({...updateData, assignedToUsername: e.target.value})}
+                          placeholder="Enter username"
+                        />
+                      </div>
                     </div>
+
                     <div className="form-group">
-                      <label>Assigned To:</label>
-                      <input
-                        type="text"
-                        value={updateData.assignedToUsername}
-                        onChange={(e) => setUpdateData({...updateData, assignedToUsername: e.target.value})}
-                        placeholder="Enter username"
+                      <label>New Comment / Resolution Notes (Visible to user):</label>
+                      <textarea
+                        value={updateData.resolutionNotes}
+                        onChange={(e) => setUpdateData({...updateData, resolutionNotes: e.target.value})}
+                        placeholder="Type a new comment to add to the history..."
+                        rows={3}
                       />
                     </div>
-                  </div>
 
-                  <div className="form-group">
-                    <label>Resolution Notes (Will be visible to user):</label>
-                    <textarea
-                      value={updateData.resolutionNotes}
-                      onChange={(e) => setUpdateData({...updateData, resolutionNotes: e.target.value})}
-                      placeholder="Add resolution notes..."
-                      rows={4}
-                    />
-                  </div>
+                    {isStatusChanged && selectedIncident.reportedByEmail && (
+                      <div style={{ padding: '10px', backgroundColor: '#eff6ff', color: '#1e3a8a', borderRadius: '6px', marginBottom: '15px', fontSize: '0.9rem', border: '1px solid #bfdbfe' }}>
+                        ℹ️ <strong>Note:</strong> Changing status to <strong>{updateData.status.replace('_', ' ')}</strong> will email {selectedIncident.reportedByEmail}.
+                      </div>
+                    )}
 
-                  {/* 🌟 UX FIX: Show an alert if they are about to email the user! */}
-                  {isStatusChanged && selectedIncident.reportedByEmail && (
-                    <div style={{ padding: '10px', backgroundColor: '#eff6ff', color: '#1e3a8a', borderRadius: '6px', marginBottom: '15px', fontSize: '0.9rem', border: '1px solid #bfdbfe' }}>
-                      ℹ️ <strong>Note:</strong> Changing the status to <strong>{updateData.status.replace('_', ' ')}</strong> will automatically email the user ({selectedIncident.reportedByEmail}) with your resolution notes.
-                    </div>
-                  )}
-
-                  <div className="modal-actions">
-                    <button className="btn-update" onClick={handleUpdateIncident}>
-                      Update Incident
-                    </button>
-                    {selectedIncident.status !== 'CLOSED' && (
-                      <button className="btn-close-incident" onClick={handleCloseIncident}>
-                        Close Incident
+                    <div className="modal-actions" style={{ marginTop: '10px' }}>
+                      <button className="btn-update" onClick={handleUpdateIncident}>
+                        Save Update
                       </button>
+                      {selectedIncident.status !== 'CLOSED' && (
+                        <button className="btn-close-incident" onClick={handleCloseIncident}>
+                          Close Incident
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 🌟 NEW: Right Column: History Timeline */}
+              <div style={{ flex: '1', display: 'flex', flexDirection: 'column' }}>
+                <div className="info-section" style={{ flex: '1', margin: 0, backgroundColor: '#f8fafc', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  <h3 style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', marginTop: 0 }}>🕒 History & Comments</h3>
+                  
+                  <div style={{ overflowY: 'auto', paddingRight: '10px', flex: '1' }}>
+                    {loadingHistory ? (
+                      <div style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>Loading history...</div>
+                    ) : incidentHistory.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>No history recorded yet.</div>
+                    ) : (
+                      <div style={{ borderLeft: '2px solid #e2e8f0', marginLeft: '10px', marginTop: '15px' }}>
+                        {incidentHistory.map((entry, index) => (
+                          <div key={entry.id || index} style={{ position: 'relative', paddingLeft: '20px', paddingBottom: '20px' }}>
+                            {/* Timeline Dot */}
+                            <div style={{ position: 'absolute', left: '-6px', top: '0', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: getStatusColor(entry.status), border: '2px solid white' }} />
+                            
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                              <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: '500' }}>
+                                {new Date(entry.updatedAt).toLocaleString()}
+                              </span>
+                              <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '12px', color: 'white', backgroundColor: getStatusColor(entry.status), fontWeight: 'bold' }}>
+                                {entry.status}
+                              </span>
+                            </div>
+                            
+                            <div style={{ backgroundColor: 'white', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', marginTop: '8px' }}>
+                              <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#334155', marginBottom: '4px' }}>
+                                👤 {entry.updatedBy || 'System Admin'}
+                              </div>
+                              {entry.comment ? (
+                                <div style={{ fontSize: '0.9rem', color: '#475569', whiteSpace: 'pre-wrap' }}>
+                                  {entry.comment}
+                                </div>
+                              ) : (
+                                <div style={{ fontSize: '0.85rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                                  Status updated
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
