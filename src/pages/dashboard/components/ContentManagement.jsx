@@ -13,8 +13,12 @@ const ContentManagement = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
+  // 🚀 NEW: Technical Mode Toggle
+  const [isTechMode, setIsTechMode] = useState(false);
+
   // --- DYNAMIC GRADES & SUBJECTS STATE ---
   const [grades, setGrades] = useState([]);
+  const [allSubjectsPool, setAllSubjectsPool] = useState([]);
 
   // Worksheet form state
   const [worksheetForm, setWorksheetForm] = useState({ grade: '', subject: '', topic: '', difficulty: 'MEDIUM', count: 20, randomize: true });
@@ -53,39 +57,99 @@ const ContentManagement = () => {
 
   const loadGradesAndSubjects = async () => {
     try {
-      const response = await axios.get(`${config.GATEWAY_URL || config.ADMIN_BASE_URL}/admin-assessment/v1/grade-subjects`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
-      const activeGrades = (response.data || []).filter(g => g.isActive).sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+      const token = localStorage.getItem('token');
+      const headers = { Authorization: `Bearer ${token}` };
+      const baseUrl = config.GATEWAY_URL || config.ADMIN_BASE_URL;
+      
+      // Fetch Active Grades
+      const gradeRes = await axios.get(`${baseUrl}/admin-assessment/v1/grade-subjects`, { headers });
+      const activeGrades = (gradeRes.data || []).filter(g => g.isActive).sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
       setGrades(activeGrades);
-      if (activeGrades.length > 0) {
-        const firstGrade = activeGrades[0];
-        const defaultSubject = firstGrade.subjects?.length > 0 ? firstGrade.subjects[0].subjectName : '';
-        setQuestionForm(prev => ({ ...prev, category: firstGrade.gradeCode, type: defaultSubject }));
-        setStoryForm(prev => ({ ...prev, category: firstGrade.gradeCode, storyType: defaultSubject }));
-        setWorksheetForm(prev => ({ ...prev, grade: firstGrade.gradeCode, subject: defaultSubject }));
-      }
+
+      // Fetch Subject Pool (to check isTechnology flag)
+      const poolRes = await axios.get(`${baseUrl}/admin-assessment/v1/grade-subjects/pool`, { headers });
+      setAllSubjectsPool(poolRes.data || []);
+
     } catch (error) {}
   };
 
+  // 🚀 DYNAMIC SUBJECT FILTERING LOGIC
+  const getFilteredSubjectsForGrade = useCallback((gradeCode, techMode) => {
+    const grade = grades.find(g => g.gradeCode === gradeCode);
+    if (!grade || !grade.subjects) return [];
+
+    return grade.subjects.filter(sub => {
+      const poolSub = allSubjectsPool.find(p => p.subjectName === sub.subjectName);
+      // Fallback check for Jackson serialization differences (isTechnology vs technology)
+      const isTechSubject = poolSub ? (poolSub.isTechnology || poolSub.technology) : false;
+      return techMode ? isTechSubject : !isTechSubject;
+    });
+  }, [grades, allSubjectsPool]);
+
+  // Handle defaults on initial load or toggle switch
+  useEffect(() => {
+    if (grades.length > 0) {
+      const firstGradeCode = grades[0].gradeCode;
+      
+      if (isTechMode) {
+        const techSubjects = allSubjectsPool.filter(sub => sub.isTechnology || sub.technology);
+        const defaultTech = techSubjects.length > 0 ? techSubjects[0].subjectName : '';
+        setQuestionForm(prev => ({ ...prev, type: defaultTech, category: 'TECHNOLOGY' }));
+      } else {
+        const filteredSubjects = getFilteredSubjectsForGrade(firstGradeCode, false);
+        const defaultSubject = filteredSubjects.length > 0 ? filteredSubjects[0].subjectName : '';
+        setQuestionForm(prev => ({ ...prev, category: prev.category === 'TECHNOLOGY' ? firstGradeCode : prev.category || firstGradeCode, type: defaultSubject }));
+      }
+
+      setStoryForm(prev => ({ ...prev, category: prev.category || firstGradeCode }));
+      setWorksheetForm(prev => ({ ...prev, grade: prev.grade || firstGradeCode }));
+    }
+  }, [isTechMode, grades, allSubjectsPool, getFilteredSubjectsForGrade]);
+
   const handleQuestionGradeChange = (e) => {
     const selectedGradeCode = e.target.value;
-    const defaultSubject = grades.find(g => g.gradeCode === selectedGradeCode)?.subjects?.[0]?.subjectName || '';
+    const filteredSubjects = getFilteredSubjectsForGrade(selectedGradeCode, isTechMode);
+    const defaultSubject = filteredSubjects.length > 0 ? filteredSubjects[0].subjectName : '';
     setQuestionForm({ ...questionForm, category: selectedGradeCode, type: defaultSubject });
   };
 
   const handleStoryGradeChange = (e) => {
     const selectedGradeCode = e.target.value;
-    const defaultSubject = grades.find(g => g.gradeCode === selectedGradeCode)?.subjects?.[0]?.subjectName || '';
+    const filteredSubjects = getFilteredSubjectsForGrade(selectedGradeCode, isTechMode);
+    const defaultSubject = filteredSubjects.length > 0 ? filteredSubjects[0].subjectName : '';
     setStoryForm({ ...storyForm, category: selectedGradeCode, storyType: defaultSubject });
   };
 
   const handleWorksheetGradeChange = (e) => {
     const selectedGradeCode = e.target.value;
-    const defaultSubject = grades.find(g => g.gradeCode === selectedGradeCode)?.subjects?.[0]?.subjectName || '';
+    const filteredSubjects = getFilteredSubjectsForGrade(selectedGradeCode, isTechMode);
+    const defaultSubject = filteredSubjects.length > 0 ? filteredSubjects[0].subjectName : '';
     setWorksheetForm({ ...worksheetForm, grade: selectedGradeCode, subject: defaultSubject });
   };
 
-  const getSubjectsForGrade = (gradeCode) => grades.find(g => g.gradeCode === gradeCode)?.subjects || [];
   const handleNavigateToWorksheets = () => window.location.href = '/admin/content-library/worksheets';
+
+  // 🚀 SYNC DB BUTTON LOGIC
+  const handleSyncDatabase = async () => {
+    setLoading(true);
+    setMessage({ type: 'success', text: 'Syncing Core Database...' });
+    try {
+      const token = localStorage.getItem('token');
+      const headers = { Authorization: `Bearer ${token}` };
+      const baseUrl = config.GATEWAY_URL || config.ADMIN_BASE_URL;
+
+      // Hit both APIs to Upsert Academic and Tech subjects
+      await axios.post(`${baseUrl}/admin-assessment/v1/grade-subjects/pool/load-defaults`, {}, { headers });
+      await axios.post(`${baseUrl}/admin-assessment/v1/grade-subjects/pool/load-tech-defaults`, {}, { headers });
+
+      await loadGradesAndSubjects(); // Reload the pool in the UI
+      setMessage({ type: 'success', text: `✅ Database Synced! Tech & Academic Subjects are now available.` });
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to sync database. Is the backend updated?' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLoadWorksheetQuestions = async (e) => {
     e.preventDefault();
@@ -132,14 +196,43 @@ const ContentManagement = () => {
 
   const handleLoadQuestions = async (e) => {
     e.preventDefault();
-    if (!questionForm.type) return setMessage({ type: 'error', text: 'Assign a Subject to this Grade first.' });
+    if (!questionForm.type) return setMessage({ type: 'error', text: `Assign a ${isTechMode ? 'Technical' : 'Academic'} Subject first.` });
     setLoading(true); setMessage(null);
+    
     try {
-      const payload = { ...questionForm, expectedResponseStructure: [{ category: questionForm.category, complexity: questionForm.complexity, type: questionForm.type, isActive: true, question: { name: "Sample question", options: { A: "A", B: "B" } }, answer: { type: questionForm.answerType, values: ["A"] } }] };
-      await axios.post(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/loadquestions`, payload, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
-      setMessage({ type: 'success', text: `Loaded ${questionForm.numberOfQuestions} questions!` });
+      const token = localStorage.getItem('token');
+      const finalCategory = isTechMode ? 'TECHNOLOGY' : questionForm.category;
+
+      const payload = {
+        ...questionForm,
+        category: finalCategory,
+        expectedResponseStructure: [{
+            category: finalCategory, 
+            complexity: questionForm.complexity,
+            type: questionForm.type,
+            isActive: true,
+            isCoding: isTechMode, 
+            question: { 
+              name: isTechMode ? "Predict the output or solve the technical problem:" : "Sample question", 
+              codeLanguage: isTechMode ? questionForm.type.toLowerCase() : null,
+              codeSnippet: isTechMode ? "// Raw code snippet generated by AI" : null,
+              options: { A: "A", B: "B", C: "C", D: "D" } 
+            },
+            answer: { type: questionForm.answerType, values: ["A"] }
+        }]
+      };
+
+      await axios.post(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/loadquestions`, payload, { 
+        headers: { Authorization: `Bearer ${token}` } 
+      });
+
+      setMessage({ type: 'success', text: `Loaded ${questionForm.numberOfQuestions} ${isTechMode ? 'Technical' : 'Academic'} questions!` });
       setTimeout(() => loadStatistics(), 1000);
-    } catch (error) { setMessage({ type: 'error', text: 'Failed to load questions.' }); } finally { setLoading(false); }
+    } catch (error) { 
+      setMessage({ type: 'error', text: 'Failed to load questions.' }); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   const handleLoadStories = async (e) => {
@@ -147,11 +240,21 @@ const ContentManagement = () => {
     if (!storyForm.storyType) return setMessage({ type: 'error', text: 'Assign a Subject to this Grade first.' });
     setLoading(true); setMessage(null);
     try {
-      const payload = { numberOfStories: storyForm.numberOfStories, loadAssessmentStoryRequest: { isActive: true, title: "Sample", storyLength: storyForm.storyLength, category: storyForm.category, storyType: storyForm.storyType, content: "Content...", source: "CHATGPT", howManyQuestions: "MCQ", questions: [], audit: { createdBy: "admin", updatedBy: "admin" } } };
-      await axios.post(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/loadstories`, payload, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+      const token = localStorage.getItem('token');
+      const payload = { 
+        numberOfStories: storyForm.numberOfStories, 
+        loadAssessmentStoryRequest: { isActive: true, title: "Sample", storyLength: storyForm.storyLength, category: storyForm.category, storyType: storyForm.storyType, content: "Content...", source: "CHATGPT", howManyQuestions: "MCQ", questions: [], audit: { createdBy: "admin", updatedBy: "admin" } } 
+      };
+      await axios.post(`${config.ADMIN_BASE_URL}/admin-assessment/v1/assessment/loadstories`, payload, { 
+        headers: { Authorization: `Bearer ${token}` } 
+      });
       setMessage({ type: 'success', text: `Loaded ${storyForm.numberOfStories} stories!` });
       setTimeout(() => loadStatistics(), 1000);
-    } catch (error) { setMessage({ type: 'error', text: 'Failed to load stories.' }); } finally { setLoading(false); }
+    } catch (error) { 
+      setMessage({ type: 'error', text: 'Failed to load stories.' }); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   // ==========================================
@@ -163,16 +266,12 @@ const ContentManagement = () => {
     setJsonError(null);
     try {
       const token = localStorage.getItem('token');
-      // Fetches the exact mapping schema direct from the Java backend!
       const response = await axios.get(
         `${config.ADMIN_BASE_URL}/admin-assessment/v1/advanced-import/template?type=${templateForm.targetSystem}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      setTemplateForm({ 
-        ...templateForm, 
-        payload: JSON.stringify(response.data, null, 2) 
-      });
+      setTemplateForm({ ...templateForm, payload: JSON.stringify(response.data, null, 2) });
       setMessage({ type: 'success', text: `✅ Loaded dynamic template directly from the backend schema!` });
     } catch (error) {
       setJsonError("Failed to fetch template from the backend.");
@@ -228,7 +327,6 @@ const ContentManagement = () => {
 
     try {
       const token = localStorage.getItem('token');
-      // Routes to the NEW backend bulk import endpoint
       const endpoint = `${config.ADMIN_BASE_URL}/admin-assessment/v1/advanced-import/json-payload?type=${templateForm.targetSystem}`;
 
       const response = await axios.post(endpoint, templateForm.payload, {
@@ -247,9 +345,32 @@ const ContentManagement = () => {
 
   return (
     <div className="content-management">
-      <h3 className="section-title"><span className="title-icon">📝</span> Content Management</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+        <h3 className="section-title"><span className="title-icon">📝</span> Content Management</h3>
 
-      <div className="content-stats">
+        <div style={{ display: 'flex', gap: '15px' }}>
+          {/* 🚀 NEW: SYNC DATABASE BUTTON */}
+          <button 
+            onClick={handleSyncDatabase} 
+            disabled={loading}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#3b82f6', color: 'white', padding: '10px 20px', borderRadius: '50px', fontWeight: 'bold', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '0 4px 10px rgba(59, 130, 246, 0.3)' }}
+          >
+            {loading ? 'Syncing...' : '🔄 Sync Core DB'}
+          </button>
+
+          {/* THE CYBER TOGGLE FOR TECH MODE */}
+          <label style={{ display: 'flex', alignItems: 'center', gap: '12px', background: isTechMode ? '#020617' : '#f1f5f9', padding: '10px 20px', borderRadius: '50px', cursor: 'pointer', border: `2px solid ${isTechMode ? '#38bdf8' : '#cbd5e1'}`, transition: 'all 0.3s ease', boxShadow: isTechMode ? '0 0 15px rgba(56, 189, 248, 0.3)' : 'none' }}>
+            <span style={{ fontWeight: 'bold', color: isTechMode ? '#94a3b8' : '#334155', fontSize: '0.95rem' }}>📚 Academic Core</span>
+            <div style={{ position: 'relative', width: '46px', height: '24px', background: isTechMode ? '#38bdf8' : '#94a3b8', borderRadius: '20px', transition: '0.3s' }}>
+              <div style={{ position: 'absolute', top: '2px', left: isTechMode ? '24px' : '2px', width: '20px', height: '20px', background: 'white', borderRadius: '50%', transition: '0.3s', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' }}></div>
+            </div>
+            <span style={{ fontWeight: 'bold', color: isTechMode ? '#38bdf8' : '#94a3b8', fontSize: '0.95rem', textShadow: isTechMode ? '0 0 10px rgba(56, 189, 248, 0.5)' : 'none' }}>💻 Tech / Coding Matrix</span>
+            <input type="checkbox" checked={isTechMode} onChange={(e) => setIsTechMode(e.target.checked)} style={{ display: 'none' }} />
+          </label>
+        </div>
+      </div>
+
+      <div className="content-stats mt-4">
         <div className="stat-card">
           <div className="stat-icon" style={{ background: '#667eea20', color: '#667eea' }}>📝</div>
           <div className="stat-info">
@@ -274,8 +395,12 @@ const ContentManagement = () => {
       </div>
 
       <div className="content-sub-tabs">
-        <button className={`content-sub-tab ${activeSubTab === 'load-questions' ? 'active' : ''}`} onClick={() => setActiveSubTab('load-questions')}>
-          <span className="tab-icon">📝</span> Auto AI Questions
+        <button 
+          className={`content-sub-tab ${activeSubTab === 'load-questions' ? 'active' : ''}`} 
+          onClick={() => setActiveSubTab('load-questions')}
+          style={isTechMode && activeSubTab === 'load-questions' ? { background: '#0f172a', color: '#38bdf8', borderColor: '#38bdf8' } : {}}
+        >
+          <span className="tab-icon">📝</span> {isTechMode ? 'Tech/Code Questions' : 'Auto AI Questions'}
         </button>
         <button className={`content-sub-tab ${activeSubTab === 'load-stories' ? 'active' : ''}`} onClick={() => setActiveSubTab('load-stories')}>
           <span className="tab-icon">📚</span> Auto AI Stories
@@ -303,17 +428,79 @@ const ContentManagement = () => {
         
         {/* --- LOAD QUESTIONS TAB --- */}
         {activeSubTab === 'load-questions' && (
-          <div className="content-form-container">
-            <div className="form-header"><h4>Load Questions from AI</h4><p className="form-description">Generate questions using AI. This may take 30-60 seconds.</p></div>
+          <div className="content-form-container" style={isTechMode ? { background: '#020617', border: '1px solid #1e293b', color: '#f8fafc' } : {}}>
+            <div className="form-header" style={isTechMode ? { borderBottomColor: '#1e293b' } : {}}>
+              <h4 style={isTechMode ? { color: '#38bdf8' } : {}}>{isTechMode ? '💻 Generate IT & Programming Questions' : 'Load Questions from AI'}</h4>
+              <p className="form-description" style={isTechMode ? { color: '#94a3b8' } : {}}>
+                {isTechMode ? 'AI will generate syntax-highlighted code snippets and technical questions.' : 'Generate standard academic questions.'}
+              </p>
+            </div>
+
             <form onSubmit={handleLoadQuestions}>
               <div className="form-grid">
-                <div className="form-group"><label>Category/Grade: *</label><select value={questionForm.category} onChange={handleQuestionGradeChange} required><option value="" disabled>Select Grade</option>{grades.map(g => <option key={g.gradeCode} value={g.gradeCode}>{g.gradeName}</option>)}</select></div>
-                <div className="form-group"><label>Subject Type: *</label><select value={questionForm.type} onChange={(e) => setQuestionForm({...questionForm, type: e.target.value})} required disabled={getSubjectsForGrade(questionForm.category).length === 0}>{getSubjectsForGrade(questionForm.category).map(sub => <option key={sub.subjectName} value={sub.subjectName}>{sub.subjectName.replace(/_/g, ' ')}</option>)}</select></div>
-                <div className="form-group"><label>Complexity:</label><select value={questionForm.complexity} onChange={(e) => setQuestionForm({...questionForm, complexity: e.target.value})} required><option value="EASY">Easy</option><option value="MEDIUM">Medium</option><option value="HARD">Hard</option></select></div>
-                <div className="form-group"><label>Answer Type:</label><select value={questionForm.answerType} onChange={(e) => setQuestionForm({...questionForm, answerType: e.target.value})} required><option value="SINGLE">Single Choice</option><option value="MULTIPLE">Multiple Choice</option></select></div>
-                <div className="form-group"><label>Quantity:</label><input type="number" min="1" max="50" value={questionForm.numberOfQuestions} onChange={(e) => setQuestionForm({...questionForm, numberOfQuestions: parseInt(e.target.value)})} required /></div>
+                
+                {!isTechMode && (
+                  <div className="form-group">
+                    <label>Category/Grade: *</label>
+                    <select value={questionForm.category} onChange={handleQuestionGradeChange} required>
+                      <option value="" disabled>Select Grade</option>
+                      {grades.map(g => <option key={g.gradeCode} value={g.gradeCode}>{g.gradeName}</option>)}
+                    </select>
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label style={isTechMode ? { color: '#cbd5e1' } : {}}>{isTechMode ? 'Programming Language / Tech: *' : 'Subject Type: *'}</label>
+                  <select 
+                    value={questionForm.type} 
+                    onChange={(e) => setQuestionForm({...questionForm, type: e.target.value})} 
+                    required 
+                    disabled={!isTechMode && getFilteredSubjectsForGrade(questionForm.category, false).length === 0}
+                    style={isTechMode ? { background: '#0f172a', color: '#38bdf8', borderColor: '#334155' } : {}}
+                  >
+                    <option value="">{`Select ${isTechMode ? 'Tech' : 'Subject'}`}</option>
+                    
+                    {isTechMode 
+                      ? allSubjectsPool.filter(s => s.isTechnology || s.technology).map(sub => (
+                          <option key={sub.subjectName} value={sub.subjectName}>{sub.subjectName.replace(/_/g, ' ')}</option>
+                        ))
+                      : getFilteredSubjectsForGrade(questionForm.category, false).map(sub => (
+                          <option key={sub.subjectName} value={sub.subjectName}>{sub.subjectName.replace(/_/g, ' ')}</option>
+                        ))
+                    }
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label style={isTechMode ? { color: '#cbd5e1' } : {}}>Complexity:</label>
+                  <select value={questionForm.complexity} onChange={(e) => setQuestionForm({...questionForm, complexity: e.target.value})} required style={isTechMode ? { background: '#0f172a', color: '#38bdf8', borderColor: '#334155' } : {}}>
+                    <option value="EASY">Easy</option><option value="MEDIUM">Medium</option><option value="HARD">Hard</option><option value="EXPERT">Expert</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label style={isTechMode ? { color: '#cbd5e1' } : {}}>Answer Type:</label>
+                  <select value={questionForm.answerType} onChange={(e) => setQuestionForm({...questionForm, answerType: e.target.value})} required style={isTechMode ? { background: '#0f172a', color: '#38bdf8', borderColor: '#334155' } : {}}>
+                    <option value="SINGLE">Single Choice</option><option value="MULTIPLE">Multiple Choice</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label style={isTechMode ? { color: '#cbd5e1' } : {}}>Quantity:</label>
+                  <input type="number" min="1" max="50" value={questionForm.numberOfQuestions} onChange={(e) => setQuestionForm({...questionForm, numberOfQuestions: parseInt(e.target.value)})} required style={isTechMode ? { background: '#0f172a', color: '#38bdf8', borderColor: '#334155' } : {}} />
+                </div>
+                
+                <div className="form-group">
+                  <label style={isTechMode ? { color: '#cbd5e1' } : {}}>Source:</label>
+                  <select value={questionForm.source} onChange={(e) => setQuestionForm({...questionForm, source: e.target.value})} required style={isTechMode ? { background: '#0f172a', color: '#38bdf8', borderColor: '#334155' } : {}}>
+                    <option value="CHATGPT">ChatGPT</option><option value="GOOGLE">Google Gemini</option><option value="MANUAL">Manual</option>
+                  </select>
+                </div>
               </div>
-              <button type="submit" className="submit-button" disabled={loading || !questionForm.type}>{loading ? 'Loading...' : 'Load AI Questions'}</button>
+
+              <button type="submit" className="submit-button" disabled={loading || !questionForm.type} style={isTechMode ? { background: loading ? '#334155' : 'linear-gradient(90deg, #0ea5e9 0%, #3b82f6 100%)', boxShadow: '0 4px 15px rgba(56, 189, 248, 0.3)', color: 'white', border: 'none' } : {}}>
+                {loading ? <><span className="spinner"></span> Generating...</> : <><span className="button-icon">🚀</span> Generate {isTechMode ? 'Code Blocks' : 'Questions'}</>}
+              </button>
             </form>
           </div>
         )}
@@ -325,7 +512,7 @@ const ContentManagement = () => {
             <form onSubmit={handleLoadStories}>
               <div className="form-grid">
                 <div className="form-group"><label>Grade Level: *</label><select value={storyForm.category} onChange={handleStoryGradeChange} required><option value="" disabled>Select Grade</option>{grades.map(g => <option key={g.gradeCode} value={g.gradeCode}>{g.gradeName}</option>)}</select></div>
-                <div className="form-group"><label>Story Type: *</label><select value={storyForm.storyType} onChange={(e) => setStoryForm({...storyForm, storyType: e.target.value})} required disabled={getSubjectsForGrade(storyForm.category).length === 0}>{getSubjectsForGrade(storyForm.category).map(sub => <option key={sub.subjectName} value={sub.subjectName}>{sub.subjectName.replace(/_/g, ' ')}</option>)}</select></div>
+                <div className="form-group"><label>Story Type: *</label><select value={storyForm.storyType} onChange={(e) => setStoryForm({...storyForm, storyType: e.target.value})} required disabled={getFilteredSubjectsForGrade(storyForm.category, false).length === 0}>{getFilteredSubjectsForGrade(storyForm.category, false).map(sub => <option key={sub.subjectName} value={sub.subjectName}>{sub.subjectName.replace(/_/g, ' ')}</option>)}</select></div>
                 <div className="form-group"><label>Quantity:</label><input type="number" min="1" max="20" value={storyForm.numberOfStories} onChange={(e) => setStoryForm({...storyForm, numberOfStories: parseInt(e.target.value)})} required /></div>
                 <div className="form-group"><label>Length:</label><select value={storyForm.storyLength} onChange={(e) => setStoryForm({...storyForm, storyLength: e.target.value})} required><option value="SHORT">Short</option><option value="MEDIUM">Medium</option><option value="LONG">Long</option></select></div>
               </div>
@@ -475,7 +662,7 @@ const ContentManagement = () => {
                   transition: '0.3s'
                 }}
               >
-                {loading ? 'Injecting Data into Core...' : '⚡ Execute Bulk Injection ⚡'}
+                {loading ? 'Transmitting Data to Core...' : '⚡ Execute Bulk Injection ⚡'}
               </button>
             </form>
           </div>
