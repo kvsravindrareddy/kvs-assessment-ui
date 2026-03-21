@@ -12,7 +12,8 @@ import GradesManagement from '../components/GradesManagement';
 import IncidentManagement from '../components/IncidentManagement';
 import FlashMessageManager from '../../admin/FlashMessageManager';
 import FeatureAccessControl from '../../admin/FeatureAccessControl';
-import Settings from '../../admin/Settings'; // 🚀 IMPORT ADDED HERE
+import Settings from '../../admin/Settings';
+import AdminSuccessStories from '../../admin/AdminSuccessStories'; // 🚀 IMPORTED SUCCESS STORIES MODERATION
 import './SuperAdminDashboard.css';
 
 const SuperAdminDashboard = () => {
@@ -20,7 +21,6 @@ const SuperAdminDashboard = () => {
   const config = getConfig();
   const [activeSection, setActiveSection] = useState('overview');
   
-  // 1. Updated state to match your StatsController payload
   const [statistics, setStatistics] = useState({
     totalUsers: 0,
     activeUsers: 0,
@@ -34,6 +34,7 @@ const SuperAdminDashboard = () => {
 
   useEffect(() => {
     loadDashboardStatistics();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadDashboardStatistics = async () => {
@@ -41,11 +42,9 @@ const SuperAdminDashboard = () => {
       const token = localStorage.getItem('token');
       const headers = { Authorization: `Bearer ${token}` };
 
-      // 2. Use Promise.allSettled so if one fails, it doesn't crash the whole dashboard
       const [usersRes, pendingRes, platformStatsRes] = await Promise.allSettled([
         axios.get(`${config.GATEWAY_URL || config.ADMIN_BASE_URL}/auth/admin/users`, { headers }),
         axios.get(`${config.GATEWAY_URL || config.ADMIN_BASE_URL}/auth/admin/pending-users`, { headers }),
-        // 3. Call your new StatsController
         axios.get(`${config.GATEWAY_URL || config.ADMIN_BASE_URL}/admin-assessment/api/stats/platform`, { headers })
       ]);
 
@@ -53,7 +52,6 @@ const SuperAdminDashboard = () => {
       const pending = pendingRes.status === 'fulfilled' ? (pendingRes.value.data || []) : [];
       const platformStats = platformStatsRes.status === 'fulfilled' ? (platformStatsRes.value.data || {}) : {};
 
-      // 4. Map the new StatsController data securely
       setStatistics({
         totalUsers: users.length || (platformStats.totalStudents + platformStats.totalTeachers + platformStats.totalParents) || 0,
         activeUsers: users.filter(u => u.status === 'ACTIVE').length,
@@ -109,6 +107,10 @@ const SuperAdminDashboard = () => {
         </button>
         <button className={`nav-item ${activeSection === 'grades' ? 'active' : ''}`} onClick={() => setActiveSection('grades')}>
           <span className="nav-icon">🎓</span><span className="nav-label">Grades</span>
+        </button>
+        {/* 🚀 ADDED SUCCESS STORIES MODERATION TO SIDEBAR */}
+        <button className={`nav-item ${activeSection === 'success-stories' ? 'active' : ''}`} onClick={() => setActiveSection('success-stories')}>
+          <span className="nav-icon">🌟</span><span className="nav-label">Success Stories</span>
         </button>
 
         <div className="nav-section-title">⚙️ System</div>
@@ -189,6 +191,7 @@ const SuperAdminDashboard = () => {
             {activeSection === 'bulk-registration' && '📋 Bulk User Registration'}
             {activeSection === 'content' && '📝 Content Management'}
             {activeSection === 'grades' && '🎓 Grades Management'}
+            {activeSection === 'success-stories' && '🌟 Success Stories Moderation'}
             {activeSection === 'access-control' && '🔐 Access Control & Permissions'}
             {activeSection === 'flash-alerts' && '⚡ Flash Alerts & Messages'}
             {activeSection === 'sessions' && '🔄 Active Sessions Management'}
@@ -205,13 +208,15 @@ const SuperAdminDashboard = () => {
           {activeSection === 'bulk-registration' && <BulkRegistration />}
           {activeSection === 'content' && <ContentManagement />}
           {activeSection === 'grades' && <GradesManagement />}
+          
+          {/* 🚀 RENDER THE NEW SUCCESS STORIES COMPONENT */}
+          {activeSection === 'success-stories' && <AdminSuccessStories />}
+          
           {activeSection === 'access-control' && <FeatureAccessControl />}
           {activeSection === 'flash-alerts' && <FlashMessageManager />}
           {activeSection === 'sessions' && <SessionManagement />}
           {activeSection === 'incidents' && <IncidentManagement />}
           {activeSection === 'analytics' && <SystemAnalytics />}
-          
-          {/* 🚀 FIX: Render the actual Settings component here */}
           {activeSection === 'settings' && <Settings />}
         </div>
       </div>
