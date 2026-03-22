@@ -59,11 +59,35 @@ import VocabularyHub from './pages/language/VocabularyHub';
 // Old App Content (existing features)
 import App from './App';
 
+import CompetitiveExamHub from './pages/assessments/CompetitiveExamHub';
+import CompetitiveAssessmentFlow from './pages/assessments/CompetitiveAssessmentFlow';
+import CompetitiveWorksheetPrint from './pages/assessments/CompetitiveWorksheetPrint';
+
 /**
  * Application Router Configuration
  * Combines new admin dashboard with existing app features
  */
 export const router = createBrowserRouter([
+  {
+    path: '/competitive-hub',
+    element: (
+      <UnifiedDashboard>
+        <CompetitiveExamHub />
+      </UnifiedDashboard>
+    )
+  },
+  {
+    path: '/competitive-assessment/:examId',
+    element: (
+      <UnifiedDashboard>
+        <CompetitiveAssessmentFlow />
+      </UnifiedDashboard>
+    )
+  },
+  {
+    path: '/competitive-worksheet/:examId',
+    element: <CompetitiveWorksheetPrint /> // No Dashboard wrapper so it prints purely full-screen!
+  },
   {
     path: '/landing',
     element: <LandingPage />

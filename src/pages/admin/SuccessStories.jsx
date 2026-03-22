@@ -11,36 +11,38 @@ const SuccessStories = () => {
   const config = getConfig();
   const baseUrl = config.GATEWAY_URL || config.ADMIN_BASE_URL;
 
+  // 🚀 PAGINATION STATE
   const [dbStories, setDbStories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
+  // Modal State
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ role: 'Student', story: '', title: '' });
   const [submitStatus, setSubmitStatus] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(''); // 🚀 NEW: Specific error messages
+  const [errorMessage, setErrorMessage] = useState('');
 
   const fallbackStories = [
     { name: "Emma, 3rd Grader", role: "Student", story: "I used to hate math but now I play Math Ninjas every day! My teacher says I went from a C to an A in 3 months.", title: "Grade improvement: C → A" },
-    { name: "Michael Chen", role: "Parent of 2", story: "As a working parent, KiVO gives me peace of mind. I get alerts when my kids struggle BEFORE it becomes a problem.", title: "Saved $200/month on tutoring" },
-    { name: "Mrs. Rodriguez", role: "4th Grade Teacher", story: "KiVO saves me 12 hours per week on grading. I finally have time to actually TEACH instead of paperwork.", title: "12 hours/week saved" }
+    { name: "Michael Chen", role: "Parent", story: "As a working parent, KiVO gives me peace of mind. I get alerts when my kids struggle BEFORE it becomes a problem.", title: "Saved $200/month on tutoring" },
+    { name: "Mrs. Rodriguez", role: "Teacher", story: "KiVO saves me 12 hours per week on grading. I finally have time to actually TEACH instead of paperwork.", title: "12 hours/week saved" }
   ];
 
   const stats = [
     { number: "89%", label: "of students report increased confidence" },
     { number: "23%", label: "average test score improvement" },
     { number: "10+ hours", label: "saved per teacher per week" },
-    { number: "4.8/5", label: "average parent rating" },
-    { number: "67%", label: "reduction in learning gaps" },
-    { number: "93%", label: "teacher satisfaction rate" }
+    { number: "4.8/5", label: "average parent rating" }
   ];
 
+  // 🚀 SERVER-SIDE PAGINATION FETCH
   useEffect(() => {
     const fetchStories = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`${baseUrl}/admin-assessment/v1/success-stories?page=${page}&size=20`);
+        // Fetches only 12 stories at a time from DB based on the current page!
+        const res = await axios.get(`${baseUrl}/admin-assessment/v1/success-stories?page=${page}&size=12`);
         const data = res.data?.content || res.data?.stories || res.data?.data || [];
         setDbStories(data);
         setTotalPages(res.data?.totalPages || 1);
@@ -48,6 +50,8 @@ const SuccessStories = () => {
         console.error("Failed to fetch stories:", error);
       } finally {
         setLoading(false);
+        // Scroll to top of stories seamlessly when page changes
+        window.scrollTo({ top: 300, behavior: 'smooth' });
       }
     };
     fetchStories();
@@ -67,7 +71,6 @@ const SuccessStories = () => {
     e.preventDefault();
     setErrorMessage('');
     
-    // 🚀 FRONTEND VALIDATION MATCHING YOUR JAVA BACKEND
     if (formData.story.trim().length < 50) {
         setSubmitStatus('error');
         setErrorMessage(`Your story is too short (${formData.story.trim().length}/50 characters). Please tell us a little more!`);
@@ -76,7 +79,7 @@ const SuccessStories = () => {
 
     let finalTitle = formData.title.trim();
     if (!finalTitle || finalTitle.length < 10) {
-        finalTitle = 'My KiVO Success Story'; // Ensures the 10 character minimum is met if left empty or too short
+        finalTitle = 'My KiVO Success Story'; 
     }
 
     setSubmitStatus('submitting');
@@ -110,32 +113,15 @@ const SuccessStories = () => {
     }
   };
 
-  const activeStories = dbStories.length > 0 ? dbStories : fallbackStories;
-  const studentStories = activeStories.filter(s => s.role?.toLowerCase().includes('student'));
-  const parentStories = activeStories.filter(s => s.role?.toLowerCase().includes('parent') || s.role?.toLowerCase().includes('mother') || s.role?.toLowerCase().includes('father'));
-  const educatorStories = activeStories.filter(s => s.role?.toLowerCase().includes('teacher') || s.role?.toLowerCase().includes('principal') || s.role?.toLowerCase().includes('educator'));
-
-  const getRoleEmoji = (role) => {
+  // Determine styles dynamically based on Role
+  const getRoleConfig = (role) => {
     const r = role?.toLowerCase() || '';
-    if (r.includes('student')) return '🎓';
-    if (r.includes('parent')) return '👨‍👩‍👧‍👦';
-    return '👩‍🏫';
+    if (r.includes('student')) return { emoji: '🎓', color: '#38bdf8', bg: '#0f172a' };
+    if (r.includes('parent') || r.includes('mother') || r.includes('father')) return { emoji: '👨‍👩‍👧‍👦', color: '#fb923c', bg: '#fff7ed' };
+    return { emoji: '👩‍🏫', color: '#10b981', bg: '#ecfdf5' };
   };
 
-  const StoryCard = ({ story, colorHex }) => (
-    <div style={{ background: '#f8f9fa', padding: '1.5rem', borderRadius: '8px', borderLeft: `4px solid ${colorHex}`, transition: 'transform 0.3s ease, box-shadow 0.3s ease' }}
-         onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.1)'; }}
-         onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}>
-      <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{getRoleEmoji(story.role)}</div>
-      <p style={{ fontStyle: 'italic', marginBottom: '1rem', color: '#555', lineHeight: '1.6' }}>"{story.story}"</p>
-      <div style={{ fontWeight: '600', color: colorHex, marginBottom: '0.5rem' }}>— {story.name}</div>
-      {story.title && (
-        <div style={{ background: `${colorHex}15`, padding: '0.5rem', borderRadius: '4px', fontSize: '0.9rem', color: colorHex, fontWeight: '600' }}>
-          📈 {story.title}
-        </div>
-      )}
-    </div>
-  );
+  const activeStories = dbStories.length > 0 ? dbStories : fallbackStories;
 
   return (
     <section id="success-stories" className="section">
@@ -144,64 +130,90 @@ const SuccessStories = () => {
           <div className="text-section">
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
-                <h1 className="section-heading" style={{ margin: 0 }}>Success Stories</h1>
+                <h1 className="section-heading" style={{ margin: 0 }}>Wall of Success 🌟</h1>
                 <button onClick={handleShareClick} style={{ padding: '12px 25px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', borderRadius: '50px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer', boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)' }}>
                     ✍️ Share Your Story
                 </button>
             </div>
 
             <div className="privacy-intro" style={{ marginTop: '20px' }}>
-              <p>Real families, real teachers, real results. See how KiVO Learning International is transforming education.</p>
+              <p>Real families, real teachers, real results. See how KiVO Learning International is transforming education across the globe.</p>
             </div>
 
+            {/* Impact Stats */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', margin: '2rem 0 3rem 0' }}>
               {stats.map((stat, index) => (
-                <div key={index} style={{ background: 'linear-gradient(135deg, #1e90ff 0%, #4169e1 100%)', color: 'white', padding: '2rem', borderRadius: '8px', textAlign: 'center', boxShadow: '0 4px 12px rgba(30, 144, 255, 0.3)' }}>
-                  <div style={{ fontSize: '2.5rem', fontWeight: '700', marginBottom: '0.5rem' }}>{stat.number}</div>
-                  <div style={{ fontSize: '1rem', opacity: 0.9 }}>{stat.label}</div>
+                <div key={index} style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', color: 'white', padding: '2rem', borderRadius: '16px', textAlign: 'center', border: '1px solid #334155' }}>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '0.5rem', color: '#38bdf8' }}>{stat.number}</div>
+                  <div style={{ fontSize: '1rem', color: '#cbd5e1' }}>{stat.label}</div>
                 </div>
               ))}
             </div>
 
             {loading ? (
-                <div style={{ textAlign: 'center', padding: '50px', color: '#64748b' }}>Loading success stories...</div>
+                <div style={{ textAlign: 'center', padding: '80px', color: '#64748b', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                    <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite', marginRight: '10px' }}>⏳</span> Fetching latest stories...
+                </div>
             ) : (
                 <>
-                    {studentStories.length > 0 && (
-                        <div className="privacy-section">
-                        <h2>👨‍🎓 Student Success</h2>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '1.5rem' }}>
-                            {studentStories.map((story, i) => <StoryCard key={i} story={story} colorHex="#1e90ff" />)}
-                        </div>
-                        </div>
-                    )}
+                    {/* 🚀 UNIFIED GRID LAYOUT */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '25px', marginTop: '2rem' }}>
+                        {activeStories.map((story, i) => {
+                            const config = getRoleConfig(story.role);
+                            return (
+                                <div key={i} style={{ background: '#ffffff', padding: '25px', borderRadius: '16px', border: `1px solid #e2e8f0`, borderTop: `6px solid ${config.color}`, boxShadow: '0 10px 25px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', transition: '0.3s' }}
+                                     onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.1)'; }}
+                                     onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.05)'; }}>
+                                    
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                                        <div style={{ fontSize: '2.5rem' }}>{config.emoji}</div>
+                                        <div style={{ background: config.bg, color: config.color, padding: '5px 12px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', border: `1px solid ${config.color}40` }}>
+                                            {story.role.toUpperCase()}
+                                        </div>
+                                    </div>
+                                    
+                                    <p style={{ fontStyle: 'italic', color: '#475569', lineHeight: '1.6', fontSize: '1.05rem', flexGrow: 1 }}>
+                                        "{story.story}"
+                                    </p>
+                                    
+                                    <div style={{ marginTop: '20px', borderTop: '1px solid #f1f5f9', paddingTop: '15px' }}>
+                                        <div style={{ fontWeight: '800', color: '#0f172a', fontSize: '1.1rem' }}>{story.name}</div>
+                                        {story.title && (
+                                            <div style={{ color: config.color, fontWeight: 'bold', fontSize: '0.9rem', marginTop: '5px' }}>
+                                                📈 {story.title}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
 
-                    {parentStories.length > 0 && (
-                        <div className="privacy-section">
-                        <h2>👨‍👩‍👧‍👦 Parent Testimonials</h2>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '1.5rem' }}>
-                            {parentStories.map((story, i) => <StoryCard key={i} story={story} colorHex="#ff8c00" />)}
-                        </div>
-                        </div>
-                    )}
-
-                    {educatorStories.length > 0 && (
-                        <div className="privacy-section">
-                        <h2>👩‍🏫 Educator Impact</h2>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '1.5rem' }}>
-                            {educatorStories.map((story, i) => <StoryCard key={i} story={story} colorHex="#4caf50" />)}
-                        </div>
+                    {/* 🚀 ELEGANT PAGINATION CONTROLS */}
+                    {totalPages > 1 && (
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginTop: '50px', padding: '20px', background: '#f8fafc', borderRadius: '16px' }}>
+                            <button 
+                                disabled={page === 0} 
+                                onClick={() => setPage(p => p - 1)} 
+                                style={{ padding: '12px 25px', borderRadius: '50px', border: 'none', background: page === 0 ? '#cbd5e1' : '#3b82f6', color: 'white', fontWeight: 'bold', cursor: page === 0 ? 'not-allowed' : 'pointer', transition: '0.2s' }}
+                            >
+                                ← Newer Stories
+                            </button>
+                            
+                            <span style={{ fontWeight: 'bold', color: '#475569', fontSize: '1.1rem' }}>
+                                Page <span style={{ color: '#0f172a' }}>{page + 1}</span> of {totalPages}
+                            </span>
+                            
+                            <button 
+                                disabled={page >= totalPages - 1} 
+                                onClick={() => setPage(p => p + 1)} 
+                                style={{ padding: '12px 25px', borderRadius: '50px', border: 'none', background: page >= totalPages - 1 ? '#cbd5e1' : '#3b82f6', color: 'white', fontWeight: 'bold', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer', transition: '0.2s' }}
+                            >
+                                Older Stories →
+                            </button>
                         </div>
                     )}
                 </>
-            )}
-
-            {totalPages > 1 && (
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '40px' }}>
-                    <button disabled={page === 0} onClick={() => setPage(p => p - 1)} style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #cbd5e1', cursor: page === 0 ? 'not-allowed' : 'pointer' }}>Previous</button>
-                    <span style={{ padding: '10px', fontWeight: 'bold' }}>Page {page + 1} of {totalPages}</span>
-                    <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)} style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #cbd5e1', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}>Next</button>
-                </div>
             )}
 
           </div>
@@ -210,48 +222,51 @@ const SuccessStories = () => {
 
       {/* SHARE YOUR STORY MODAL */}
       {showModal && (
-          <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ background: 'white', padding: '30px', borderRadius: '16px', width: '90%', maxWidth: '500px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                      <h2 style={{ margin: 0, color: '#1e293b' }}>Share Your Experience</h2>
-                      <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#64748b' }}>×</button>
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(15, 23, 42, 0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(5px)' }}>
+              <div style={{ background: 'white', padding: '35px', borderRadius: '24px', width: '90%', maxWidth: '550px', boxShadow: '0 25px 50px rgba(0,0,0,0.25)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+                      <h2 style={{ margin: 0, color: '#0f172a', fontSize: '1.8rem', fontWeight: '800' }}>Share Your Experience</h2>
+                      <button onClick={() => setShowModal(false)} style={{ background: '#f1f5f9', border: 'none', fontSize: '1.5rem', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
                   </div>
 
                   {submitStatus === 'success' ? (
                       <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-                          <div style={{ fontSize: '4rem', marginBottom: '15px' }}>🎉</div>
-                          <h3 style={{ color: '#10b981' }}>Thank you!</h3>
-                          <p style={{ color: '#64748b' }}>Your story has been securely transmitted to our moderation queue. It will be published upon review.</p>
+                          <div style={{ fontSize: '5rem', marginBottom: '15px' }}>🎉</div>
+                          <h3 style={{ color: '#10b981', fontSize: '1.8rem', margin: '0 0 10px 0' }}>Thank you!</h3>
+                          <p style={{ color: '#64748b', fontSize: '1.1rem', lineHeight: '1.6' }}>Your story has been securely transmitted to our moderation queue. It will be published upon review.</p>
                       </div>
                   ) : (
-                      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                           
-                          <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.95rem' }}>
+                          <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '12px', border: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.95rem' }}>
                             Posting publicly as: <strong style={{ color: '#0f172a' }}>{user.firstName ? `${user.firstName} ${user.lastName || ''}` : user.email}</strong>
                           </div>
 
                           <div>
-                              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px', color: '#475569' }}>Your Role *</label>
-                              <select required value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px' }}>
-                                  <option value="Student">Student</option><option value="Parent">Parent</option><option value="Teacher">Teacher / Educator</option>
+                              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Your Role *</label>
+                              <select required value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} style={{ width: '100%', padding: '15px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '1rem', outline: 'none', cursor: 'pointer' }}>
+                                  <option value="Student">Student</option>
+                                  <option value="Parent">Parent</option>
+                                  <option value="Teacher">Teacher / Educator</option>
                               </select>
                           </div>
                           
                           <div>
-                              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px', color: '#475569' }}>Your Story *</label>
-                              <textarea required rows="4" value={formData.story} onChange={e => setFormData({...formData, story: e.target.value})} style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', resize: 'vertical' }} placeholder="How has KiVO helped you? (Minimum 50 characters)" />
-                              <div style={{ fontSize: '0.8rem', textAlign: 'right', marginTop: '5px', color: formData.story.length < 50 ? '#ef4444' : '#10b981' }}>
-                                  {formData.story.length}/50 min characters
+                              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Your Story *</label>
+                              <textarea required rows="5" value={formData.story} onChange={e => setFormData({...formData, story: e.target.value})} style={{ width: '100%', padding: '15px', border: '2px solid #e2e8f0', borderRadius: '12px', resize: 'vertical', fontSize: '1rem', outline: 'none' }} placeholder="How has KiVO helped you? (Minimum 50 characters)" />
+                              <div style={{ fontSize: '0.85rem', textAlign: 'right', marginTop: '8px', fontWeight: 'bold', color: formData.story.trim().length < 50 ? '#ef4444' : '#10b981' }}>
+                                  {formData.story.trim().length}/50 min characters
                               </div>
                           </div>
+
                           <div>
-                              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px', color: '#475569' }}>Greatest Impact (Optional Headline)</label>
-                              <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px' }} placeholder="e.g. Grades went from C to A" />
+                              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#334155' }}>Greatest Impact (Optional Headline)</label>
+                              <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} style={{ width: '100%', padding: '15px', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '1rem', outline: 'none' }} placeholder="e.g. Grades went from C to A" />
                           </div>
                           
-                          {submitStatus === 'error' && <div style={{ color: '#ef4444', fontSize: '0.9rem', fontWeight: 'bold' }}>{errorMessage || 'An error occurred. Please try again.'}</div>}
+                          {submitStatus === 'error' && <div style={{ color: '#ef4444', fontSize: '0.95rem', fontWeight: 'bold', background: '#fef2f2', padding: '10px', borderRadius: '8px', border: '1px solid #fecaca' }}>{errorMessage || 'An error occurred. Please try again.'}</div>}
                           
-                          <button type="submit" disabled={submitStatus === 'submitting' || formData.story.trim().length < 50} style={{ padding: '15px', background: formData.story.trim().length < 50 ? '#94a3b8' : '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', cursor: submitStatus === 'submitting' || formData.story.trim().length < 50 ? 'not-allowed' : 'pointer', marginTop: '10px', transition: '0.3s' }}>
+                          <button type="submit" disabled={submitStatus === 'submitting' || formData.story.trim().length < 50} style={{ padding: '18px', background: formData.story.trim().length < 50 ? '#cbd5e1' : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', color: 'white', border: 'none', borderRadius: '50px', fontWeight: 'bold', fontSize: '1.2rem', cursor: submitStatus === 'submitting' || formData.story.trim().length < 50 ? 'not-allowed' : 'pointer', marginTop: '10px', transition: '0.3s', boxShadow: formData.story.trim().length >= 50 ? '0 10px 20px rgba(59, 130, 246, 0.3)' : 'none' }}>
                               {submitStatus === 'submitting' ? 'Submitting...' : 'Submit Story'}
                           </button>
                       </form>

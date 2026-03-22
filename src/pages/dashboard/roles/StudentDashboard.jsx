@@ -36,6 +36,20 @@ const StudentDashboard = () => {
             <span className="action-icon">📄</span><span>Worksheets</span>
           </button>
 
+          {/* 🚀 NEW: Safely added Global Exams button here! */}
+          <button 
+            className="action-card" 
+            onClick={() => navigate('/competitive-hub')} 
+            style={{ 
+              background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', 
+              border: '1px solid #38bdf8',
+              boxShadow: '0 4px 15px rgba(56, 189, 248, 0.2)'
+            }}
+          >
+            <span className="action-icon" style={{ filter: 'drop-shadow(0 0 5px rgba(56, 189, 248, 0.8))' }}>🌍</span>
+            <span style={{ color: '#38bdf8', fontWeight: 'bold' }}>Global Exams</span>
+          </button>
+
           <button className="action-card" onClick={() => setShowOfflineMode(true)}>
             <span className="action-icon">📥</span><span>Offline Learning</span>
           </button>

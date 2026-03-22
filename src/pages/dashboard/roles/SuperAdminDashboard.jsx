@@ -13,7 +13,8 @@ import IncidentManagement from '../components/IncidentManagement';
 import FlashMessageManager from '../../admin/FlashMessageManager';
 import FeatureAccessControl from '../../admin/FeatureAccessControl';
 import Settings from '../../admin/Settings';
-import AdminSuccessStories from '../../admin/AdminSuccessStories'; // 🚀 IMPORTED SUCCESS STORIES MODERATION
+import AdminSuccessStories from '../../admin/AdminSuccessStories'; 
+import CompetitiveExamManager from '../../admin/CompetitiveExamManager'; // 🚀 IMPORT COMPTETITIVE MANAGER
 import './SuperAdminDashboard.css';
 
 const SuperAdminDashboard = () => {
@@ -108,7 +109,12 @@ const SuperAdminDashboard = () => {
         <button className={`nav-item ${activeSection === 'grades' ? 'active' : ''}`} onClick={() => setActiveSection('grades')}>
           <span className="nav-icon">🎓</span><span className="nav-label">Grades</span>
         </button>
-        {/* 🚀 ADDED SUCCESS STORIES MODERATION TO SIDEBAR */}
+        
+        {/* 🚀 ADDED COMPETITIVE EXAM SETUP */}
+        <button className={`nav-item ${activeSection === 'competitive' ? 'active' : ''}`} onClick={() => setActiveSection('competitive')}>
+          <span className="nav-icon">🌍</span><span className="nav-label">Global Exams Setup</span>
+        </button>
+        
         <button className={`nav-item ${activeSection === 'success-stories' ? 'active' : ''}`} onClick={() => setActiveSection('success-stories')}>
           <span className="nav-icon">🌟</span><span className="nav-label">Success Stories</span>
         </button>
@@ -191,6 +197,7 @@ const SuperAdminDashboard = () => {
             {activeSection === 'bulk-registration' && '📋 Bulk User Registration'}
             {activeSection === 'content' && '📝 Content Management'}
             {activeSection === 'grades' && '🎓 Grades Management'}
+            {activeSection === 'competitive' && '🌍 Global Exams Setup'}
             {activeSection === 'success-stories' && '🌟 Success Stories Moderation'}
             {activeSection === 'access-control' && '🔐 Access Control & Permissions'}
             {activeSection === 'flash-alerts' && '⚡ Flash Alerts & Messages'}
@@ -209,7 +216,9 @@ const SuperAdminDashboard = () => {
           {activeSection === 'content' && <ContentManagement />}
           {activeSection === 'grades' && <GradesManagement />}
           
-          {/* 🚀 RENDER THE NEW SUCCESS STORIES COMPONENT */}
+          {/* 🚀 RENDER COMPETITIVE EXAM MANAGER */}
+          {activeSection === 'competitive' && <CompetitiveExamManager />}
+          
           {activeSection === 'success-stories' && <AdminSuccessStories />}
           
           {activeSection === 'access-control' && <FeatureAccessControl />}

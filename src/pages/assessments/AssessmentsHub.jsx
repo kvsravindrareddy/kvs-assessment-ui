@@ -36,6 +36,17 @@ export default function AssessmentsHub() {
     }, [user]);
 
     const categories = [
+        // 🚀 NEW: Premium Global Exams Card
+        {
+            id: 'competitive-exams',
+            title: 'Global Entrance Matrix',
+            description: 'Simulate real-world competitive exams (IIT-JEE, SAT, EAMCET) with section timers and negative marking.',
+            icon: '🌍',
+            gradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', // Sleek dark theme for premium feel
+            path: '/competitive-hub',
+            hasResume: false,
+            progress: 0
+        },
         {
             id: 'speed-math',
             title: 'Speed Math Challenge',
@@ -132,11 +143,11 @@ export default function AssessmentsHub() {
             <div className="hub-grid">
                 {categories.map(cat => (
                     <div key={cat.id} className="hub-card" onClick={() => navigate(cat.path)}>
-                        <div className="hub-card-icon" style={{ background: cat.gradient }}>
+                        <div className="hub-card-icon" style={{ background: cat.gradient, border: cat.id === 'competitive-exams' ? '2px solid #38bdf8' : 'none' }}>
                             {cat.icon}
                         </div>
                         <div className="hub-card-content">
-                            <h3>{cat.title}</h3>
+                            <h3 style={{ color: cat.id === 'competitive-exams' ? '#38bdf8' : 'inherit' }}>{cat.title}</h3>
                             <p>{cat.description}</p>
                             
                             {cat.hasResume ? (
@@ -150,7 +161,9 @@ export default function AssessmentsHub() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="hub-start-btn">Start Assessment ➔</div>
+                                <div className="hub-start-btn" style={{ color: cat.id === 'competitive-exams' ? '#38bdf8' : 'inherit' }}>
+                                    {cat.id === 'competitive-exams' ? 'Enter Matrix ➔' : 'Start Assessment ➔'}
+                                </div>
                             )}
                         </div>
                     </div>
