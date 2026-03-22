@@ -33,16 +33,24 @@ export default function StudentMetricsDashboard() {
 
   const currentMetrics = data[activeTab];
 
+  const STANDARD_TYPES = ['STORY', 'MATH_CHALLENGE', 'MATH', 'SCIENCE', 'ENGLISH', 'SOCIAL_STUDIES', 'COMPUTER_SCIENCE', 'HINDI', 'SANSKRIT'];
+  const isStandardType = (type) => STANDARD_TYPES.includes(type?.toUpperCase());
+
   const handleResume = (session) => {
-    if (session.assessmentType === 'STORY') {
+    const type = session.assessmentType?.toUpperCase() || '';
+    
+    // 🚀 ROUTING: Regardless of whether it's a competitive matrix section or standard, it safely resumes!
+    if (!isStandardType(type)) {
+        navigate(`/assessments/subject-assessments?resumeId=${session.assessmentId}`);
+        return;
+    }
+
+    if (type === 'STORY') {
       navigate(`/reading?storyId=${session.assessmentId}`);
-    } else if (session.assessmentType === 'MATH_CHALLENGE') {
+    } else if (type === 'MATH_CHALLENGE') {
       navigate(`/assessments/speed-math`);
-    } else if (['MATH', 'SCIENCE', 'ENGLISH', 'SOCIAL_STUDIES', 'COMPUTER_SCIENCE', 'HINDI', 'SANSKRIT'].includes(session.assessmentType)) {
-      // Subject-based assessments - navigate to subject assessments with resume data
-      navigate(`/assessments/subject-assessments?resumeId=${session.assessmentId}`);
     } else {
-      navigate(`/${session.assessmentType.toLowerCase()}?id=${session.assessmentId}`);
+      navigate(`/assessments/subject-assessments?resumeId=${session.assessmentId}`);
     }
   };
 
@@ -70,13 +78,19 @@ export default function StudentMetricsDashboard() {
   };
 
   const getCategoryDisplay = (type) => {
-    if (!type) return { label: 'Assessment', icon: '📝', color: '#64748b', bg: '#f1f5f9' };
+    if (!type) return { label: 'Assessment', icon: '📝', color: '#64748b', bg: '#f1f5f9', border: '#cbd5e1' };
     const t = type.toUpperCase();
+
+    if (!isStandardType(t)) {
+        return { label: type.replace(/_/g, ' '), icon: '🎓', color: '#38bdf8', bg: '#0f172a', border: '#38bdf8' };
+    }
+
     if (t === 'STORY') return { label: 'Story Reading', icon: '📖', color: '#0ea5e9', bg: '#e0f2fe', border: '#bae6fd' };
-    if (t === 'MATH_CHALLENGE') return { label: 'The Math Universe 🌍', icon: '⚡', color: '#f59e0b', bg: '#fef3c7', border: '#fde68a' };
-    if (t === 'MATH') return { label: 'Grade Mathematics', icon: '📐', color: '#10b981', bg: '#d1fae5', border: '#a7f3d0' };
-    if (t === 'SCIENCE') return { label: 'Grade Science', icon: '🔬', color: '#8b5cf6', bg: '#ede9fe', border: '#ddd6fe' };
-    if (t === 'ENGLISH') return { label: 'Grade English', icon: '📝', color: '#f43f5e', bg: '#ffe4e6', border: '#fecdd3' };
+    if (t === 'MATH_CHALLENGE') return { label: 'The Math Universe', icon: '⚡', color: '#f59e0b', bg: '#fef3c7', border: '#fde68a' };
+    if (t === 'MATH') return { label: 'Mathematics', icon: '📐', color: '#10b981', bg: '#d1fae5', border: '#a7f3d0' };
+    if (t === 'SCIENCE') return { label: 'Science', icon: '🔬', color: '#8b5cf6', bg: '#ede9fe', border: '#ddd6fe' };
+    if (t === 'ENGLISH') return { label: 'English', icon: '📝', color: '#f43f5e', bg: '#ffe4e6', border: '#fecdd3' };
+    
     return { label: type.replace(/_/g, ' '), icon: '📚', color: '#475569', bg: '#e2e8f0', border: '#cbd5e1' };
   };
 
@@ -97,8 +111,6 @@ export default function StudentMetricsDashboard() {
   };
 
   const filteredCompletedItems = getFilteredCompletedList();
-  
-  // Clean fallback mapping
   const categoryScores = data.scoreBySubject || {};
 
   return (
@@ -132,26 +144,29 @@ export default function StudentMetricsDashboard() {
             {data.continueLearning.map(session => {
               const progress = session.totalQuestions > 0 ? (session.lastAttemptedIndex / session.totalQuestions) * 100 : 0;
               const category = getCategoryDisplay(session.assessmentType);
+              const isDynamic = !isStandardType(session.assessmentType);
 
               return (
-                <div key={session.sessionId} className="resume-card">
+                <div key={session.sessionId} className="resume-card" style={isDynamic ? { background: '#1e293b', color: '#f8fafc', border: `1px solid ${category.border}` } : {}}>
                   <div>
                     <div style={{ background: category.bg, color: category.color, padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', width: 'fit-content', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '5px', border: `1px solid ${category.border}` }}>
                         <span>{category.icon}</span> {category.label}
                     </div>
-                    <h3>{session.assessmentName}</h3>
+                    <h3 style={isDynamic ? { color: '#38bdf8' } : {}}>{session.assessmentName}</h3>
                     <div className="progress-container">
-                      <div className="progress-text">
+                      <div className="progress-text" style={isDynamic ? { color: '#cbd5e1' } : {}}>
                         <span>Progress</span>
                         <span>{session.lastAttemptedIndex} / {session.totalQuestions}</span>
                       </div>
                       <div className="progress-bar-bg">
-                        <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
+                        <div className="progress-bar-fill" style={{ width: `${progress}%`, background: category.color }}></div>
                       </div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                    <button className="resume-btn" onClick={() => handleResume(session)} style={{ flex: 2 }}>Resume Challenge →</button>
+                    <button className="resume-btn" onClick={() => handleResume(session)} style={{ flex: 2, background: category.color, color: isDynamic ? '#0f172a' : 'white', border: 'none' }}>
+                        Resume Section →
+                    </button>
                     <button onClick={() => handleEndSession(session)} style={{ flex: 1, background: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5', padding: '10px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: '0.2s' }}>End 🛑</button>
                   </div>
                 </div>
@@ -174,7 +189,6 @@ export default function StudentMetricsDashboard() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '24px' }}>
-          {/* Quick Stats */}
           <div style={{ background: 'white', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-around' }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Tests</div>
@@ -192,7 +206,6 @@ export default function StudentMetricsDashboard() {
             </div>
           </div>
 
-          {/* Subject Breakdown - Only if there are scores */}
           {Object.keys(categoryScores).length > 0 && (
             <div style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0' }}>
               <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#64748b', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🏆 Top Subjects</div>
@@ -222,14 +235,15 @@ export default function StudentMetricsDashboard() {
           <h2 className="section-title">🏆 Recently Completed</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
               {filteredCompletedItems.slice(0, 6).map(session => {
-              const stars = getSessionRating(session.score, session.totalQuestions);
               const category = getCategoryDisplay(session.assessmentType);
+              const isDynamic = !isStandardType(session.assessmentType);
               const accuracy = session.totalQuestions > 0 ? Math.round((session.score / session.totalQuestions) * 100) : 0;
+              
               return (
-                  <div key={session.sessionId} style={{ background: 'white', borderRadius: '12px', padding: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div key={session.sessionId} style={{ background: isDynamic ? '#0f172a' : 'white', borderRadius: '12px', padding: '16px', border: `1px solid ${category.border}`, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.95rem', fontWeight: '700', color: '#1e293b', marginBottom: '4px', lineHeight: '1.3' }}>{session.assessmentName}</div>
+                        <div style={{ fontSize: '0.95rem', fontWeight: '700', color: isDynamic ? '#38bdf8' : '#1e293b', marginBottom: '4px', lineHeight: '1.3' }}>{session.assessmentName}</div>
                         <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{new Date(session.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
                       </div>
                       <div style={{ background: category.bg, color: category.color, padding: '4px 8px', borderRadius: '8px', fontSize: '1rem', border: `1px solid ${category.border}` }}>
