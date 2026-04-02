@@ -35,14 +35,14 @@ export default function CompetitiveExamHub() {
     }
   };
 
-  // 🚀 NEW: Start Simulation Handler
   const handleStartSimulation = () => {
-      navigate(`/competitive-assessment/${selectedExam.id}`, { state: { exam: selectedExam } });
+      // 🚀 Normal Test Mode
+      navigate(`/competitive-assessment/${selectedExam.id}`, { state: { exam: selectedExam, printMode: false } });
   };
 
-  // 🚀 NEW: Print Worksheet Handler
   const handlePrintWorksheet = () => {
-      navigate(`/competitive-worksheet/${selectedExam.id}`, { state: { exam: selectedExam } });
+      // 🚀 Print Mode (Same component, shared memory!)
+      navigate(`/competitive-assessment/${selectedExam.id}`, { state: { exam: selectedExam, printMode: true } });
   };
 
   return (

@@ -61,7 +61,7 @@ import App from './App';
 
 import CompetitiveExamHub from './pages/assessments/CompetitiveExamHub';
 import CompetitiveAssessmentFlow from './pages/assessments/CompetitiveAssessmentFlow';
-import CompetitiveWorksheetPrint from './pages/assessments/CompetitiveWorksheetPrint';
+//import CompetitiveWorksheetPrint from './pages/assessments/CompetitiveWorksheetPrint';
 
 /**
  * Application Router Configuration
@@ -84,10 +84,10 @@ export const router = createBrowserRouter([
       </UnifiedDashboard>
     )
   },
-  {
-    path: '/competitive-worksheet/:examId',
-    element: <CompetitiveWorksheetPrint /> // No Dashboard wrapper so it prints purely full-screen!
-  },
+  // {
+  //   path: '/competitive-worksheet/:examId',
+  //   element: <CompetitiveWorksheetPrint /> // No Dashboard wrapper so it prints purely full-screen!
+  // },
   {
     path: '/landing',
     element: <LandingPage />
