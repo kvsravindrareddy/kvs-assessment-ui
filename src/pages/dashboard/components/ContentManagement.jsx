@@ -61,7 +61,9 @@ const ContentManagement = () => {
     }
   }, [config.ADMIN_BASE_URL]);
 
-  useEffect(() => { loadStatistics(); loadGradesAndSubjects(); }, [loadStatistics]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { loadStatistics(); loadGradesAndSubjects(); },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [loadStatistics]);
 
   const loadGradesAndSubjects = async () => {
     try {

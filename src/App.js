@@ -75,7 +75,8 @@ function AppContent() {
     else if (path.includes('/ai-hub')) setActiveSection('AI');
     else if (path.includes('/worksheets')) setActiveSection('Worksheets');
     else if (path === '/' && activeSection !== 'Home') setActiveSection('Home');
-  }, [location.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   const [, setLocationState] = useState({ latitude: null, longitude: null });
   const [gradeData] = useState({});
