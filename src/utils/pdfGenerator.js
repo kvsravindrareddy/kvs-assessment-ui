@@ -1723,5 +1723,255 @@ export const PDFGenerator = {
 
     addFooter(doc);
     return doc;
+  },
+
+  /**
+   * Generate 4-Line Writing Worksheet (English alphabet / cursive practice)
+   * Each set of 4 lines: baseline, midline, top line, descender line
+   * @param {string} text - Text to display as reference at the top of each row (empty = blank paper)
+   * @param {number} lines - Number of 4-line rows
+   * @param {boolean} isCursive - When true, labels the sheet as Cursive Practice
+   */
+  generate4LineWorksheet(text = '', lines = 12, isCursive = false) {
+    const doc = new _jsPDF();
+    const title = isCursive ? 'Cursive Writing Practice' : '4-Line English Writing Practice';
+    const subtitle = isCursive ? 'Cursive Handwriting' : 'Handwriting Practice';
+    addHeader(doc, title, subtitle);
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const leftMargin = 15;
+    const rightMargin = pageWidth - 15;
+    const rowHeight = 18; // total height of one 4-line row
+    const lineSpacing = rowHeight / 4; // space between each of the 4 lines
+
+    let yStart = 38;
+
+    for (let i = 0; i < lines; i++) {
+      if (yStart + rowHeight > pageHeight - 18) {
+        doc.addPage();
+        addHeader(doc, title, subtitle);
+        yStart = 38;
+      }
+
+      // If reference text provided, print it lightly at the start of the row
+      if (text && text.trim()) {
+        doc.setFontSize(7);
+        doc.setTextColor(180);
+        doc.text(text.trim(), leftMargin + 1, yStart + lineSpacing * 2.5);
+        doc.setTextColor(0);
+      }
+
+      // Draw the 4 lines for this row
+      for (let l = 0; l < 4; l++) {
+        const y = yStart + l * lineSpacing;
+        if (l === 0 || l === 3) {
+          // Top (ascender) and bottom (descender) lines — thin & light
+          doc.setDrawColor(180);
+          doc.setLineWidth(0.2);
+        } else if (l === 2) {
+          // Baseline — thicker & dark
+          doc.setDrawColor(80);
+          doc.setLineWidth(0.5);
+        } else {
+          // Midline — medium
+          doc.setDrawColor(140);
+          doc.setLineWidth(0.3);
+        }
+        doc.line(leftMargin, y, rightMargin, y);
+      }
+
+      yStart += rowHeight + 4; // gap between rows
+    }
+
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.2);
+    addFooter(doc);
+    return doc;
+  },
+
+  /**
+   * Generate 2-Line Writing Worksheet (Hindi / regional script practice)
+   * Each row has 2 lines (baseline + header line) with a dotted midline
+   * @param {string} text - Reference text (empty = blank)
+   * @param {number} lines - Number of 2-line rows
+   */
+  generate2LineWorksheet(text = '', lines = 10) {
+    const doc = new _jsPDF();
+    addHeader(doc, '2-Line Writing Practice', 'Handwriting Practice');
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const leftMargin = 15;
+    const rightMargin = pageWidth - 15;
+    const rowHeight = 20; // total height per 2-line row
+    const halfRow = rowHeight / 2;
+
+    let yStart = 38;
+
+    for (let i = 0; i < lines; i++) {
+      if (yStart + rowHeight > pageHeight - 18) {
+        doc.addPage();
+        addHeader(doc, '2-Line Writing Practice', 'Handwriting Practice');
+        yStart = 38;
+      }
+
+      // Optional reference text
+      if (text && text.trim()) {
+        doc.setFontSize(7);
+        doc.setTextColor(180);
+        doc.text(text.trim(), leftMargin + 1, yStart + halfRow * 0.9);
+        doc.setTextColor(0);
+      }
+
+      // Top (header) line — solid, medium
+      doc.setDrawColor(100);
+      doc.setLineWidth(0.4);
+      doc.line(leftMargin, yStart, rightMargin, yStart);
+
+      // Middle dotted line
+      doc.setDrawColor(160);
+      doc.setLineWidth(0.2);
+      const dashLen = 2;
+      const gapLen = 2;
+      let x = leftMargin;
+      while (x < rightMargin) {
+        doc.line(x, yStart + halfRow, Math.min(x + dashLen, rightMargin), yStart + halfRow);
+        x += dashLen + gapLen;
+      }
+
+      // Bottom baseline — solid, dark
+      doc.setDrawColor(60);
+      doc.setLineWidth(0.5);
+      doc.line(leftMargin, yStart + rowHeight, rightMargin, yStart + rowHeight);
+
+      yStart += rowHeight + 6;
+    }
+
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.2);
+    addFooter(doc);
+    return doc;
+  },
+
+  /**
+   * Generate Math Square Grid Worksheet
+   * @param {number} gridSize - Cell size in mm (e.g. 5, 10, 15)
+   */
+  generateMathGridWorksheet(gridSize = 10) {
+    const doc = new _jsPDF();
+    const label = gridSize <= 5 ? 'Small' : gridSize <= 10 ? 'Medium' : 'Large';
+    addHeader(doc, `Math Square Grid (${label} — ${gridSize}mm)`, 'Graph Paper Worksheet');
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const topMargin = 36;
+    const bottomMargin = 18;
+    const leftMargin = 15;
+    const rightMargin = pageWidth - 15;
+    const availableWidth = rightMargin - leftMargin;
+    const availableHeight = pageHeight - topMargin - bottomMargin;
+
+    const cols = Math.floor(availableWidth / gridSize);
+    const rows = Math.floor(availableHeight / gridSize);
+    const gridWidth = cols * gridSize;
+    const gridHeight = rows * gridSize;
+
+    doc.setDrawColor(180);
+    doc.setLineWidth(0.2);
+
+    // Vertical lines
+    for (let c = 0; c <= cols; c++) {
+      const x = leftMargin + c * gridSize;
+      doc.line(x, topMargin, x, topMargin + gridHeight);
+    }
+
+    // Horizontal lines
+    for (let r = 0; r <= rows; r++) {
+      const y = topMargin + r * gridSize;
+      doc.line(leftMargin, y, leftMargin + gridWidth, y);
+    }
+
+    // Bold border around the entire grid
+    doc.setDrawColor(80);
+    doc.setLineWidth(0.6);
+    doc.rect(leftMargin, topMargin, gridWidth, gridHeight);
+
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.2);
+    addFooter(doc);
+    return doc;
+  },
+
+  /**
+   * Generate Story Writing Paper Worksheet
+   * Top section: picture/drawing box; bottom section: writing lines
+   * @param {boolean} is4Line - When true, uses 4-line rows instead of single lines
+   * @param {number} lines - Number of writing lines (or 4-line rows when is4Line=true)
+   */
+  generateStoryPaperWorksheet(is4Line = false, lines = 8) {
+    const doc = new _jsPDF();
+    const title = is4Line ? 'Story Writing Paper (Primary)' : 'Story Writing Paper';
+    addHeader(doc, title, 'Creative Writing Worksheet');
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const leftMargin = 15;
+    const rightMargin = pageWidth - 15;
+    const drawingBoxHeight = 55; // height of the illustration / drawing area
+    const drawingBoxTop = 36;
+
+    // Drawing / illustration box with label
+    doc.setDrawColor(120);
+    doc.setLineWidth(0.4);
+    doc.rect(leftMargin, drawingBoxTop, rightMargin - leftMargin, drawingBoxHeight);
+
+    doc.setFontSize(8);
+    doc.setTextColor(160);
+    doc.text('Draw a picture about your story here', pageWidth / 2, drawingBoxTop + drawingBoxHeight / 2, { align: 'center' });
+    doc.setTextColor(0);
+
+    // Writing lines below the drawing box
+    const lineAreaTop = drawingBoxTop + drawingBoxHeight + 8;
+
+    if (is4Line) {
+      const rowHeight = 16;
+      const lineSpacing = rowHeight / 4;
+      let yStart = lineAreaTop;
+
+      for (let i = 0; i < lines; i++) {
+        if (yStart + rowHeight > pageHeight - 18) break;
+
+        for (let l = 0; l < 4; l++) {
+          const y = yStart + l * lineSpacing;
+          if (l === 0 || l === 3) {
+            doc.setDrawColor(180);
+            doc.setLineWidth(0.2);
+          } else if (l === 2) {
+            doc.setDrawColor(80);
+            doc.setLineWidth(0.5);
+          } else {
+            doc.setDrawColor(140);
+            doc.setLineWidth(0.3);
+          }
+          doc.line(leftMargin, y, rightMargin, y);
+        }
+        yStart += rowHeight + 3;
+      }
+    } else {
+      const lineGap = (pageHeight - 18 - lineAreaTop) / lines;
+      for (let i = 0; i < lines; i++) {
+        const y = lineAreaTop + i * lineGap;
+        if (y > pageHeight - 18) break;
+        doc.setDrawColor(100);
+        doc.setLineWidth(0.4);
+        doc.line(leftMargin, y, rightMargin, y);
+      }
+    }
+
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.2);
+    addFooter(doc);
+    return doc;
   }
 };
