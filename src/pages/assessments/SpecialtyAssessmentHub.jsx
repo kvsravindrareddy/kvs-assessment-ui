@@ -30,8 +30,6 @@ export default function SpecialtyAssessmentHub({ title, subtitle, topics, primar
     const [showPrintView, setShowPrintView] = useState(false);
     const [printConfig, setPrintConfig] = useState({ showAnswers: true, showExplanations: true });
 
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
     useEffect(() => {
         const loadGrades = async () => {
             try {
@@ -70,40 +68,38 @@ export default function SpecialtyAssessmentHub({ title, subtitle, topics, primar
         return { qText, qOptions, actualAnswer, explanation };
     };
 
+    // 🚀 FIX: High-Speed Concurrent Chunking! (No backend changes required)
     const compilePaper = async (assessmentId, totalQs) => {
         setIsCompiling(true);
+        setCompileProgress(`Initializing secure connection...`);
         const token = localStorage.getItem('token');
         const baseUrl = CONFIG.development.GATEWAY_URL || CONFIG.development.ADMIN_BASE_URL;
         const newCache = { ...qCache };
         
-        for(let i = 1; i <= totalQs; i++) {
-            if (!newCache[i]) {
-                setCompileProgress(`Downloading node ${i} of ${totalQs}...`);
-                let success = false;
-                let attempts = 0;
-                while (!success && attempts < 3) {
-                    try {
-                        const qRes = await axios.post(`${baseUrl}/v1/assessment/questions/start`, {
-                            userId: currentUserId.toString(), email: user?.email || '',
-                            assessmentId: assessmentId, questionIndex: i
-                        }, { headers: { Authorization: `Bearer ${token}` } });
-                        
-                        let qData = qRes.data.question || qRes.data;
-                        if (qRes.data.questions && Array.isArray(qRes.data.questions)) qData = qRes.data.questions[0];
-                        
-                        if (qRes.data.correctAnswer) qData.correctAnswer = qRes.data.correctAnswer;
-                        if (qRes.data.explanation) qData.explanation = qRes.data.explanation;
-                        
-                        newCache[i] = qData;
-                        success = true;
-                        await sleep(150); 
-                    } catch (e) {
-                        attempts++;
-                        await sleep(1000);
-                    }
+        // Fetch in parallel batches of 5 to maximize speed without overloading the server
+        const batchSize = 5;
+        for (let i = 1; i <= totalQs; i += batchSize) {
+            const batch = [];
+            for (let j = i; j < i + batchSize && j <= totalQs; j++) {
+                if (!newCache[j]) {
+                    const req = axios.post(`${baseUrl}/v1/assessment/questions/start`, {
+                        userId: currentUserId.toString(), email: user?.email || '',
+                        assessmentId: assessmentId, questionIndex: j
+                    }, { headers: { Authorization: `Bearer ${token}` } })
+                    .then(res => {
+                        let qData = res.data.question || res.data;
+                        if (res.data.questions && Array.isArray(res.data.questions)) qData = res.data.questions[0];
+                        if (res.data.correctAnswer) qData.correctAnswer = res.data.correctAnswer;
+                        if (res.data.explanation) qData.explanation = res.data.explanation;
+                        newCache[j] = qData;
+                    }).catch(() => console.warn(`Background fetch failed for Q${j}`));
+                    batch.push(req);
                 }
             }
+            await Promise.all(batch); // Wait for the batch to finish
+            setCompileProgress(`Loaded ${Math.min(i + batchSize - 1, totalQs)} of ${totalQs} modules...`);
         }
+        
         setQCache(newCache);
         setIsCompiling(false);
         return newCache;
@@ -128,11 +124,19 @@ export default function SpecialtyAssessmentHub({ title, subtitle, topics, primar
             const qCount = loadRes.data.numberOfQuestions || 10;
             setAssessmentData({ id: assId, count: qCount });
             
+            // Start the lightning-fast background fetch
             compilePaper(assId, qCount);
             
+            // 🚀 FIX: Read the Resume Index and Score directly from the backend if recovering a session!
+            let resumeIndex = 1;
+            if (loadRes.data.resumeQuestionIndex) resumeIndex = loadRes.data.resumeQuestionIndex;
+            else if (loadRes.data.currentQuestionIndex) resumeIndex = loadRes.data.currentQuestionIndex;
+            else if (loadRes.data.questionIndex) resumeIndex = loadRes.data.questionIndex;
+
+            setCurrentIndex(resumeIndex);
+            setScore(loadRes.data.currentScore || loadRes.data.score || 0);
+            
             setAnswerKey([]);
-            setCurrentIndex(1);
-            setScore(0);
             setAnswers({});
             setCompleted(false);
         } catch (err) {
@@ -149,6 +153,7 @@ export default function SpecialtyAssessmentHub({ title, subtitle, topics, primar
         try {
             const token = localStorage.getItem('token');
             const baseUrl = CONFIG.development.GATEWAY_URL || CONFIG.development.ADMIN_BASE_URL;
+            // Instantly sync the answer to the DB to ensure browser-close safety
             const res = await axios.post(`${baseUrl}/v1/assessment/questions/submit-answer`, {
                 assessmentId: assessmentData.id, userId: currentUserId.toString(), email: user?.email || '',
                 questionIndex: currentIndex, userAnswer: [selectedOption]
@@ -196,31 +201,13 @@ export default function SpecialtyAssessmentHub({ title, subtitle, topics, primar
                     {`
                         @media print {
                             html, body, #root, .app-container, .unified-dashboard-container, .dashboard-content, .content-body {
-                                height: auto !important;
-                                min-height: auto !important;
-                                overflow: visible !important;
-                                background: white !important;
-                                margin: 0 !important;
-                                padding: 0 !important;
-                                position: static !important;
+                                height: auto !important; min-height: auto !important; overflow: visible !important;
+                                background: white !important; margin: 0 !important; padding: 0 !important; position: static !important;
                             }
                             .no-print { display: none !important; }
-                            
-                            /* 🚀 FIX: Removed borders in print view so it looks clean across multiple pages */
-                            .print-container { 
-                                box-shadow: none !important; 
-                                padding: 0 !important; 
-                                max-width: 100% !important; 
-                                margin: 0 !important; 
-                                border: none !important; 
-                                border-radius: 0 !important; 
-                            }
-                            
+                            .print-wrapper { box-shadow: none !important; padding: 0 !important; max-width: 100% !important; margin: 0 !important; border: none !important; border-radius: 0 !important; }
                             @page { margin: 15mm; size: auto; }
-                            * {
-                                color: black !important;
-                                text-shadow: none !important;
-                            }
+                            * { color: black !important; text-shadow: none !important; }
                             .page-break { page-break-inside: avoid; margin-bottom: 30px; }
                         }
                     `}
@@ -240,7 +227,7 @@ export default function SpecialtyAssessmentHub({ title, subtitle, topics, primar
                     </div>
                 </div>
                 
-                <div className="print-container" style={{ background: 'white', color: 'black', padding: '40px', maxWidth: '850px', margin: '0 auto', border: '3px solid #1e293b', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
+                <div className="print-wrapper" style={{ background: 'white', color: 'black', padding: '40px', maxWidth: '850px', margin: '0 auto', border: '3px solid #1e293b', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
                     <div style={{ textAlign: 'center', borderBottom: '2px solid black', paddingBottom: '20px', marginBottom: '30px' }}>
                         <img src="/kivo-logo.png" alt="KiVO Learning" style={{ height: '60px', objectFit: 'contain', marginBottom: '10px' }} onError={(e) => { e.target.style.display = 'none'; }} />
                         <h2 style={{ margin: '0 0 5px 0', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '24px' }}>KiVO Learning International</h2>
@@ -311,6 +298,10 @@ export default function SpecialtyAssessmentHub({ title, subtitle, topics, primar
                             </div>
                         );
                     })}
+
+                    <div style={{ textAlign: 'center', marginTop: '40px', paddingTop: '20px', borderTop: '2px solid #e2e8f0', color: '#94a3b8', fontSize: '0.9rem', fontStyle: 'italic' }}>
+                        *** End of Report ***
+                    </div>
                 </div>
             </div>
         );

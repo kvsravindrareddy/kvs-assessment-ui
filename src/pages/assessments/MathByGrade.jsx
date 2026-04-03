@@ -40,8 +40,6 @@ export default function MathByGrade() {
   const baseUrl = CONFIG.development.GATEWAY_URL || CONFIG.development.ADMIN_BASE_URL;
   const loadAssessmentURL = `${baseUrl}/v1/assessment/questions/load`;
 
-  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
   useEffect(() => {
     const loadGradesAndSubjects = async () => {
       try {
@@ -89,7 +87,6 @@ export default function MathByGrade() {
     };
 
     loadGradesAndSubjects();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getQDetails = (qNode) => {
@@ -101,39 +98,36 @@ export default function MathByGrade() {
     return { qText, qOptions, actualAnswer, explanation };
   };
 
+  // 🚀 FIX: High-Speed Concurrent Chunking!
   const compilePaper = async (assessmentId, totalQs) => {
       setIsCompiling(true);
+      setCompileProgress(`Gathering puzzle pieces...`);
       const token = localStorage.getItem('token');
       const newCache = { ...qCache };
       
-      for(let i = 1; i <= totalQs; i++) {
-          if (!newCache[i]) {
-              setCompileProgress(`Gathering puzzle piece ${i} of ${totalQs}...`);
-              let success = false;
-              let attempts = 0;
-              while (!success && attempts < 3) {
-                  try {
-                      const qRes = await axios.post(`${baseUrl}/v1/assessment/questions/start`, {
-                          userId: currentUserId.toString(), email: user?.email || '',
-                          assessmentId: assessmentId, questionIndex: i
-                      }, { headers: { Authorization: `Bearer ${token}` } });
-                      
-                      let qData = qRes.data.question || qRes.data;
-                      if (qRes.data.questions && Array.isArray(qRes.data.questions)) qData = qRes.data.questions[0];
-                      
-                      if (qRes.data.correctAnswer) qData.correctAnswer = qRes.data.correctAnswer;
-                      if (qRes.data.explanation) qData.explanation = qRes.data.explanation;
-                      
-                      newCache[i] = qData;
-                      success = true;
-                      await sleep(150); 
-                  } catch (e) {
-                      attempts++;
-                      await sleep(1000);
-                  }
+      const batchSize = 5;
+      for (let i = 1; i <= totalQs; i += batchSize) {
+          const batch = [];
+          for (let j = i; j < i + batchSize && j <= totalQs; j++) {
+              if (!newCache[j]) {
+                  const req = axios.post(`${baseUrl}/v1/assessment/questions/start`, {
+                      userId: currentUserId.toString(), email: user?.email || '',
+                      assessmentId: assessmentId, questionIndex: j
+                  }, { headers: { Authorization: `Bearer ${token}` } })
+                  .then(res => {
+                      let qData = res.data.question || res.data;
+                      if (res.data.questions && Array.isArray(res.data.questions)) qData = res.data.questions[0];
+                      if (res.data.correctAnswer) qData.correctAnswer = res.data.correctAnswer;
+                      if (res.data.explanation) qData.explanation = res.data.explanation;
+                      newCache[j] = qData;
+                  }).catch(() => console.warn(`Background fetch failed for Q${j}`));
+                  batch.push(req);
               }
           }
+          await Promise.all(batch);
+          setCompileProgress(`Packed ${Math.min(i + batchSize - 1, totalQs)} of ${totalQs} items...`);
       }
+      
       setQCache(newCache);
       setIsCompiling(false);
       return newCache;
@@ -170,11 +164,17 @@ export default function MathByGrade() {
       setAssessmentData({ id: assId, count: qCount, subject: mathSubject });
       
       compilePaper(assId, qCount);
+      
+      // 🚀 FIX: Auto-Resume logic
+      let resumeIndex = 1;
+      if (loadRes.data.resumeQuestionIndex) resumeIndex = loadRes.data.resumeQuestionIndex;
+      else if (loadRes.data.currentQuestionIndex) resumeIndex = loadRes.data.currentQuestionIndex;
+      else if (loadRes.data.questionIndex) resumeIndex = loadRes.data.questionIndex;
 
       setShowConfigDialog(false);
       setAnswerKey([]);
-      setCurrentIndex(1);
-      setScore(0);
+      setCurrentIndex(resumeIndex);
+      setScore(loadRes.data.currentScore || loadRes.data.score || 0);
       setAnswers({});
       setCompleted(false);
     } catch (err) {
@@ -197,7 +197,7 @@ export default function MathByGrade() {
           }, { headers: { Authorization: `Bearer ${token}` } });
           
           if (res.data && res.data.score !== undefined) {
-              setScore(res.data.score); // Sync exact backend score
+              setScore(res.data.score);
           }
       } catch (e) { 
           console.error("Failed to sync answer");
@@ -223,8 +223,6 @@ export default function MathByGrade() {
           setCurrentIndex(prev => prev + 1);
       }
   };
-
-  // --- RENDERING VIEWS ---
 
   if (gradesLoading || loading) return (
       <div style={{ background: '#f0fdf4', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -283,7 +281,6 @@ export default function MathByGrade() {
                   </div>
               </div>
               
-              {/* Web view retains border, Print view drops it */}
               <div className="print-wrapper" style={{ background: 'white', padding: '40px', maxWidth: '850px', margin: '0 auto', border: '4px solid #16a34a', borderRadius: '24px', boxShadow: '0 8px 30px rgba(0,0,0,0.1)' }}>
                   <div style={{ textAlign: 'center', borderBottom: '3px dashed #16a34a', paddingBottom: '20px', marginBottom: '30px' }}>
                       <img src="/kivo-logo.png" alt="KiVO Learning" style={{ height: '70px', objectFit: 'contain', marginBottom: '15px' }} onError={(e) => { e.target.style.display = 'none'; }} />
@@ -354,7 +351,7 @@ export default function MathByGrade() {
                           </div>
                       );
                   })}
-
+                  
                   {/* 🚀 FIX: Document Footer for clean ending */}
                   <div style={{ textAlign: 'center', marginTop: '40px', paddingTop: '20px', borderTop: '2px solid #e2e8f0', color: '#94a3b8', fontSize: '0.9rem', fontStyle: 'italic' }}>
                       *** End of Report ***

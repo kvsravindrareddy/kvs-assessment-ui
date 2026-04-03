@@ -16,7 +16,7 @@
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
   transition: all 0.3s ease;
-  z-index: 9999;
+  z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -53,7 +53,7 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
-  z-index: 10000;
+  z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -269,7 +269,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  z-index: 10001;
+  z-index: 9999999;
   max-width: 400px;
   animation: slideInRight 0.3s ease-out;
   font-size: 0.95rem;
