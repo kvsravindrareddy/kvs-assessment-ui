@@ -1,5 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import './App.css';
+import './css/styles.css';
 import './css/footer.css';
 import kivoLogo from './assets/kivo.png';
 
