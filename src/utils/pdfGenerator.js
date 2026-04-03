@@ -333,186 +333,6 @@ export const PDFGenerator = {
   },
 
   /**
-   * Generate 4-Line Handwriting Paper (English)
-   */
-  generate4LineWorksheet(text, lineCount, isCursive = false) {
-    const doc = new jsPDF();
-    addHeader(doc, isCursive ? 'Cursive Handwriting Practice' : 'English Handwriting Practice', '4-Line Format');
-
-    let yPosition = 45;
-    const leftMargin = 15;
-    const rightMargin = 195;
-    const lineSpacing = 4; // Height between the 4 lines
-    const rowSpacing = 18; // Gap between rows
-
-    for (let i = 0; i < lineCount; i++) {
-      if (yPosition > 260) {
-        doc.addPage();
-        addHeader(doc, isCursive ? 'Cursive Handwriting Practice' : 'English Handwriting Practice', '4-Line Format');
-        yPosition = 45;
-      }
-
-      // Draw 4 lines
-      doc.setLineWidth(0.4);
-      doc.setDrawColor(239, 68, 68); // Top Red
-      doc.line(leftMargin, yPosition, rightMargin, yPosition);
-
-      doc.setDrawColor(59, 130, 246); // Middle Blue 1
-      doc.line(leftMargin, yPosition + lineSpacing, rightMargin, yPosition + lineSpacing);
-
-      doc.setDrawColor(59, 130, 246); // Middle Blue 2
-      doc.line(leftMargin, yPosition + 2 * lineSpacing, rightMargin, yPosition + 2 * lineSpacing);
-
-      doc.setDrawColor(239, 68, 68); // Bottom Red
-      doc.line(leftMargin, yPosition + 3 * lineSpacing, rightMargin, yPosition + 3 * lineSpacing);
-
-      // Add tracing text if provided
-      if (text) {
-        doc.setTextColor(200, 200, 200); // Light gray for tracing
-        doc.setFont(isCursive ? 'times' : 'helvetica', isCursive ? 'italic' : 'normal');
-        doc.setFontSize(28);
-        // Baseline is on the second blue line
-        doc.text(text, leftMargin + 5, yPosition + 2 * lineSpacing + 1);
-        doc.setTextColor(0, 0, 0); // Reset
-      }
-
-      yPosition += rowSpacing;
-    }
-
-    addFooter(doc);
-    return doc;
-  },
-
-  /**
-   * Generate 2-Line Handwriting Paper (Hindi/Regional)
-   */
-  generate2LineWorksheet(text, lineCount) {
-    const doc = new jsPDF();
-    addHeader(doc, 'Language Handwriting Practice', '2-Line Format');
-
-    let yPosition = 45;
-    const leftMargin = 15;
-    const rightMargin = 195;
-    const lineSpacing = 12; // Gap between the 2 lines
-    const rowSpacing = 22; // Gap between rows
-
-    for (let i = 0; i < lineCount; i++) {
-      if (yPosition > 260) {
-        doc.addPage();
-        addHeader(doc, 'Language Handwriting Practice', '2-Line Format');
-        yPosition = 45;
-      }
-
-      // Draw 2 lines
-      doc.setLineWidth(0.5);
-      doc.setDrawColor(50, 50, 50);
-      doc.line(leftMargin, yPosition, rightMargin, yPosition); // Top line
-      doc.line(leftMargin, yPosition + lineSpacing, rightMargin, yPosition + lineSpacing); // Bottom line
-
-      if (text) {
-        doc.setTextColor(200, 200, 200);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(28);
-        doc.text(text, leftMargin + 5, yPosition + lineSpacing - 2);
-        doc.setTextColor(0, 0, 0);
-      }
-
-      yPosition += rowSpacing;
-    }
-
-    addFooter(doc);
-    return doc;
-  },
-
-  /**
-   * Generate Square Math Grid
-   */
-  generateMathGridWorksheet(gridSizeMm) {
-    const doc = new jsPDF();
-    addHeader(doc, 'Math Square Grid', `${gridSizeMm}mm Squares`);
-
-    const leftMargin = 15;
-    const rightMargin = 195;
-    const topMargin = 40;
-    const bottomMargin = 270;
-
-    // Grid size in points (1 mm = 2.83465 points)
-    const gridSizePts = gridSizeMm * 2.83465;
-
-    doc.setLineWidth(0.2);
-    doc.setDrawColor(150, 150, 200); // Light blue grid
-
-    // Vertical lines
-    for (let x = leftMargin; x <= rightMargin; x += gridSizePts) {
-      doc.line(x, topMargin, x, bottomMargin);
-    }
-    // Final boundary line
-    doc.line(rightMargin, topMargin, rightMargin, bottomMargin);
-
-    // Horizontal lines
-    for (let y = topMargin; y <= bottomMargin; y += gridSizePts) {
-      doc.line(leftMargin, y, rightMargin, y);
-    }
-    // Bottom boundary line
-    doc.line(leftMargin, bottomMargin, rightMargin, bottomMargin);
-
-    addFooter(doc);
-    return doc;
-  },
-
-  /**
-   * Generate Story Paper (Picture box top, lines bottom)
-   */
-  generateStoryPaperWorksheet(is4Line, lineCount) {
-    const doc = new jsPDF();
-    addHeader(doc, 'Story Writing', 'Draw a picture and write a story!');
-
-    const leftMargin = 15;
-    const rightMargin = 195;
-    let yPosition = 45;
-
-    // Draw Picture Box
-    doc.setDrawColor(150, 150, 150);
-    doc.setLineWidth(0.5);
-    doc.rect(leftMargin, yPosition, rightMargin - leftMargin, 85); // Picture box
-    
-    // Add a subtle hint text in the box
-    doc.setTextColor(200, 200, 200);
-    doc.setFontSize(14);
-    doc.text('Draw your picture here', leftMargin + 65, yPosition + 45);
-    doc.setTextColor(0, 0, 0);
-
-    yPosition += 100; // Move below the box to start lines
-
-    // Draw lines
-    if (is4Line) {
-      const lineSpacing = 4;
-      const rowSpacing = 18;
-      for (let i = 0; i < lineCount; i++) {
-        if (yPosition > 260) break;
-        doc.setLineWidth(0.4);
-        doc.setDrawColor(239, 68, 68); doc.line(leftMargin, yPosition, rightMargin, yPosition);
-        doc.setDrawColor(59, 130, 246); doc.line(leftMargin, yPosition + lineSpacing, rightMargin, yPosition + lineSpacing);
-        doc.line(leftMargin, yPosition + 2 * lineSpacing, rightMargin, yPosition + 2 * lineSpacing);
-        doc.setDrawColor(239, 68, 68); doc.line(leftMargin, yPosition + 3 * lineSpacing, rightMargin, yPosition + 3 * lineSpacing);
-        yPosition += rowSpacing;
-      }
-    } else {
-      const lineSpacing = 12;
-      for (let i = 0; i < lineCount; i++) {
-        if (yPosition > 260) break;
-        doc.setLineWidth(0.3);
-        doc.setDrawColor(150, 150, 150);
-        doc.line(leftMargin, yPosition, rightMargin, yPosition);
-        yPosition += lineSpacing;
-      }
-    }
-
-    addFooter(doc);
-    return doc;
-  },
-  
-  /**
    * Print PDF directly
    */
   printPDF(doc) {
@@ -528,7 +348,7 @@ export const PDFGenerator = {
 
   /**
    * Generate Custom Question Worksheet from Backend Questions
-   * Supports multiple choice questions with answer keys
+   * 🚀 FIX: Perfectly aligned question text sharing the same line as "Q1)"
    */
   generateCustomQuestionWorksheet(questions, options = {}) {
     const doc = new jsPDF();
@@ -538,20 +358,15 @@ export const PDFGenerator = {
       difficulty = '',
       topic = '',
       includeAnswers = false,
-      showDifficulty = false  // New option to control difficulty display
+      showDifficulty = false 
     } = options;
 
-    // Header - build subtitle without difficulty
     let subtitle = [];
     if (grade) subtitle.push(`Grade: ${grade}`);
     if (showDifficulty && difficulty) subtitle.push(`Difficulty: ${difficulty}`);
     if (topic) subtitle.push(`Topic: ${topic}`);
 
-    addHeader(
-      doc,
-      title,
-      includeAnswers ? `ANSWER KEY | ${subtitle.join(' | ')}` : subtitle.join(' | ')
-    );
+    addHeader(doc, title, includeAnswers ? `ANSWER KEY | ${subtitle.join(' | ')}` : subtitle.join(' | '));
 
     let yPosition = 40;
     const leftMargin = 15;
@@ -560,41 +375,37 @@ export const PDFGenerator = {
     const pageHeight = doc.internal.pageSize.getHeight();
 
     questions.forEach((question, index) => {
-      // Check if we need a new page
       if (yPosition > pageHeight - 40) {
         doc.addPage();
         addHeader(doc, title, includeAnswers ? `ANSWER KEY | ${subtitle.join(' | ')}` : subtitle.join(' | '));
         yPosition = 40;
       }
 
-      // Question number and difficulty badge
-      doc.setFontSize(11);
-      doc.setFont(undefined, 'bold');
-      doc.text(`Q${index + 1}.`, leftMargin, yPosition);
-
-      // Difficulty badge
-      if (question.complexity) {
+      // Calculate difficulty badge width to wrap text correctly
+      let badgeWidth = 0;
+      if (showDifficulty && question.complexity) {
+        badgeWidth = 28;
         doc.setFontSize(8);
-        const complexityColor = {
-          EASY: [34, 197, 94],
-          MEDIUM: [234, 179, 8],
-          COMPLEX: [239, 68, 68]
-        };
+        const complexityColor = { EASY: [34, 197, 94], MEDIUM: [234, 179, 8], COMPLEX: [239, 68, 68] };
         const color = complexityColor[question.complexity] || [156, 163, 175];
         doc.setFillColor(...color);
         doc.setTextColor(255, 255, 255);
         doc.roundedRect(rightMargin - 25, yPosition - 4, 25, 6, 1, 1, 'F');
         doc.text(question.complexity, rightMargin - 12.5, yPosition, { align: 'center' });
-        doc.setTextColor(0, 0, 0);
+        doc.setTextColor(0, 0, 0); // Reset text color
       }
 
-      yPosition += lineHeight;
+      // Question number
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Q${index + 1})`, leftMargin, yPosition);
 
-      // Question text
-      doc.setFontSize(10);
+      // Question text (Starting on the EXACT SAME line, properly indented)
+      const textIndent = 12; // Gap for the "Q1) " text
+      doc.setFontSize(10.5);
       doc.setFont(undefined, 'normal');
       const questionText = question.question?.name || question.name || 'Question text not available';
-      const splitQuestion = doc.splitTextToSize(questionText, rightMargin - leftMargin - 5);
+      const splitQuestion = doc.splitTextToSize(questionText, rightMargin - leftMargin - textIndent - badgeWidth);
 
       splitQuestion.forEach(line => {
         if (yPosition > pageHeight - 40) {
@@ -602,7 +413,7 @@ export const PDFGenerator = {
           addHeader(doc, title, includeAnswers ? `ANSWER KEY | ${subtitle.join(' | ')}` : subtitle.join(' | '));
           yPosition = 40;
         }
-        doc.text(line, leftMargin + 5, yPosition);
+        doc.text(line, leftMargin + textIndent, yPosition);
         yPosition += lineHeight;
       });
 
@@ -625,13 +436,13 @@ export const PDFGenerator = {
           if (isCorrect) {
             doc.setFont(undefined, 'bold');
             doc.setFillColor(220, 252, 231);
-            doc.rect(leftMargin + 5, yPosition - 4, rightMargin - leftMargin - 10, lineHeight, 'F');
+            doc.rect(leftMargin + textIndent - 2, yPosition - 4, rightMargin - leftMargin - textIndent + 2, lineHeight, 'F');
           } else {
             doc.setFont(undefined, 'normal');
           }
 
           const optionText = `${key}) ${value}`;
-          const splitOption = doc.splitTextToSize(optionText, rightMargin - leftMargin - 15);
+          const splitOption = doc.splitTextToSize(optionText, rightMargin - leftMargin - textIndent - 5);
 
           splitOption.forEach((line, idx) => {
             if (yPosition > pageHeight - 40) {
@@ -639,7 +450,7 @@ export const PDFGenerator = {
               addHeader(doc, title, includeAnswers ? `ANSWER KEY | ${subtitle.join(' | ')}` : subtitle.join(' | '));
               yPosition = 40;
             }
-            doc.text(line, leftMargin + 10, yPosition);
+            doc.text(line, leftMargin + textIndent + 2, yPosition);
             yPosition += lineHeight;
           });
 
@@ -657,7 +468,7 @@ export const PDFGenerator = {
         }
         doc.setFontSize(9);
         doc.setTextColor(100, 100, 100);
-        doc.text('Answer: _________________', leftMargin + 10, yPosition);
+        doc.text('Answer: _________________', leftMargin + textIndent, yPosition);
         doc.setTextColor(0, 0, 0);
         yPosition += lineHeight;
       }
@@ -1901,20 +1712,5 @@ export const PDFGenerator = {
 
     addFooter(doc);
     return doc;
-  },
-
-  /**
-   * Print PDF
-   */
-  printPDF(doc) {
-    doc.autoPrint();
-    window.open(doc.output('bloburl'), '_blank');
-  },
-
-  /**
-   * Download PDF
-   */
-  downloadPDF(doc, filename) {
-    doc.save(filename);
   }
 };

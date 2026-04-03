@@ -25,34 +25,29 @@ const getSubjectIcon = (subjectName) => {
 export default function WorksheetsHub() {
     const config = getConfig();
 
-    // Main Mode: 'custom-generators' or 'question-bank'
-    const [mainMode, setMainMode] = useState('custom-generators');
-
-    // --- 🚀 NEW: Subject Grouping for User Friendliness ---
-    const [activeSubjectGroup, setActiveSubjectGroup] = useState('Math');
-    
-    // Custom Sub-modes
-    const [activeCategory, setActiveCategory] = useState('multiplicationTables');
+    // Main Layout Modes
+    const [mainMode, setMainMode] = useState('custom-generators'); // 'custom-generators' or 'question-bank'
     const [mathMode, setMathMode] = useState('templates'); // 'templates' or 'custom'
 
-    // Question Bank State
-    const [activeTab, setActiveTab] = useState('by-grade');
+    // Subject Grouping for Custom Generators
+    const [activeSubjectGroup, setActiveSubjectGroup] = useState('Math');
+    const [activeCategory, setActiveCategory] = useState('multiplicationTables');
+
+    // Dynamic Question Bank State
     const [orderedGrades, setOrderedGrades] = useState([]);
     const [gradeSubjectMap, setGradeSubjectMap] = useState({});
     const [selectedGrade, setSelectedGrade] = useState(null);
     const [selectedSubject, setSelectedSubject] = useState(null);
+    
     const [loadedQuestions, setLoadedQuestions] = useState([]);
-    const [responseTime, setResponseTime] = useState(null);
     const [expandedPreview, setExpandedPreview] = useState(false);
 
-    // Common State
+    // Global UI State
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState(null);
-
-    // Preview Modal State
     const [previewModal, setPreviewModal] = useState({ open: false, pdfUrl: null, template: null });
 
-    // Format Preferences (horizontal vs vertical)
+    // Format Preferences
     const [formatPreference, setFormatPreference] = useState({
         simpleAddition: 'vertical', simpleSubtraction: 'vertical', simpleMultiplication: 'vertical', simpleDivision: 'vertical',
         addition: 'horizontal', subtraction: 'horizontal', multiplication: 'horizontal', division: 'horizontal',
@@ -61,7 +56,7 @@ export default function WorksheetsHub() {
         multiplicationTables: 'vertical', numberWriting: 'horizontal', mixedOperations: 'horizontal'
     });
 
-    // Custom Parameters (Combined Original Math + New Writing)
+    // Custom Generator Parameters
     const [customParams, setCustomParams] = useState({
         multiplicationTables: { from: 1, to: 10 },
         simpleAddition: { count: 30, max: 20, difficulty: 'easy' },
@@ -82,7 +77,6 @@ export default function WorksheetsHub() {
         patterns: { count: 20, difficulty: 'easy' },
         numberWriting: { from: 1, to: 100, percentage: 50 },
         mixedOperations: { count: 20, max: 100, difficulty: 'easy' },
-        // Writing Practice Params
         english4Line: { text: 'Aa Bb Cc', lines: 12 },
         hindi2Line: { text: 'अ आ इ ई', lines: 10 },
         mathGrid: { gridSize: 10 },
@@ -90,38 +84,33 @@ export default function WorksheetsHub() {
         storyPaper: { is4Line: false, lines: 8 }
     });
 
-    // Question Bank Form
     const [worksheetForm, setWorksheetForm] = useState({
         topic: '', difficulty: 'MEDIUM', count: 20, randomize: true
     });
 
-    // --- 🚀 NEW: Clearly Categorized UI Definitions ---
     const subjectGroups = [
         { id: 'Math', name: 'Mathematics', icon: '🧮', color: '#10b981', desc: 'Numbers, Operations & Logic' },
         { id: 'Writing', name: 'Handwriting & Stories', icon: '✍️', color: '#3b82f6', desc: 'Cursive, 4-Line & Story Paper' }
     ];
 
     const allCategories = [
-        // Writing & English Group
         { id: 'english4Line', name: '4-Line English Practice', icon: '📝', color: '#3b82f6', subjectGroup: 'Writing' },
         { id: 'cursiveWriting', name: 'Cursive Generator', icon: '🖋️', color: '#8b5cf6', subjectGroup: 'Writing' },
         { id: 'storyPaper', name: 'Story Writing Paper', icon: '📖', color: '#ec4899', subjectGroup: 'Writing' },
         { id: 'hindi2Line', name: '2-Line Regional', icon: '✍️', color: '#f59e0b', subjectGroup: 'Writing' },
-
-        // Math Group
         { id: 'mathGrid', name: 'Math Square Grid', icon: '🧮', color: '#10b981', subjectGroup: 'Math' },
         { id: 'multiplicationTables', name: 'Multiplication Tables', icon: '📊', color: '#667eea', subjectGroup: 'Math' },
-        { id: 'simpleAddition', name: 'Simple Addition (1+2)', icon: '➕', color: '#56ab2f', subjectGroup: 'Math' },
-        { id: 'simpleSubtraction', name: 'Simple Subtraction (5-2)', icon: '➖', color: '#f093fb', subjectGroup: 'Math' },
-        { id: 'simpleMultiplication', name: 'Simple Multiplication (2×3)', icon: '✖️', color: '#fa709a', subjectGroup: 'Math' },
-        { id: 'simpleDivision', name: 'Simple Division (6÷2)', icon: '➗', color: '#4facfe', subjectGroup: 'Math' },
+        { id: 'simpleAddition', name: 'Simple Addition', icon: '➕', color: '#56ab2f', subjectGroup: 'Math' },
+        { id: 'simpleSubtraction', name: 'Simple Subtraction', icon: '➖', color: '#f093fb', subjectGroup: 'Math' },
+        { id: 'simpleMultiplication', name: 'Simple Multiplication', icon: '✖️', color: '#fa709a', subjectGroup: 'Math' },
+        { id: 'simpleDivision', name: 'Simple Division', icon: '➗', color: '#4facfe', subjectGroup: 'Math' },
         { id: 'addition', name: 'Advanced Addition', icon: '➕', color: '#56ab2f', subjectGroup: 'Math' },
         { id: 'subtraction', name: 'Advanced Subtraction', icon: '➖', color: '#f093fb', subjectGroup: 'Math' },
         { id: 'multiplication', name: 'Advanced Multiplication', icon: '✖️', color: '#fa709a', subjectGroup: 'Math' },
         { id: 'division', name: 'Advanced Division', icon: '➗', color: '#4facfe', subjectGroup: 'Math' },
         { id: 'mixedOperations', name: 'Mixed Operations', icon: '🔢', color: '#fa8bff', subjectGroup: 'Math' },
-        { id: 'romanNumeralsBasic', name: 'Roman Numerals (I-X)', icon: 'Ⅰ', color: '#8e44ad', subjectGroup: 'Math' },
-        { id: 'romanNumeralsAdvanced', name: 'Roman Numerals (X-M)', icon: 'Ⅹ', color: '#9b59b6', subjectGroup: 'Math' },
+        { id: 'romanNumeralsBasic', name: 'Roman (I-X)', icon: 'Ⅰ', color: '#8e44ad', subjectGroup: 'Math' },
+        { id: 'romanNumeralsAdvanced', name: 'Roman (X-M)', icon: 'Ⅹ', color: '#9b59b6', subjectGroup: 'Math' },
         { id: 'romanToArabic', name: 'Roman → Number', icon: '🔄', color: '#e74c3c', subjectGroup: 'Math' },
         { id: 'arabicToRoman', name: 'Number → Roman', icon: '🔃', color: '#c0392b', subjectGroup: 'Math' },
         { id: 'timeClock', name: 'Time & Clock', icon: '🕐', color: '#3498db', subjectGroup: 'Math' },
@@ -131,11 +120,9 @@ export default function WorksheetsHub() {
         { id: 'numberWriting', name: 'Number Writing', icon: '✏️', color: '#43e97b', subjectGroup: 'Math' }
     ];
 
-    // Filter tabs based on selected parent subject
     const activeCategories = allCategories.filter(c => c.subjectGroup === activeSubjectGroup);
     const noAnswersCategories = ['numberWriting', 'english4Line', 'hindi2Line', 'mathGrid', 'cursiveWriting', 'storyPaper'];
 
-    // Auto-select first tab when switching subjects
     useEffect(() => {
         if (activeSubjectGroup === 'Math') setActiveCategory('multiplicationTables');
         if (activeSubjectGroup === 'Writing') setActiveCategory('english4Line');
@@ -158,7 +145,6 @@ export default function WorksheetsHub() {
         loadImages();
     }, []);
 
-    // Sync Grades and Subjects from API for Question Bank Mode
     const loadGradesAndSubjects = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -190,13 +176,10 @@ export default function WorksheetsHub() {
         }
     };
 
-    // ==================== CUSTOM GENERATORS LOGIC ====================
-
     const generatePDFForTemplate = (template, includeAnswers) => {
         const format = formatPreference[activeCategory] || 'vertical';
         let doc;
 
-        // Math Logic
         if (activeCategory === 'simpleAddition') {
             doc = format === 'vertical' ? PDFGenerator.generateSimpleAdditionWorksheet(template.count, template.max, includeAnswers) : PDFGenerator.generateAdditionWorksheet(template.count, template.max, 'easy', includeAnswers);
         } else if (activeCategory === 'simpleSubtraction') {
@@ -235,10 +218,7 @@ export default function WorksheetsHub() {
             doc = PDFGenerator.generateNumberWritingWorksheet(template.from, template.to, template.percentage);
         } else if (activeCategory === 'mixedOperations') {
             doc = PDFGenerator.generateMixedOperationsWorksheet(template.count, template.max, template.difficulty, includeAnswers);
-        } 
-        
-        // Writing Logic
-        else if (activeCategory === 'english4Line') {
+        } else if (activeCategory === 'english4Line') {
             doc = PDFGenerator.generate4LineWorksheet(template.text, template.lines || 12, false);
         } else if (activeCategory === 'hindi2Line') {
             doc = PDFGenerator.generate2LineWorksheet(template.text, template.lines || 10);
@@ -313,15 +293,13 @@ export default function WorksheetsHub() {
         setPreviewModal({ open: false, pdfUrl: null, template: null });
     };
 
-    // ==================== QUESTION BANK LOGIC ====================
-
     const handleLoadQuestions = async (e) => {
         e.preventDefault();
         setLoading(true);
         setMessage(null);
         setLoadedQuestions([]);
+        setExpandedPreview(false); // Reset preview state
 
-        const startTime = Date.now();
         try {
             const payload = {
                 grade: selectedGrade,
@@ -338,17 +316,15 @@ export default function WorksheetsHub() {
 
             const response = await axios.post(endpoint, payload);
             const data = response.data;
-            const clientResponseTime = Date.now() - startTime;
 
             if (data.success && data.questions && data.questions.length > 0) {
                 setLoadedQuestions(data.questions);
-                setResponseTime({ server: data.responseTimeMs, client: clientResponseTime });
-                setMessage({ type: 'success', text: `✅ Loaded ${data.questions.length} questions` });
+                setMessage({ type: 'success', text: `✅ Successfully fetched ${data.questions.length} questions` });
             } else {
                 setMessage({ type: 'warning', text: `⚠️ No questions found for this configuration.` });
             }
         } catch (error) {
-            setMessage({ type: 'error', text: 'Failed to load questions from database.' });
+            setMessage({ type: 'error', text: 'Failed to fetch questions from database.' });
         } finally {
             setLoading(false);
         }
@@ -362,6 +338,7 @@ export default function WorksheetsHub() {
                 title: `${selectedSubject || 'Math'} Worksheet - Grade ${selectedGrade.replace('_', ' ')}`,
                 grade: selectedGrade,
                 topic: worksheetForm.topic,
+                difficulty: worksheetForm.difficulty,
                 includeAnswers: includeAnswers,
                 showDifficulty: false
             });
@@ -422,7 +399,6 @@ export default function WorksheetsHub() {
                 <section aria-labelledby="custom-generators-heading" className="custom-math-section">
                     <h2 id="custom-generators-heading" className="visually-hidden">Custom Content Generators</h2>
                     
-                    {/* 🚀 BEAUTIFUL SUBJECT HIGHLIGHTING */}
                     <div className="subject-group-nav" role="group" aria-label="Select Subject Type" style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '30px', flexWrap: 'wrap' }}>
                         {subjectGroups.map(group => (
                             <button
@@ -453,11 +429,10 @@ export default function WorksheetsHub() {
                             ⚡ Quick Templates
                         </button>
                         <button className={`mode-btn ${mathMode === 'custom' ? 'active' : ''}`} onClick={() => setMathMode('custom')} aria-pressed={mathMode === 'custom'}>
-                            🎨 Custom Generator
+                            🎨 Custom Settings
                         </button>
                     </div>
 
-                    {/* Contextual Category Sub-Tabs */}
                     <nav aria-label="Worksheet Categories" className="category-tabs">
                         {activeCategories.map(cat => (
                             <button
@@ -477,7 +452,6 @@ export default function WorksheetsHub() {
                         ))}
                     </nav>
 
-                    {/* Math Format Toggles */}
                     {mathMode === 'templates' && activeSubjectGroup === 'Math' && ['simpleAddition', 'simpleSubtraction', 'simpleMultiplication', 'simpleDivision', 'addition', 'subtraction', 'multiplication', 'division'].includes(activeCategory) && (
                         <div className="format-toggle-container">
                             <div className="format-info">
@@ -634,13 +608,20 @@ export default function WorksheetsHub() {
                         <h2 id="question-bank-heading" style={{ fontSize: '2rem', color: '#1e293b', textAlign: 'center', marginBottom: '30px' }}>Subject Question Bank 📚</h2>
                         <p className="visually-hidden">Create worksheets from our verified curriculum question bank.</p>
 
-                        <nav aria-label="Grade Selection" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '20px', marginBottom: '20px' }}>
+                        <nav aria-label="Grade Selection" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '12px', marginBottom: '30px' }}>
                             {orderedGrades.map(grade => (
                                 <button
                                     key={grade}
                                     onClick={() => { setSelectedGrade(grade); setSelectedSubject(null); setLoadedQuestions([]); }}
                                     aria-pressed={selectedGrade === grade}
-                                    style={{ padding: '10px 20px', borderRadius: '50px', border: 'none', fontWeight: 'bold', whiteSpace: 'nowrap', cursor: 'pointer', background: selectedGrade === grade ? '#0f172a' : '#f1f5f9', color: selectedGrade === grade ? 'white' : '#475569', transition: 'all 0.2s' }}
+                                    style={{ 
+                                        padding: '12px 24px', borderRadius: '50px', border: `2px solid ${selectedGrade === grade ? '#3b82f6' : '#e2e8f0'}`, 
+                                        fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer', transition: 'all 0.2s ease',
+                                        background: selectedGrade === grade ? '#eff6ff' : 'white', 
+                                        color: selectedGrade === grade ? '#1d4ed8' : '#64748b', 
+                                        boxShadow: selectedGrade === grade ? '0 4px 12px rgba(59,130,246,0.15)' : '0 2px 4px rgba(0,0,0,0.02)',
+                                        transform: selectedGrade === grade ? 'translateY(-2px)' : 'none'
+                                    }}
                                 >
                                     Grade {grade.replace('_', ' ')}
                                 </button>
@@ -648,16 +629,27 @@ export default function WorksheetsHub() {
                         </nav>
 
                         {selectedGrade && gradeSubjectMap[selectedGrade] && gradeSubjectMap[selectedGrade].length > 0 ? (
-                            <div role="group" aria-label="Subject Selection" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '30px' }}>
+                            <div role="group" aria-label="Subject Selection" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '16px', marginBottom: '35px' }}>
                                 {gradeSubjectMap[selectedGrade].map(subject => (
                                     <button
                                         key={subject}
                                         onClick={() => { setSelectedSubject(subject); setLoadedQuestions([]); }}
                                         aria-pressed={selectedSubject === subject}
-                                        style={{ padding: '15px', borderRadius: '16px', border: `2px solid ${selectedSubject === subject ? '#10b981' : '#e2e8f0'}`, background: selectedSubject === subject ? '#ecfdf5' : 'white', cursor: 'pointer', textAlign: 'center', transition: '0.2s', boxShadow: selectedSubject === subject ? '0 4px 15px rgba(16,185,129,0.2)' : 'none', width: '100%' }}
+                                        style={{ 
+                                            minWidth: '160px', padding: '20px 15px', borderRadius: '16px', 
+                                            border: `2px solid ${selectedSubject === subject ? '#10b981' : '#e2e8f0'}`, 
+                                            background: selectedSubject === subject ? '#ecfdf5' : 'white', 
+                                            cursor: 'pointer', textAlign: 'center', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 
+                                            boxShadow: selectedSubject === subject ? '0 8px 20px rgba(16,185,129,0.15)' : '0 4px 6px rgba(0,0,0,0.02)', 
+                                            transform: selectedSubject === subject ? 'translateY(-4px)' : 'translateY(0)' 
+                                        }}
                                     >
-                                        <div style={{ fontSize: '2rem', marginBottom: '5px' }} aria-hidden="true">{getSubjectIcon(subject)}</div>
-                                        <div style={{ fontWeight: 'bold', color: selectedSubject === subject ? '#065f46' : '#475569' }}>{subject.replace('_', ' ')}</div>
+                                        <div style={{ fontSize: '2.5rem', marginBottom: '10px', filter: selectedSubject === subject ? 'drop-shadow(0 4px 6px rgba(16,185,129,0.2))' : 'none' }} aria-hidden="true">
+                                            {getSubjectIcon(subject)}
+                                        </div>
+                                        <div style={{ fontWeight: '800', fontSize: '1.1rem', color: selectedSubject === subject ? '#065f46' : '#475569' }}>
+                                            {subject.replace('_', ' ')}
+                                        </div>
                                     </button>
                                 ))}
                             </div>
@@ -687,30 +679,66 @@ export default function WorksheetsHub() {
                                         <input id="qbTopic" type="text" placeholder="e.g. Algebra" value={worksheetForm.topic} onChange={(e) => setWorksheetForm({...worksheetForm, topic: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1' }} />
                                     </div>
                                 </div>
-                                <button type="submit" disabled={loading} style={{ width: '100%', padding: '16px', background: '#3b82f6', color: 'white', fontWeight: 'bold', fontSize: '1.1rem', border: 'none', borderRadius: '50px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(59,130,246,0.3)' }}>
+                                <button type="submit" disabled={loading} style={{ width: '100%', padding: '16px', background: '#3b82f6', color: 'white', fontWeight: 'bold', fontSize: '1.1rem', border: 'none', borderRadius: '50px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(59,130,246,0.3)', transition: 'transform 0.2s' }}>
                                     {loading ? 'Fetching questions...' : '⚡ Fetch Questions from Database'}
                                 </button>
                             </form>
                         )}
                     </div>
 
+                    {/* 🚀 FIX: Beautifully formatted inline Preview List */}
                     {loadedQuestions.length > 0 && (
                         <article className="results-panel" style={{ width: '100%', maxWidth: '100%' }}>
-                            <div className="results-container">
-                                <header className="results-summary">
-                                    <div className="summary-badge">
-                                        <span className="badge-icon" aria-hidden="true">✅</span>
-                                        <div className="badge-info">
-                                            <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{loadedQuestions.length} Questions Prepared</h3>
-                                            <small>Ready to compile into PDF</small>
-                                        </div>
+                            <div className="results-container" style={{ background: 'white', padding: '30px', borderRadius: '24px', boxShadow: '0 10px 40px rgba(0,0,0,0.05)' }}>
+                                <header className="results-summary" style={{ marginBottom: '25px', textAlign: 'center' }}>
+                                    <div style={{ display: 'inline-block', background: '#ecfdf5', padding: '10px 20px', borderRadius: '50px', border: '2px solid #10b981' }}>
+                                        <span style={{ fontSize: '1.2rem', color: '#065f46', fontWeight: 'bold' }}>✅ {loadedQuestions.length} Questions Prepared</span>
                                     </div>
                                 </header>
 
-                                <footer className="download-section">
-                                    <button className="download-btn primary" onClick={() => generateWorksheetPDF(false)} disabled={loading} aria-label="Download student worksheet PDF">📄 Download Worksheet</button>
-                                    <button className="download-btn print" onClick={() => generateWorksheetPDF(false, true)} disabled={loading} aria-label="Print worksheet directly">🖨️ Print Directly</button>
-                                    <button className="download-btn secondary" onClick={() => generateWorksheetPDF(true)} disabled={loading} aria-label="Download teacher answer key">✅ Download Answer Key</button>
+                                {/* The Preview Block */}
+                                <div style={{ background: '#f8fafc', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0', marginBottom: '30px' }}>
+                                    <h4 style={{ margin: '0 0 15px 0', color: '#1e293b', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span>📝</span> Document Preview
+                                    </h4>
+                                    
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {(expandedPreview ? loadedQuestions : loadedQuestions.slice(0, 5)).map((q, idx) => (
+                                            <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '15px', padding: '15px', background: 'white', borderRadius: '12px', border: '1px solid #cbd5e1', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                                
+                                                {/* Single Line Text Flex Container */}
+                                                <div style={{ fontSize: '1.05rem', color: '#334155', lineHeight: '1.5', flex: 1, display: 'flex', alignItems: 'flex-start' }}>
+                                                    <strong style={{ color: '#3b82f6', marginRight: '10px', whiteSpace: 'nowrap' }}>Q{idx + 1})</strong>
+                                                    <span style={{ fontWeight: '500' }}>{q.question?.name || q.name || 'Question text not available'}</span>
+                                                </div>
+
+                                                {/* Difficulty Badge */}
+                                                <span style={{ 
+                                                    fontSize: '0.75rem', fontWeight: 'bold', padding: '5px 10px', borderRadius: '20px', whiteSpace: 'nowrap',
+                                                    background: q.complexity === 'EASY' ? '#dcfce7' : q.complexity === 'COMPLEX' ? '#fee2e2' : '#fef3c7', 
+                                                    color: q.complexity === 'EASY' ? '#166534' : q.complexity === 'COMPLEX' ? '#991b1b' : '#92400e' 
+                                                }}>
+                                                    {q.complexity || 'MEDIUM'}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                    {/* Expand Button */}
+                                    {loadedQuestions.length > 5 && (
+                                        <button 
+                                            onClick={() => setExpandedPreview(!expandedPreview)}
+                                            style={{ width: '100%', marginTop: '15px', padding: '12px', background: 'white', border: '2px dashed #cbd5e1', borderRadius: '12px', color: '#64748b', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+                                        >
+                                            {expandedPreview ? '▲ Collapse View' : `▼ View All ${loadedQuestions.length} Questions`}
+                                        </button>
+                                    )}
+                                </div>
+
+                                <footer style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                    <button className="download-btn primary" onClick={() => generateWorksheetPDF(false)} disabled={loading} style={{ padding: '15px 30px', fontSize: '1.1rem', borderRadius: '50px' }}>📄 Download Worksheet</button>
+                                    <button className="download-btn print" onClick={() => generateWorksheetPDF(false, true)} disabled={loading} style={{ padding: '15px 30px', fontSize: '1.1rem', borderRadius: '50px' }}>🖨️ Print Directly</button>
+                                    <button className="download-btn secondary" onClick={() => generateWorksheetPDF(true)} disabled={loading} style={{ padding: '15px 30px', fontSize: '1.1rem', borderRadius: '50px' }}>✅ Download Answer Key</button>
                                 </footer>
                             </div>
                         </article>
@@ -718,7 +746,7 @@ export default function WorksheetsHub() {
                 </section>
             )}
 
-            {/* Accessibility and UI Overlays */}
+            {/* Loading Overlay */}
             {loading && (
                 <div className="loading-overlay" role="alert" aria-busy="true">
                     <div className="spinner-large" aria-hidden="true"></div>
@@ -726,12 +754,14 @@ export default function WorksheetsHub() {
                 </div>
             )}
 
+            {/* Error Message */}
             {message && message.type === 'error' && (
                 <div role="alert" style={{ position: 'fixed', bottom: '20px', right: '20px', background: '#ef4444', color: 'white', padding: '15px 20px', borderRadius: '8px', zIndex: 1000, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
                     {message.text}
                 </div>
             )}
 
+            {/* Preview Modal */}
             {previewModal.open && (
                 <div className="preview-modal-overlay" onClick={closePreview} role="dialog" aria-modal="true" aria-labelledby="preview-heading">
                     <div className="preview-modal-content" onClick={(e) => e.stopPropagation()}>
