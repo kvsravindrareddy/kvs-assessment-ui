@@ -13,7 +13,6 @@ export default function MathByGrade() {
 
   const currentUserId = user ? (user.id || user.email || 'GUEST_USER') : 'GUEST_USER';
 
-  // --- DYNAMIC GRADES & MATH SUBJECTS STATE ---
   const [orderedGrades, setOrderedGrades] = useState([]);
   const [gradeData, setGradeData] = useState({});
   const [gradesLoading, setGradesLoading] = useState(true);
@@ -21,7 +20,6 @@ export default function MathByGrade() {
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [showConfigDialog, setShowConfigDialog] = useState(false);
 
-  // Assessment configuration
   const [numberOfQuestions, setNumberOfQuestions] = useState(10);
   const [complexity, setComplexity] = useState('SIMPLE');
 
@@ -35,10 +33,8 @@ export default function MathByGrade() {
   const [completed, setCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  // Clean single error message state
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Timer state
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState(new Set());
@@ -63,14 +59,13 @@ export default function MathByGrade() {
     });
   };
 
-  // --- UI CACHING IMPLEMENTATION WITH MATH FILTERING ---
   useEffect(() => {
     const loadGradesAndSubjects = async () => {
       try {
         setGradesLoading(true);
         const CACHE_KEY = 'kivo_dynamic_grades_cache';
         const CACHE_TTL_KEY = 'kivo_dynamic_grades_cache_time';
-        const CACHE_DURATION = 1000 * 60 * 60; // 1 Hour
+        const CACHE_DURATION = 1000 * 60 * 60; 
 
         let activeGrades = [];
         const cachedData = localStorage.getItem(CACHE_KEY);
@@ -241,10 +236,8 @@ export default function MathByGrade() {
 
     } catch (err) {
       console.error('Error starting math assessment:', err);
-      // Clean single error message from backend
       const errorMsg = err.response?.data?.message || 'Could not load questions. Please ensure content is available for this Grade.';
       setErrorMessage(errorMsg);
-      // Ensure dialog stays open if we fail here, so user sees the message
       setShowConfigDialog(true);
     } finally {
       setLoading(false);
@@ -331,7 +324,6 @@ export default function MathByGrade() {
     );
   }
 
-  // Determine what to show in the right panel based on state
   const renderMainPanel = () => {
     if (completed) {
       return (
@@ -461,7 +453,6 @@ export default function MathByGrade() {
       );
     }
 
-    // Default View: Subject Hero
     const hasMath = gradeData[selectedGrade] && gradeData[selectedGrade].length > 0;
     return (
       <>
@@ -502,12 +493,28 @@ export default function MathByGrade() {
 
   return (
     <div className="math-nextgen-container">
-      <button onClick={() => navigate('/assessments')} className="math-hub-back-btn">
-        <span>←</span> Back to Hub
-      </button>
+        
+      {/* 🚀 NEW TOP NAVIGATION BAR */}
+      <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', padding: '0 20px', paddingTop: '20px' }}>
+          <button 
+              onClick={() => navigate('/')} 
+              style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#475569', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}
+              onMouseEnter={(e) => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#94a3b8'; }}
+              onMouseLeave={(e) => { e.target.style.background = '#ffffff'; e.target.style.borderColor = '#cbd5e1'; }}
+          >
+              🏠 Home
+          </button>
+          <button 
+              onClick={() => navigate('/assessments')} 
+              style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#475569', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}
+              onMouseEnter={(e) => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#94a3b8'; }}
+              onMouseLeave={(e) => { e.target.style.background = '#ffffff'; e.target.style.borderColor = '#cbd5e1'; }}
+          >
+              ← Back to Hub
+          </button>
+      </div>
 
       <div className="math-dashboard-layout">
-        {/* LEFT SIDEBAR: Vertical Grade List */}
         {(!assessmentId && !showConfigDialog && !completed) && (
             <aside className="math-vertical-sidebar">
                 <div className="sidebar-header">Academic Level</div>
@@ -534,7 +541,6 @@ export default function MathByGrade() {
             </aside>
         )}
 
-        {/* RIGHT MAIN PANEL: Dynamic Content based on State */}
         <main className="math-main-panel" style={{ gridColumn: (assessmentId || showConfigDialog || completed) ? '1 / -1' : 'auto' }}>
             {renderMainPanel()}
         </main>

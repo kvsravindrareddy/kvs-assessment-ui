@@ -1,15 +1,20 @@
 import React from 'react';
-import UniversalSubjectHub from '../assessments/UniversalSubjectHub';
+import SpecialtyAssessmentHub from '../assessments/SpecialtyAssessmentHub';
 
 export default function VocabularyHub() {
     return (
-        <UniversalSubjectHub
-            title="Vocabulary & Spelling"
-            subtitle="Expand your word power and confidence 🔤"
-            subjectKeywords={['VOCABULARY', 'SPELLING', 'PHONICS', 'WORDS', 'DICTIONARY']}
+        <SpecialtyAssessmentHub
+            title="Vocabulary Matrix"
+            subtitle="Expand your word power and spelling confidence 🔤"
+            topics={[
+                { id: 'SPELLING', label: 'Spelling Data', icon: '📝' },
+                { id: 'SYNONYMS', label: 'Synonym Link', icon: '🔄' },
+                { id: 'ANTONYMS', label: 'Antonym Void', icon: '↔️' },
+                { id: 'SIGHT_WORDS', label: 'Sight Words', icon: '👁️' }
+            ]}
             primaryColor="#f43f5e" 
             secondaryColor="#be123c"
-            icon="🔤"
+            icon="🔠"
             ambientSymbols={['A', 'Z', '📖', '⭐', '✨', '🧠', '🧩']}
         />
     );

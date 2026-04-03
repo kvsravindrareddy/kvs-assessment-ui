@@ -3,18 +3,21 @@ import { useSubscription } from '../context/SubscriptionContext';
 import './UsageIndicator.css';
 
 const UsageIndicator = ({ type = 'assessment', showInHeader = false }) => {
-  // 1. Hooks MUST be called first, before any conditional returns
   const { getRemainingUsage, getLimits, subscriptionTier, SUBSCRIPTION_TIERS } = useSubscription();
 
-  // 2. NOW we can safely exit if it's a game
   if (type === 'game') return null;
+
+  // Safely handle the pluralization of 'story' to 'stories' to prevent NaN
+  const pluralType = type === 'story' ? 'stories' : type + 's';
 
   const remaining = getRemainingUsage(type);
   const limits = getLimits();
-  const limit = limits[`${type}sPerDay`] || limits[`${type}sTotal`];
+  
+  // Safely pull the limits using the correct grammar
+  const limit = limits[`${pluralType}PerDay`] || limits[`${pluralType}Total`];
 
-  // Don't show for unlimited tiers
-  if (limit === -1) return null;
+  // Don't show for unlimited tiers or if the limit wasn't found
+  if (limit === -1 || limit === undefined) return null;
 
   // Don't show if user has paid tier (except for tracking)
   if (subscriptionTier !== SUBSCRIPTION_TIERS.GUEST &&
@@ -25,22 +28,16 @@ const UsageIndicator = ({ type = 'assessment', showInHeader = false }) => {
 
   const icons = {
     assessment: '📝',
-    story: '📚',
+    story: '📖',
     game: '🎮',
     ai: '🤖'
   };
 
-  const labels = {
-    assessment: 'Assessments',
-    story: 'Stories',
-    game: 'Games',
-    ai: 'AI Questions'
-  };
-
-  const percentage = (remaining / limit) * 100;
+  const percentage = limit > 0 ? (remaining / limit) * 100 : 0;
   const isLow = percentage <= 33;
   const isCritical = percentage <= 10;
 
+  // Only render if it is explicitly asked to be shown in the Top Header Navbar
   if (showInHeader) {
     return (
       <div className={`usage-header-badge ${isCritical ? 'critical' : isLow ? 'low' : ''}`}>
@@ -50,24 +47,9 @@ const UsageIndicator = ({ type = 'assessment', showInHeader = false }) => {
     );
   }
 
-  return (
-    <div className="usage-indicator">
-      <div className="usage-indicator-header">
-        <span className="usage-indicator-icon">{icons[type]}</span>
-        <span className="usage-indicator-label">{labels[type]} Remaining</span>
-      </div>
-      <div className="usage-indicator-bar">
-        <div
-          className={`usage-indicator-fill ${isCritical ? 'critical' : isLow ? 'low' : 'normal'}`}
-          style={{ width: `${percentage}%` }}
-        />
-      </div>
-      <div className="usage-indicator-text">
-        {remaining} of {limit} remaining
-        {subscriptionTier === SUBSCRIPTION_TIERS.GUEST && ' (total limit)'}
-      </div>
-    </div>
-  );
+  // 🚀 The progress bar and "x of y remaining" text have been completely removed.
+  // We now return nothing for the standard body placement.
+  return null;
 };
 
 export default UsageIndicator;

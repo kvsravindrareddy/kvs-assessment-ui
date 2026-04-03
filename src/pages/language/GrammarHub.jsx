@@ -1,16 +1,21 @@
 import React from 'react';
-import UniversalSubjectHub from '../assessments/UniversalSubjectHub';
+import SpecialtyAssessmentHub from '../assessments/SpecialtyAssessmentHub';
 
 export default function GrammarHub() {
     return (
-        <UniversalSubjectHub
-            title="Grammar & Language"
-            subtitle="Master the rules of reading and writing 📝"
-            subjectKeywords={['GRAMMAR', 'ENGLISH', 'LANGUAGE', 'LITERATURE', 'COMPREHENSION']}
-            primaryColor="#3b82f6" 
-            secondaryColor="#1d4ed8"
-            icon="📚"
-            ambientSymbols={['A', 'B', 'C', '📝', '✍️', '📖', '🗣️']}
+        <SpecialtyAssessmentHub
+            title="Grammar Galaxy"
+            subtitle="Master the rules of language, reading, and writing 📝"
+            topics={[
+                { id: 'NOUNS_VERBS', label: 'Nouns & Verbs', icon: '🧑‍🚀' },
+                { id: 'TENSES', label: 'Time Tenses', icon: '⏳' },
+                { id: 'PUNCTUATION', label: 'Punctuation', icon: '❗️' },
+                { id: 'ADJECTIVES', label: 'Adjectives', icon: '🎨' }
+            ]}
+            primaryColor="#38bdf8" 
+            secondaryColor="#0284c7"
+            icon="🌌"
+            ambientSymbols={['📝', '✍️', '📖', '🗣️', '✨', '🌍']}
         />
     );
 }

@@ -21,7 +21,6 @@ const getSubjectIcon = (subjectName) => {
   if (s.includes('ART')) return '🎨';
   if (s.includes('MUSIC')) return '🎵';
 
-  // Fallback: Deterministic Hash for ANY unknown subject added by Admin!
   const genericIcons = ['📖', '✏️', '🎯', '🧩', '⭐', '🌟', '🧠', '⚡', '🚀', '🔍'];
   let hash = 0;
   for (let i = 0; i < s.length; i++) {
@@ -38,7 +37,6 @@ export default function SubjectAssessments() {
 
   const currentUserId = user ? (user.id || user.email || 'GUEST_USER') : 'GUEST_USER';
 
-  // --- DYNAMIC GRADES & SUBJECTS STATE ---
   const [orderedGrades, setOrderedGrades] = useState([]);
   const [gradeSubjectMap, setGradeSubjectMap] = useState({});
   const [gradesLoading, setGradesLoading] = useState(true);
@@ -48,7 +46,6 @@ export default function SubjectAssessments() {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [showConfigDialog, setShowConfigDialog] = useState(false);
 
-  // Assessment configuration
   const [numberOfQuestions, setNumberOfQuestions] = useState(10);
   const [complexity, setComplexity] = useState('SIMPLE');
 
@@ -63,11 +60,8 @@ export default function SubjectAssessments() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Timer state
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-
-  // Bookmarks
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState(new Set());
 
   const assessmentUrl = CONFIG.development.ASSESSMENT_BASE_URL;
@@ -86,16 +80,12 @@ export default function SubjectAssessments() {
   const toggleBookmark = () => {
     setBookmarkedQuestions(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(questionIndex)) {
-        newSet.delete(questionIndex);
-      } else {
-        newSet.add(questionIndex);
-      }
+      if (newSet.has(questionIndex)) newSet.delete(questionIndex);
+      else newSet.add(questionIndex);
       return newSet;
     });
   };
 
-  // 🚀 FIX: Added "forceRefresh" parameter to bust the cache when needed
   const loadGradesAndSubjects = async (forceRefresh = false) => {
     try {
       if (!forceRefresh) setGradesLoading(true);
@@ -103,17 +93,15 @@ export default function SubjectAssessments() {
 
       const CACHE_KEY = 'kivo_dynamic_grades_cache';
       const CACHE_TTL_KEY = 'kivo_dynamic_grades_cache_time';
-      const CACHE_DURATION = 1000 * 60 * 60; // 1 Hour
+      const CACHE_DURATION = 1000 * 60 * 60;
 
       let activeGrades = [];
       const cachedData = localStorage.getItem(CACHE_KEY);
       const cachedTime = localStorage.getItem(CACHE_TTL_KEY);
 
-      // Check if cache exists and is valid, AND we aren't forcing a refresh
       if (!forceRefresh && cachedData && cachedTime && (Date.now() - parseInt(cachedTime) < CACHE_DURATION)) {
           activeGrades = JSON.parse(cachedData);
       } else {
-          // Fetch from API
           const token = localStorage.getItem('token');
           const response = await axios.get(
             `${adminUrl}/admin-assessment/v1/grade-subjects`,
@@ -123,17 +111,14 @@ export default function SubjectAssessments() {
           activeGrades = (response.data || []).filter(g => g.isActive);
           activeGrades.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
           
-          // Save to UI Cache
           localStorage.setItem(CACHE_KEY, JSON.stringify(activeGrades));
           localStorage.setItem(CACHE_TTL_KEY, Date.now().toString());
       }
       
-      // Process Data
       const gradesList = activeGrades.map(g => g.gradeCode);
       const subjMap = {};
       
       activeGrades.forEach(g => {
-        // Filter out Technology subjects (they belong in the IT Learning Hub!)
         subjMap[g.gradeCode] = (g.subjects || [])
           .filter(s => !s.isTechnology && !s.technology) 
           .map(s => s.subjectName);
@@ -142,7 +127,6 @@ export default function SubjectAssessments() {
       setOrderedGrades(gradesList);
       setGradeSubjectMap(subjMap);
 
-      // Auto-select Default Grade
       if (gradesList.length > 0 && !selectedGrade) {
         const defaultGrade = gradesList.includes('V') ? 'V' : gradesList[0];
         setSelectedGrade(defaultGrade);
@@ -164,9 +148,7 @@ export default function SubjectAssessments() {
   useEffect(() => {
     let interval;
     if (isTimerRunning && !completed) {
-      interval = setInterval(() => {
-        setTimeElapsed(prev => prev + 1);
-      }, 1000);
+      interval = setInterval(() => setTimeElapsed(prev => prev + 1), 1000);
     }
     return () => clearInterval(interval);
   }, [isTimerRunning, completed]);
@@ -289,7 +271,6 @@ export default function SubjectAssessments() {
 
   const submitAnswer = async () => {
     if (!assessmentId || !currentQuestion || !selectedAnswer) return;
-    
     const isLastQuestion = questionIndex === totalQuestions;
 
     try {
@@ -326,11 +307,7 @@ export default function SubjectAssessments() {
     try {
         const token = localStorage.getItem('token');
         await axios.post(`${CONFIG.development.GATEWAY_URL}/api/assessment/end-session`, null, {
-            params: {
-                userId: currentUserId,
-                assessmentId: assessmentId,
-                assessmentType: selectedSubject
-            },
+            params: { userId: currentUserId, assessmentId: assessmentId, assessmentType: selectedSubject },
             headers: { Authorization: `Bearer ${token}` }
         });
         setCompleted(true);
@@ -366,16 +343,32 @@ export default function SubjectAssessments() {
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px', fontFamily: 'system-ui, sans-serif' }}>
-        <button onClick={() => navigate('/assessments')} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <span>←</span> Back to Hub
-        </button>
+        
+        {/* 🚀 NEW TOP NAVIGATION BAR */}
+        <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
+            <button 
+                onClick={() => navigate('/')} 
+                style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#475569', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}
+                onMouseEnter={(e) => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#94a3b8'; }}
+                onMouseLeave={(e) => { e.target.style.background = '#ffffff'; e.target.style.borderColor = '#cbd5e1'; }}
+            >
+                🏠 Home
+            </button>
+            <button 
+                onClick={() => navigate('/assessments')} 
+                style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#475569', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}
+                onMouseEnter={(e) => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#94a3b8'; }}
+                onMouseLeave={(e) => { e.target.style.background = '#ffffff'; e.target.style.borderColor = '#cbd5e1'; }}
+            >
+                ← Back to Hub
+            </button>
+        </div>
 
       {!assessmentId && !showConfigDialog ? (
         <div style={{ background: '#ffffff', borderRadius: '24px', padding: '30px 20px', boxShadow: '0 10px 40px rgba(0,0,0,0.08)' }}>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginBottom: '5px' }}>
               <h2 style={{ fontSize: '2.2rem', color: '#1e293b', margin: 0, fontWeight: '800' }}>Subject Assessments 📚</h2>
               
-              {/* 🚀 THE CACHE BUSTER BUTTON */}
               <button 
                 onClick={() => loadGradesAndSubjects(true)} 
                 disabled={isRefreshingCache}
@@ -388,7 +381,6 @@ export default function SubjectAssessments() {
             
             <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '30px', fontSize: '1.1rem' }}>Select your Grade and Subject to begin.</p>
 
-            {/* DYNAMIC Grade Selector */}
             <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '20px', marginBottom: '20px' }}>
                 {orderedGrades.map(grade => (
                     <button 
@@ -401,7 +393,6 @@ export default function SubjectAssessments() {
                 ))}
             </div>
 
-            {/* DYNAMIC Subject Selector */}
             {gradeSubjectMap[selectedGrade] && gradeSubjectMap[selectedGrade].length > 0 ? (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '40px' }}>
                     {gradeSubjectMap[selectedGrade].map(subject => (

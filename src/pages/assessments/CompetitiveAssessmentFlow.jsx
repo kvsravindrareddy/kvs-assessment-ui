@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
@@ -13,14 +13,12 @@ export default function CompetitiveAssessmentFlow() {
     const exam = state?.exam;
     const startInPrintMode = state?.printMode || false;
     
-    // UI States
     const [loading, setLoading] = useState(true);
     const [isCompiling, setIsCompiling] = useState(false);
     const [compileProgress, setCompileProgress] = useState("");
     const [showPrintView, setShowPrintView] = useState(false);
     const [printConfig, setPrintConfig] = useState({ showAnswers: false, showExplanations: false });
 
-    // Exam States
     const [sectionsData, setSectionsData] = useState([]);
     const [timeLeft, setTimeLeft] = useState(exam?.totalDurationMinutes ? exam.totalDurationMinutes * 60 : 0);
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -30,14 +28,12 @@ export default function CompetitiveAssessmentFlow() {
     const [activeQIndex, setActiveQIndex] = useState(1); 
     const [qLoading, setQLoading] = useState(false);
 
-    // Shared Memory Cache
     const [qCache, setQCache] = useState({}); 
     const [answers, setAnswers] = useState({}); 
     const [statuses, setStatuses] = useState({}); 
 
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    // 🚀 BULLETPROOF QUESTION EXTRACTOR
     const getQDetails = (qNode) => {
         if (!qNode) return { qText: '', qOptions: {}, actualAnswer: 'N/A', explanation: '' };
 
@@ -60,7 +56,6 @@ export default function CompetitiveAssessmentFlow() {
         return { qText, qOptions, actualAnswer, explanation };
     };
 
-    // 🚀 THE COMPILER: Fetches ONLY the questions that aren't already in cache
     const compileFullPaper = async (currentSections) => {
         setIsCompiling(true);
         const token = localStorage.getItem('token');
@@ -73,33 +68,28 @@ export default function CompetitiveAssessmentFlow() {
         for (const section of currentSections) {
             if (!newCache[section.id]) newCache[section.id] = {};
             
-            for(let i = 1; i <= section.questionCount; i++) {
-                if (!newCache[section.id][i]) {
-                    setCompileProgress(`Downloading ${section.sectionName}: Q${i} of ${section.questionCount}...`);
+            const loadedCount = Object.keys(newCache[section.id]).length;
+            
+            if (loadedCount < section.questionCount) {
+                setCompileProgress(`Fast-downloading ${section.sectionName} database...`);
+                try {
+                    const res = await axios.post(`${baseUrl}/v1/assessment/questions/start-bulk?totalQuestions=${section.questionCount}`, {
+                        userId: userId.toString(), 
+                        email: userEmail,
+                        assessmentId: section.assessmentId
+                    }, { headers: { Authorization: `Bearer ${token}` } });
                     
-                    let success = false;
-                    let attempts = 0;
-                    while (!success && attempts < 3) {
-                        try {
-                            const qRes = await axios.post(`${baseUrl}/v1/assessment/questions/start`, {
-                                userId: userId.toString(), email: userEmail,
-                                assessmentId: section.assessmentId, questionIndex: i
-                            }, { headers: { Authorization: `Bearer ${token}` } });
-                            
-                            let qData = qRes.data.question || qRes.data;
-                            if (qRes.data.questions && Array.isArray(qRes.data.questions)) qData = qRes.data.questions[0];
-
-                            newCache[section.id][i] = qData;
-                            success = true;
-                            await sleep(150); // Safe delay to bypass 429
-                        } catch (e) {
-                            attempts++;
-                            await sleep(1000);
-                        }
-                    }
+                    res.data.forEach((qData, index) => {
+                        let extractedQ = qData.question || qData;
+                        if (qData.questions && Array.isArray(qData.questions)) extractedQ = qData.questions[0];
+                        newCache[section.id][index + 1] = extractedQ;
+                    });
+                } catch (e) {
+                    console.error("Bulk fetch failed, falling back to cached state", e);
                 }
             }
         }
+        
         setQCache(newCache);
         setIsCompiling(false);
         return newCache;
@@ -119,8 +109,7 @@ export default function CompetitiveAssessmentFlow() {
 
                 for (let s = 0; s < exam.sections.length; s++) {
                     const section = exam.sections[s];
-                    if (s > 0) await sleep(500); 
-
+                    
                     const payload = {
                         category: exam.examName, 
                         type: section.sectionName, 
@@ -151,7 +140,6 @@ export default function CompetitiveAssessmentFlow() {
                 setActiveSectionId(loadedSections[0]?.id);
                 setLoading(false);
 
-                // If user clicked "Generate Mock Paper", immediately compile and print
                 if (startInPrintMode) {
                     await compileFullPaper(loadedSections);
                     setPrintConfig({ showAnswers: false, showExplanations: false });
@@ -213,7 +201,6 @@ export default function CompetitiveAssessmentFlow() {
             return prev;
         });
 
-        // 🚀 ENSURE RESUME WORKS: Quietly update the backend tracking index
         syncAnswerToBackend(sectionId, qIndex, answers[sectionId]?.[qIndex] || null, overrideAssessmentId);
 
         if (qCache[sectionId]?.[qIndex]) return;
@@ -315,7 +302,6 @@ export default function CompetitiveAssessmentFlow() {
     const handleSubmit = async (bypassConfirm = false) => {
         if (!bypassConfirm && !window.confirm("Are you sure you want to submit the exam?")) return;
         
-        // Ensure all skipped questions are loaded for grading & PDF
         const fullyCompiledCache = await compileFullPaper(sectionsData);
         
         let correct = 0, wrong = 0, skipped = 0, totalPossibleScore = 0, earnedScore = 0;
@@ -364,18 +350,16 @@ export default function CompetitiveAssessmentFlow() {
         setIsSubmitted(true);
     };
 
-    // --- RENDER LOGIC ---
-
     if (loading) return <div style={{ background: '#020617', color: '#38bdf8', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>Initializing Matrix...</div>;
     
     if (isCompiling) return (
         <div style={{ background: '#020617', color: '#10b981', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '10px' }}>Compiling Full Paper...</div>
+            <div style={{ fontSize: '2rem', marginBottom: '10px' }}>Compiling Rapid PDF Matrix...</div>
             <div style={{ fontSize: '1.2rem', color: '#64748b' }}>{compileProgress}</div>
         </div>
     );
 
-    // 🚀 THE MASTER PRINT VIEW (Shared by Pre-Exam Mock and Post-Exam Result)
+    // 🚀 THE MASTER PRINT VIEW
     if (showPrintView) {
         return (
             <div style={{ background: '#f8fafc', minHeight: '100vh', padding: '40px', fontFamily: '"Times New Roman", Times, serif' }}>
@@ -394,6 +378,7 @@ export default function CompetitiveAssessmentFlow() {
                     `}
                 </style>
 
+                {/* 🚀 UPDATED TOP CONTROLS FOR PRINT VIEW */}
                 <div className="no-print" style={{ maxWidth: '850px', margin: '0 auto 20px auto', background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                         <h3 style={{ margin: '0 0 10px 0', fontFamily: 'sans-serif' }}>⚙️ PDF Settings</h3>
@@ -406,12 +391,22 @@ export default function CompetitiveAssessmentFlow() {
                             </label>
                         </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    
+                    <div style={{ display: 'flex', gap: '15px' }}>
+                        <button onClick={() => navigate('/')} style={{ padding: '10px 20px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(59, 130, 246, 0.3)' }}>
+                            🏠 Home
+                        </button>
+                        
                         <button onClick={() => {
                             if (startInPrintMode) navigate('/competitive-hub');
                             else setShowPrintView(false);
-                        }} style={{ padding: '10px 20px', background: '#e2e8f0', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Close Print View</button>
-                        <button onClick={() => window.print()} style={{ padding: '10px 30px', background: '#10b981', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>🖨️ Print Paper</button>
+                        }} style={{ padding: '10px 20px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)' }}>
+                            ❌ Close Print View
+                        </button>
+                        
+                        <button onClick={() => window.print()} style={{ padding: '10px 30px', background: '#10b981', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(16, 185, 129, 0.3)' }}>
+                            🖨️ Print Paper
+                        </button>
                     </div>
                 </div>
 
@@ -420,14 +415,8 @@ export default function CompetitiveAssessmentFlow() {
                     <div className="print-header" style={{ textAlign: 'center', marginBottom: '20px', borderBottom: '2px solid black', paddingBottom: '20px' }}>
                         <img src="/kivo-logo.png" alt="KiVO Learning" style={{ height: '60px', objectFit: 'contain', marginBottom: '10px' }} onError={(e) => { e.target.style.display = 'none'; }} />
                         <h2 style={{ margin: '0 0 5px 0', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '24px' }}>KiVO Learning International</h2>
-                        <h3 style={{ margin: '0', color: '#555' }}>{exam.examName} {isSubmitted ? 'PERFORMANCE REPORT' : 'MOCK PAPER'}</h3>
-                    </div>
-
-                    <div className="no-print" style={{ textAlign: 'center', marginBottom: '20px', borderBottom: '2px solid black', paddingBottom: '20px' }}>
-                        <h2 style={{ margin: '0 0 5px 0', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '24px' }}>{exam.examName} {isSubmitted ? 'PERFORMANCE REPORT' : 'MOCK PAPER'}</h2>
-                    </div>
-
-                    <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                        <h3 style={{ margin: '0 0 15px 0', color: '#555' }}>{exam.examName} {isSubmitted ? 'PERFORMANCE REPORT' : 'MOCK PAPER'}</h3>
+                        
                         {isSubmitted && scoreResult ? (
                             <p style={{ margin: 0, fontSize: '1.2rem' }}>Score: <strong>{scoreResult.earnedScore} / {scoreResult.totalPossibleScore}</strong> | Correct: {scoreResult.correct} | Incorrect: {scoreResult.wrong}</p>
                         ) : (
@@ -437,6 +426,10 @@ export default function CompetitiveAssessmentFlow() {
                             <span>Student: {user?.username || user?.email || '_______________________'}</span>
                             <span>Date: {new Date().toLocaleDateString()}</span>
                         </div>
+                    </div>
+
+                    <div className="no-print" style={{ textAlign: 'center', marginBottom: '20px', borderBottom: '2px solid black', paddingBottom: '20px' }}>
+                        <h2 style={{ margin: '0 0 5px 0', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '24px' }}>{exam.examName} {isSubmitted ? 'PERFORMANCE REPORT' : 'MOCK PAPER'}</h2>
                     </div>
 
                     {sectionsData.map((sec, secIndex) => (
@@ -449,7 +442,6 @@ export default function CompetitiveAssessmentFlow() {
                                 const qIndex = i + 1;
                                 const cachedQ = qCache[sec.id]?.[qIndex];
                                 
-                                // Failsafe if question isn't loaded
                                 if (!cachedQ) return (
                                     <div key={qIndex} style={{ marginBottom: '15px', color: 'gray', fontStyle: 'italic' }}>
                                         {qIndex}. Failed to load question from database.
@@ -540,8 +532,6 @@ export default function CompetitiveAssessmentFlow() {
         );
     }
 
-    // 🚀 THE STANDARD EXAM UI
-    
     const currentSection = sectionsData.find(s => s.id === activeSectionId);
     const activeQData = qCache[activeSectionId]?.[activeQIndex];
     const { qText, qOptions } = getQDetails(activeQData);
@@ -559,15 +549,6 @@ export default function CompetitiveAssessmentFlow() {
             <div style={{ background: '#1e293b', padding: '15px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, borderBottom: '2px solid #334155' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <h2 style={{ margin: 0, color: '#38bdf8', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '1px' }}>{exam.examName}</h2>
-                    {!isSubmitted && (
-                        <button onClick={async () => {
-                            await compileFullPaper(sectionsData);
-                            setPrintConfig({ showAnswers: false, showExplanations: false });
-                            setShowPrintView(true);
-                        }} style={{ padding: '8px 15px', background: '#334155', color: '#f8fafc', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            🖨️ Print Paper
-                        </button>
-                    )}
                 </div>
                 {!isSubmitted && (
                     <div style={{ fontSize: '1.5rem', fontWeight: 'bold', background: '#020617', padding: '10px 20px', borderRadius: '8px', border: `1px solid ${timeLeft < 300 ? '#ef4444' : '#38bdf8'}`, color: timeLeft < 300 ? '#ef4444' : '#f8fafc' }}>
@@ -577,7 +558,6 @@ export default function CompetitiveAssessmentFlow() {
             </div>
 
             {isSubmitted && scoreResult ? (
-                // SUBMISSION SCREEN
                 <div style={{ maxWidth: '800px', margin: '50px auto', background: '#1e293b', padding: '50px', borderRadius: '20px', textAlign: 'center', border: '2px solid #38bdf8', boxShadow: '0 0 50px rgba(56, 189, 248, 0.1)' }}>
                     <h1 style={{ color: '#38bdf8', fontSize: '3rem', margin: '0 0 30px 0' }}>Simulation Complete</h1>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '20px', fontSize: '1.2rem', marginBottom: '40px' }}>
@@ -588,7 +568,6 @@ export default function CompetitiveAssessmentFlow() {
                     <div style={{ background: 'linear-gradient(135deg, #020617 0%, #0f172a 100%)', padding: '40px', borderRadius: '16px', border: '2px dashed #38bdf8' }}>
                         <h2 style={{ margin: 0, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '2px' }}>Final Competitive Score</h2>
                         <h1 style={{ fontSize: '5rem', color: '#34d399', margin: '15px 0' }}>{scoreResult.earnedScore} <span style={{fontSize: '2rem', color: '#475569'}}>/ {scoreResult.totalPossibleScore}</span></h1>
-                        <p style={{ color: '#64748b', margin: 0 }}>Penalty rule applied: -{exam.negativeMarkingFactor * 100}% per incorrect answer.</p>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '40px' }}>
                         <button onClick={() => {
@@ -599,7 +578,6 @@ export default function CompetitiveAssessmentFlow() {
                     </div>
                 </div>
             ) : (
-                // EXAM UI
                 <div style={{ display: 'flex', minHeight: 'calc(100vh - 85px)' }}>
                     <div style={{ flex: '1', padding: '30px', display: 'flex', flexDirection: 'column', borderRight: '2px solid #334155' }}>
                         <div style={{ display: 'flex', gap: '5px', marginBottom: '30px', borderBottom: '2px solid #334155' }}>
@@ -667,12 +645,7 @@ export default function CompetitiveAssessmentFlow() {
                                         <button 
                                             key={qIdx}
                                             onClick={() => fetchAndSetQuestion(activeSectionId, qIdx)}
-                                            style={{ 
-                                                aspectRatio: '1', background: bgColor, color: status === 'NOT_VISITED' ? '#0f172a' : 'white', 
-                                                border: activeQIndex === qIdx ? '3px solid white' : 'none', borderRadius: '8px', 
-                                                fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer',
-                                                boxShadow: activeQIndex === qIdx ? '0 0 10px rgba(255,255,255,0.5)' : 'none'
-                                            }}
+                                            style={{ aspectRatio: '1', background: bgColor, color: status === 'NOT_VISITED' ? '#0f172a' : 'white', border: activeQIndex === qIdx ? '3px solid white' : 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer', boxShadow: activeQIndex === qIdx ? '0 0 10px rgba(255,255,255,0.5)' : 'none' }}
                                         >
                                             {qIdx}
                                         </button>

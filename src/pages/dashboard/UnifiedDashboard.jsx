@@ -10,11 +10,9 @@ import ContentCreatorDashboard from './roles/ContentCreatorDashboard';
 import './UnifiedDashboard.css';
 
 const UnifiedDashboard = ({ children }) => {
-  // FIX: Destructure 'loading' (not isLoading) from AuthContext
   const { user, activeRole, switchRole, getAccessibleRoles, ROLES, loading } = useAuth();
   const [showRoleSwitcher, setShowRoleSwitcher] = useState(false);
   
-  // Safely check for accessible roles only if the user exists
   const accessibleRoles = user && getAccessibleRoles ? getAccessibleRoles() : [];
   
   const navigate = useNavigate();
@@ -22,8 +20,6 @@ const UnifiedDashboard = ({ children }) => {
 
   const isProfileView = location.pathname === '/profile';
 
-  // 1. FIX: Handle Loading State properly
-  // This prevents logged-in users from seeing "Not Authenticated" on refresh
   if (loading) {
     return (
       <div className="unified-dashboard-container">
@@ -35,12 +31,22 @@ const UnifiedDashboard = ({ children }) => {
     );
   }
 
-  // 2. --- GUEST VIEW ---
-  // If no user is logged in, show the guest layout and render the tool (children)
+  // --- GUEST VIEW ---
   if (!user) {
     return (
       <div className="unified-dashboard-container">
-        <div className="dashboard-header">
+        {/* 🚀 PRINT FIX: Added print-overrides to completely strip the dashboard wrapper during PDF generation */}
+        <style>
+          {`
+            @media print {
+              .dashboard-header { display: none !important; }
+              .unified-dashboard-container { padding: 0 !important; margin: 0 !important; background: white !important; min-height: auto !important; }
+              .dashboard-content { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
+            }
+          `}
+        </style>
+
+        <div className="dashboard-header no-print">
           <div className="dashboard-header-left">
             <h1 className="dashboard-title">
               <span className="dashboard-icon">⚡</span>
@@ -64,9 +70,8 @@ const UnifiedDashboard = ({ children }) => {
         </div>
 
         <div className="dashboard-content">
-          {/* If they are accessing a specific tool (like Science Lab), render it. Otherwise, prompt login. */}
           {children ? children : (
-            <div className="dashboard-error">
+            <div className="dashboard-error no-print">
               <h2>⚠️ Dashboard Access Restricted</h2>
               <p>Please log in to access your personalized dashboard.</p>
               <button 
@@ -82,7 +87,7 @@ const UnifiedDashboard = ({ children }) => {
     );
   }
 
-  // 3. --- LOGGED IN USER VIEW ---
+  // --- LOGGED IN USER VIEW ---
 
   const dashboardComponents = {
     [ROLES?.SUPER_ADMIN]: SuperAdminDashboard,
@@ -139,7 +144,19 @@ const UnifiedDashboard = ({ children }) => {
 
   return (
     <div className="unified-dashboard-container">
-      <div className="dashboard-header">
+      {/* 🚀 PRINT FIX: Added print-overrides to completely strip the dashboard wrapper during PDF generation */}
+      <style>
+        {`
+          @media print {
+            .dashboard-header { display: none !important; }
+            .unified-dashboard-container { padding: 0 !important; margin: 0 !important; background: white !important; min-height: auto !important; }
+            .dashboard-content { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
+          }
+        `}
+      </style>
+
+      {/* Added no-print class here to ensure header never prints */}
+      <div className="dashboard-header no-print">
         <div className="dashboard-header-left">
           <h1 className="dashboard-title">
             <span className="dashboard-icon">{isProfileView ? '👤' : '📊'}</span>

@@ -8,7 +8,6 @@ export default function SpeedMathChallenge() {
     const navigate = useNavigate();
     const { user } = useAuth();
     
-    // 🌟 FIX: Standardized the User ID to match the Dashboard perfectly!
     const currentUserId = user ? (user.id || user.email || 'GUEST_USER') : 'GUEST_USER';
     
     const [loading, setLoading] = useState(true);
@@ -151,7 +150,7 @@ export default function SpeedMathChallenge() {
         try {
             const token = localStorage.getItem('token');
             const res = await axios.post(`${CONFIG.development.GATEWAY_URL}/api/assessment/submitrandomquestion`, {
-                userId: currentUserId, // 🌟 NOW MATCHES DASHBOARD
+                userId: currentUserId, 
                 email: user?.email,
                 assessmentId: session.assessmentId,
                 assessmentType: 'MATH_CHALLENGE',
@@ -184,7 +183,7 @@ export default function SpeedMathChallenge() {
             const token = localStorage.getItem('token');
             await axios.post(`${CONFIG.development.GATEWAY_URL}/api/assessment/end-session`, null, {
                 params: {
-                    userId: currentUserId, // 🌟 NOW MATCHES DASHBOARD
+                    userId: currentUserId,
                     assessmentId: session.assessmentId,
                     assessmentType: 'MATH_CHALLENGE'
                 },
@@ -199,38 +198,188 @@ export default function SpeedMathChallenge() {
 
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}><div className="spinner"></div></div>;
 
-    const getBubbleStyle = (weight, isSelected, color) => {
-        const baseStyle = {
-            cursor: 'pointer',
-            borderRadius: '50px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 'bold',
-            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-            border: `2px solid ${color}`,
-            background: isSelected ? color : 'rgba(255, 255, 255, 0.05)',
-            color: isSelected ? '#ffffff' : color,
-            boxShadow: isSelected ? `0 0 20px ${color}99, inset 0 0 10px rgba(255,255,255,0.5)` : 'none',
-            transform: isSelected ? 'scale(1.1) translateY(-5px)' : 'scale(1)'
-        };
-
-        if (weight === 3) return { ...baseStyle, fontSize: '1.1rem', padding: '16px 28px' };
-        if (weight === 2) return { ...baseStyle, fontSize: '0.95rem', padding: '12px 20px' };
-        return { ...baseStyle, fontSize: '0.85rem', padding: '8px 16px' };
-    };
-
     return (
-        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px', fontFamily: 'system-ui, sans-serif' }}>
-            <button onClick={() => navigate('/assessments')} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <span>←</span> Back to Hub
-            </button>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', fontFamily: 'system-ui, sans-serif' }}>
+            
+            <style>
+            {`
+                .universe-grid {
+                    background-color: #020617;
+                    background-image: 
+                        radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.15) 0%, transparent 60%),
+                        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+                    background-size: 100% 100%, 40px 40px, 40px 40px;
+                    border: 1px solid #1e293b;
+                    box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 0 20px 40px rgba(0,0,0,0.1);
+                    border-radius: 24px;
+                    padding: 50px 30px;
+                    margin-bottom: 40px;
+                    display: flex;
+                    flex-wrap: wrap;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 20px;
+                }
+
+                .math-node-card {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(15, 23, 42, 0.6);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-top: 1px solid rgba(255, 255, 255, 0.2);
+                    border-bottom: 3px solid var(--node-color);
+                    border-radius: 20px;
+                    color: #94a3b8;
+                    cursor: pointer;
+                    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    position: relative;
+                    overflow: hidden;
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+                }
+
+                .math-node-card:hover {
+                    background: rgba(30, 41, 59, 0.85);
+                    border-color: var(--node-color);
+                    color: #f8fafc;
+                    transform: translateY(-8px);
+                    box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 30px var(--node-color-alpha);
+                    z-index: 10;
+                }
+
+                .math-node-card.selected {
+                    background: var(--node-color-alpha-heavy);
+                    border-color: var(--node-color);
+                    color: #ffffff;
+                    transform: translateY(-12px) scale(1.05);
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.7), 0 0 50px var(--node-color-alpha), inset 0 0 25px var(--node-color-alpha);
+                    z-index: 20;
+                    animation: float-pulse 3s ease-in-out infinite;
+                }
+
+                .math-node-card .node-huge-icon {
+                    font-size: var(--icon-size);
+                    margin-bottom: 8px;
+                    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+                    filter: drop-shadow(0 0 10px var(--node-color-alpha));
+                    line-height: 1;
+                }
+
+                .math-node-card:hover .node-huge-icon {
+                    transform: scale(1.15);
+                    filter: drop-shadow(0 0 20px var(--node-color));
+                    text-shadow: 0 0 20px rgba(255,255,255,0.4);
+                }
+
+                .math-node-card.selected .node-huge-icon {
+                    transform: scale(1.25);
+                    filter: drop-shadow(0 0 35px var(--node-color));
+                    text-shadow: 0 0 30px rgba(255,255,255,0.8);
+                }
+
+                .math-node-card .node-label-text {
+                    font-weight: 800;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                    text-align: center;
+                    font-size: var(--text-size);
+                    transition: color 0.3s;
+                }
+
+                .math-node-card.selected .node-label-text {
+                    color: #ffffff;
+                    text-shadow: 0 0 10px var(--node-color);
+                }
+
+                @keyframes float-pulse {
+                    0% { transform: translateY(-12px) scale(1.05); box-shadow: 0 20px 40px rgba(0,0,0,0.7), 0 0 30px var(--node-color-alpha), inset 0 0 15px var(--node-color-alpha); }
+                    50% { transform: translateY(-18px) scale(1.08); box-shadow: 0 25px 50px rgba(0,0,0,0.8), 0 0 60px var(--node-color-alpha), inset 0 0 30px var(--node-color-alpha); }
+                    100% { transform: translateY(-12px) scale(1.05); box-shadow: 0 20px 40px rgba(0,0,0,0.7), 0 0 30px var(--node-color-alpha), inset 0 0 15px var(--node-color-alpha); }
+                }
+
+                .difficulty-card {
+                    flex: 1;
+                    min-width: 140px;
+                    padding: 16px 20px;
+                    border-radius: 16px;
+                    background: #f8fafc;
+                    border: 2px solid #e2e8f0;
+                    color: #64748b;
+                    text-align: center;
+                    cursor: pointer;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    overflow: hidden;
+                    font-weight: 800;
+                    letter-spacing: 0.5px;
+                }
+                
+                .difficulty-card:hover {
+                    background: #f1f5f9;
+                    transform: translateY(-2px);
+                }
+
+                .difficulty-card.selected {
+                    background: #0f172a;
+                    border-color: var(--diff-color);
+                    color: #ffffff;
+                    transform: translateY(-4px);
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.1), 0 0 20px var(--diff-color-alpha);
+                }
+
+                .difficulty-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0; left: 0; right: 0; height: 5px;
+                    background: var(--diff-color);
+                    opacity: 0.3;
+                    transition: 0.3s;
+                }
+
+                .difficulty-card.selected::before {
+                    opacity: 1;
+                    box-shadow: 0 0 15px var(--diff-color);
+                }
+                
+                .universe-title {
+                    background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    font-weight: 900;
+                }
+            `}
+            </style>
+
+            {/* 🚀 TOP NAVIGATION BAR (Consistently rendered in all states) */}
+            <div style={{ display: 'flex', gap: '15px', marginBottom: '30px' }}>
+                <button 
+                    onClick={() => navigate('/')} 
+                    style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#475569', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}
+                    onMouseEnter={(e) => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#94a3b8'; }}
+                    onMouseLeave={(e) => { e.target.style.background = '#ffffff'; e.target.style.borderColor = '#cbd5e1'; }}
+                >
+                    🏠 Home
+                </button>
+                <button 
+                    onClick={() => navigate('/assessments')} 
+                    style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#475569', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}
+                    onMouseEnter={(e) => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#94a3b8'; }}
+                    onMouseLeave={(e) => { e.target.style.background = '#ffffff'; e.target.style.borderColor = '#cbd5e1'; }}
+                >
+                    ← Back to Hub
+                </button>
+            </div>
 
             {setupMode ? (
-                <div style={{ background: '#ffffff', borderRadius: '24px', padding: '30px 20px', boxShadow: '0 10px 40px rgba(0,0,0,0.08)' }}>
+                <div style={{ background: '#ffffff', borderRadius: '24px', padding: '40px', boxShadow: '0 10px 50px rgba(0,0,0,0.08)' }}>
                     
                     {activeSavedSession && (
-                        <div style={{ background: '#eff6ff', border: '2px solid #bfdbfe', borderRadius: '16px', padding: '20px', marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+                        <div style={{ background: '#eff6ff', border: '2px solid #bfdbfe', borderRadius: '16px', padding: '20px', marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
                             <div>
                                 <h3 style={{ margin: '0 0 5px 0', color: '#1e293b', fontSize: '1.2rem' }}>⚡ Active Challenge Detected</h3>
                                 <p style={{ margin: 0, color: '#64748b' }}>You were in the middle of a <b>{activeSavedSession.assessmentName}</b> challenge.</p>
@@ -241,49 +390,57 @@ export default function SpeedMathChallenge() {
                         </div>
                     )}
 
-                    <h2 style={{ textAlign: 'center', fontSize: '2.2rem', color: '#1e293b', margin: '0 0 5px 0', fontWeight: '800' }}>The Math Universe 🌍</h2>
-                    <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '30px', fontSize: '1.1rem' }}>Select a constellation to begin your challenge.</p>
-
-                    <div style={{ 
-                        background: 'radial-gradient(circle at center, #1e293b 0%, #0f172a 100%)', 
-                        borderRadius: '24px', padding: '40px 20px', marginBottom: '40px',
-                        display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: '12px',
-                        boxShadow: 'inset 0 0 40px rgba(0,0,0,0.5)'
-                    }}>
-                        {mathNodes.map(node => (
-                            <div 
-                                key={node.id}
-                                onClick={() => setMathType(node.id)}
-                                style={getBubbleStyle(node.weight, mathType === node.id, node.color)}
-                                onMouseEnter={(e) => {
-                                    if(mathType !== node.id) {
-                                        e.target.style.background = `${node.color}22`;
-                                        e.target.style.transform = 'scale(1.05)';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if(mathType !== node.id) {
-                                        e.target.style.background = 'rgba(255, 255, 255, 0.05)';
-                                        e.target.style.transform = 'scale(1)';
-                                    }
-                                }}
-                            >
-                                {node.label}
-                            </div>
-                        ))}
+                    <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                        <h2 className="universe-title" style={{ fontSize: '3rem', margin: '0 0 10px 0' }}>The Math Universe</h2>
+                        <p style={{ color: '#64748b', fontSize: '1.2rem', margin: 0 }}>Select a constellation to calibrate your navigation computer.</p>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap', marginBottom: '40px' }}>
+                    <div className="universe-grid">
+                        {mathNodes.map(node => {
+                            const parts = node.label.split(' ');
+                            const icon = parts[0];
+                            const text = parts.slice(1).join(' ');
+                            
+                            let width = '120px';
+                            let height = '120px';
+                            let iconSize = '3.5rem';
+                            let textSize = '0.75rem';
+                            
+                            if (node.weight === 3) { 
+                                width = '180px'; height = '170px'; iconSize = '5.5rem'; textSize = '1rem'; 
+                            } else if (node.weight === 2) { 
+                                width = '140px'; height = '135px'; iconSize = '4.5rem'; textSize = '0.85rem'; 
+                            }
+
+                            return (
+                                <div 
+                                    key={node.id}
+                                    onClick={() => setMathType(node.id)}
+                                    className={`math-node-card ${mathType === node.id ? 'selected' : ''}`}
+                                    style={{
+                                        width, height,
+                                        '--node-color': node.color,
+                                        '--node-color-alpha': `${node.color}66`,
+                                        '--node-color-alpha-heavy': `${node.color}33`,
+                                        '--icon-size': iconSize,
+                                        '--text-size': textSize
+                                    }}
+                                >
+                                    <div className="node-huge-icon">{icon}</div>
+                                    <div className="node-label-text">{text}</div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap', marginBottom: '50px' }}>
                         {difficultyCards.map(diff => (
                             <div 
                                 key={diff.id} onClick={() => setComplexity(diff.id)}
+                                className={`difficulty-card ${complexity === diff.id ? 'selected' : ''}`}
                                 style={{
-                                    padding: '12px 24px', borderRadius: '30px', cursor: 'pointer', fontWeight: 'bold',
-                                    background: complexity === diff.id ? diff.color : '#f8fafc',
-                                    color: complexity === diff.id ? '#ffffff' : '#475569',
-                                    transition: 'all 0.2s', border: `2px solid ${complexity === diff.id ? diff.color : '#e2e8f0'}`,
-                                    boxShadow: complexity === diff.id ? `0 4px 15px ${diff.color}66` : 'none',
-                                    transform: complexity === diff.id ? 'translateY(-2px)' : 'none'
+                                    '--diff-color': diff.color,
+                                    '--diff-color-alpha': `${diff.color}66`,
                                 }}
                             >
                                 {diff.label}
@@ -293,11 +450,11 @@ export default function SpeedMathChallenge() {
 
                     <button 
                         onClick={startNewAssessment}
-                        style={{ width: '100%', maxWidth: '400px', margin: '0 auto', display: 'block', padding: '20px', fontSize: '1.3rem', fontWeight: 'bold', borderRadius: '50px', background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 10px 25px rgba(37, 99, 235, 0.4)', transition: 'transform 0.2s' }}
-                        onMouseEnter={(e) => e.target.style.transform = 'translateY(-3px)'}
-                        onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                        style={{ width: '100%', maxWidth: '400px', margin: '0 auto', display: 'block', padding: '20px', fontSize: '1.3rem', fontWeight: '900', letterSpacing: '1px', borderRadius: '50px', background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 10px 30px rgba(37, 99, 235, 0.4)', transition: 'transform 0.2s' }}
+                        onMouseEnter={(e) => e.target.style.transform = 'translateY(-3px) scale(1.02)'}
+                        onMouseLeave={(e) => e.target.style.transform = 'translateY(0) scale(1)'}
                     >
-                        Launch Challenge 🚀
+                        INITIALIZE SEQUENCE 🚀
                     </button>
                 </div>
             ) : completed ? (

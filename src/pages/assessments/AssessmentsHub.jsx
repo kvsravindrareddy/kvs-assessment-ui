@@ -17,7 +17,6 @@ export default function AssessmentsHub() {
             try {
                 const token = localStorage.getItem('token');
                 const userId = user?.username || 'GUEST';
-                // We will build this endpoint in the backend next
                 const res = await axios.get(`${CONFIG.development.GATEWAY_URL}/api/assessment/random-math/session/${userId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -36,13 +35,12 @@ export default function AssessmentsHub() {
     }, [user]);
 
     const categories = [
-        // 🚀 NEW: Premium Global Exams Card
         {
             id: 'competitive-exams',
             title: 'Global Entrance Matrix',
             description: 'Simulate real-world competitive exams (IIT-JEE, SAT, EAMCET) with section timers and negative marking.',
             icon: '🌍',
-            gradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', // Sleek dark theme for premium feel
+            gradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', 
             path: '/competitive-hub',
             hasResume: false,
             progress: 0
@@ -77,9 +75,25 @@ export default function AssessmentsHub() {
             id: 'vocabulary-spelling',
             title: 'Vocabulary & Spelling',
             description: 'Master word meanings, spellings, and usage. Expand your language skills.',
-            icon: '📝',
-            gradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-            path: '/assessments/vocabulary-spelling'
+            icon: '🔠', // Updated icon
+            gradient: 'linear-gradient(135deg, #f43f5e 0%, #be123c 100%)', // Updated to match the Magenta Theme
+            path: '/assessments/vocabulary-hub' // 🚀 FIXED PATH
+        },
+        {
+            id: 'grammar-language',
+            title: 'Grammar & Language',
+            description: 'Master grammar rules, sentence structure, and proper language usage.',
+            icon: '🌌', // Updated icon
+            gradient: 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)', // Updated to match the Cyan Theme
+            path: '/assessments/grammar-hub' // 🚀 FIXED PATH
+        },
+        {
+            id: 'critical-thinking',
+            title: 'Critical Thinking',
+            description: 'Solve puzzles, riddles, and logic problems. Develop reasoning skills.',
+            icon: '🤖', // Updated icon
+            gradient: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', // Updated to match the Green Theme
+            path: '/assessments/critical-thinking' // 🚀 ALREADY CORRECT
         },
         {
             id: 'science-lab',
@@ -88,22 +102,6 @@ export default function AssessmentsHub() {
             icon: '🔬',
             gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
             path: '/assessments/science-lab'
-        },
-        {
-            id: 'grammar-language',
-            title: 'Grammar & Language',
-            description: 'Master grammar rules, sentence structure, and proper language usage.',
-            icon: '✍️',
-            gradient: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
-            path: '/assessments/grammar-language'
-        },
-        {
-            id: 'critical-thinking',
-            title: 'Critical Thinking',
-            description: 'Solve puzzles, riddles, and logic problems. Develop reasoning skills.',
-            icon: '🧠',
-            gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-            path: '/assessments/critical-thinking'
         },
         {
             id: 'subject-tests',

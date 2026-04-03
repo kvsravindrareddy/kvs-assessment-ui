@@ -4,7 +4,8 @@ import {
   QuestionMarkCircleIcon,
   BookOpenIcon,
   DocumentTextIcon,
-  SparklesIcon
+  SparklesIcon,
+  CpuChipIcon // 🚀 Added Icon for AI Generator
 } from '@heroicons/react/24/outline';
 
 /**
@@ -13,8 +14,6 @@ import {
  */
 const ContentLibrary = () => {
   const navigate = useNavigate();
-
-  console.log('🔥 ContentLibrary component is rendering!');
 
   const contentCategories = [
     {
@@ -59,6 +58,22 @@ const ContentLibrary = () => {
         label: 'Categories'
       },
       badge: 'AI-Powered'
+    },
+    // 🚀 NEW: AI Specialty Content Generator Card
+    {
+      id: 'specialty',
+      title: 'Specialty Content',
+      description: 'AI-generate Grammar, Vocabulary, and Logic questions instantly',
+      icon: CpuChipIcon,
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-50',
+      hoverBg: 'hover:bg-emerald-100',
+      path: '/admin/specialty-content',
+      stats: {
+        total: '∞',
+        label: 'AI Generated'
+      },
+      badge: 'GPT-4 Powered'
     }
   ];
 
@@ -126,8 +141,8 @@ const ContentLibrary = () => {
         </p>
       </div>
 
-      {/* Content Categories Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* 🚀 Changed to grid-cols-4 for larger screens to fit all 4 cards beautifully */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {contentCategories.map(category => (
           <CategoryCard key={category.id} category={category} />
         ))}
@@ -154,7 +169,7 @@ const ContentLibrary = () => {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-purple-600 mt-1">✓</span>
-              <span>Category-specific configurations for 20+ math topics</span>
+              <span>Auto-generate Logic, Grammar, and Vocabulary questions</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-purple-600 mt-1">✓</span>
@@ -197,7 +212,8 @@ const ContentLibrary = () => {
       {/* Getting Started */}
       <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <h3 className="text-lg font-bold text-gray-900 mb-4">Getting Started</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* 🚀 Changed to grid-cols-4 and added the 4th step */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-4 bg-gray-50 rounded-lg">
             <div className="text-2xl mb-2">📝</div>
             <h4 className="font-semibold text-gray-900 mb-1">1. Manage Questions</h4>
@@ -210,8 +226,13 @@ const ContentLibrary = () => {
           </div>
           <div className="p-4 bg-gray-50 rounded-lg">
             <div className="text-2xl mb-2">🤖</div>
-            <h4 className="font-semibold text-gray-900 mb-1">3. Generate Worksheets</h4>
+            <h4 className="font-semibold text-gray-900 mb-1">3. Worksheets</h4>
             <p className="text-sm text-gray-600">Use AI to create custom worksheet templates with GPT-4 integration</p>
+          </div>
+          <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-lg">
+            <div className="text-2xl mb-2">🧠</div>
+            <h4 className="font-semibold text-emerald-900 mb-1">4. Specialty AI</h4>
+            <p className="text-sm text-emerald-700">Auto-generate Logic, Grammar, and Vocab questions directly into the database.</p>
           </div>
         </div>
       </div>

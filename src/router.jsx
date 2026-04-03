@@ -61,6 +61,8 @@ import App from './App';
 
 import CompetitiveExamHub from './pages/assessments/CompetitiveExamHub';
 import CompetitiveAssessmentFlow from './pages/assessments/CompetitiveAssessmentFlow';
+import CriticalThinkingHub from './pages/assessments/CriticalThinkingHub';
+import SpecialtyContentManager from './pages/admin/SpecialtyContentManager';
 //import CompetitiveWorksheetPrint from './pages/assessments/CompetitiveWorksheetPrint';
 
 /**
@@ -263,6 +265,10 @@ export const router = createBrowserRouter([
             element: <WorksheetManager />
           }
         ]
+      },
+      {
+        path: 'specialty-content',
+        element: <SpecialtyContentManager />
       }
     ]
   },
@@ -317,6 +323,10 @@ export const router = createBrowserRouter([
   {
     path: '/assessments/vocabulary-hub',
     element: <UnifiedDashboard><VocabularyHub /></UnifiedDashboard>
+  },
+  {
+    path: '/assessments/critical-thinking',
+    element: <UnifiedDashboard><CriticalThinkingHub /></UnifiedDashboard>
   }
 ], {
   future: {

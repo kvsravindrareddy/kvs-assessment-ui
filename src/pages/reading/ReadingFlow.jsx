@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import CONFIG from '../../Config';
-import '../../css/AssessmentFlow.css';
 import { useSubscription } from '../../context/SubscriptionContext';
 import { useAuth } from '../../context/AuthContext';
 import UpgradePrompt from '../../components/UpgradePrompt';
@@ -16,7 +15,6 @@ const getSubjectIcon = (subjectName) => {
   if (!subjectName) return '📝';
   const s = subjectName.toUpperCase();
   
-  // Keep semantic mapping for common subjects for best UX
   if (s.includes('MATH')) return '📐';
   if (s.includes('ENGLISH')) return '📚';
   if (s.includes('SCIENCE')) return '🔬';
@@ -29,7 +27,6 @@ const getSubjectIcon = (subjectName) => {
   if (s.includes('ART')) return '🎨';
   if (s.includes('MUSIC')) return '🎵';
 
-  // Fallback: Deterministic Hash for ANY unknown subject added by Admin!
   const genericIcons = ['📖', '✏️', '🎯', '🧩', '⭐', '🌟', '🧠', '⚡', '🚀', '🔍'];
   let hash = 0;
   for (let i = 0; i < s.length; i++) {
@@ -81,11 +78,9 @@ export default function ReadingFlow() {
         const cachedData = localStorage.getItem(CACHE_KEY);
         const cachedTime = localStorage.getItem(CACHE_TTL_KEY);
 
-        // Check if cache exists and is valid
         if (cachedData && cachedTime && (Date.now() - parseInt(cachedTime) < CACHE_DURATION)) {
             activeGrades = JSON.parse(cachedData);
         } else {
-            // Fetch from API if cache expired or doesn't exist
             const token = localStorage.getItem('token');
             const response = await axios.get(
               `${baseUrl}/admin-assessment/v1/grade-subjects`,
@@ -95,12 +90,10 @@ export default function ReadingFlow() {
             activeGrades = (response.data || []).filter(g => g.isActive);
             activeGrades.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
             
-            // Save to UI Cache
             localStorage.setItem(CACHE_KEY, JSON.stringify(activeGrades));
             localStorage.setItem(CACHE_TTL_KEY, Date.now().toString());
         }
         
-        // Process Data
         const gradesList = activeGrades.map(g => g.gradeCode);
         const subjMap = {};
         
@@ -273,7 +266,6 @@ export default function ReadingFlow() {
     if (storyDetails.content) queue.push(storyDetails.content);
     
     const currentQ = storyDetails.questions?.[questionIndex];
-    // FIX: Fallback to either `.question` or `.name` for Read Aloud 
     const questionText = currentQ?.question || currentQ?.name;
     if (questionText) queue.push(questionText);
     
@@ -341,7 +333,6 @@ export default function ReadingFlow() {
         
         storyDetails.questions.forEach((q, index) => {
             if (y > pageHeight - 30) { doc.addPage(); y = 45; }
-            // FIX: Ensure PDF works regardless of if the property is 'question' or 'name'
             const questionText = q.question || q.name || "Question text missing";
             const qLines = doc.splitTextToSize(`${index + 1}. ${questionText}`, contentWidth);
             doc.text(qLines, margin, y);
@@ -398,195 +389,473 @@ export default function ReadingFlow() {
 
   if (gradesLoading) {
     return (
-      <div className="timeless-layout">
-        <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📚</div>
-          <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Loading curriculum...</p>
+      <div style={{ background: '#f0f9ff', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '4rem', marginBottom: '20px', animation: 'bounce 2s infinite' }}>📚</div>
+          <p style={{ color: '#0284c7', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '1px' }}>Loading Magic... ✨</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="timeless-layout">
+    <div style={{ background: 'linear-gradient(135deg, #e0f2fe 0%, #fef3c7 100%)', color: '#334155', minHeight: '100vh', fontFamily: '"Nunito", "Comic Sans MS", sans-serif' }}>
       {!storyDetails && <UsageIndicator type="story" />}
 
+      {/* 🚀 KID-FRIENDLY UI CSS INJECTION */}
+      <style>
+        {`
+          .magic-library-layout {
+              display: flex;
+              min-height: calc(100vh - 60px);
+          }
+          
+          .magic-sidebar {
+              width: 280px;
+              background: rgba(255, 255, 255, 0.8);
+              border-right: 4px dashed #bae6fd;
+              backdrop-filter: blur(10px);
+              padding: 30px 20px;
+              display: flex;
+              flex-direction: column;
+              gap: 12px;
+              z-index: 10;
+              box-shadow: 5px 0 20px rgba(0,0,0,0.05);
+          }
+
+          .magic-grade-btn {
+              background: white;
+              border: 3px solid #e2e8f0;
+              color: #64748b;
+              padding: 16px 20px;
+              border-radius: 20px;
+              text-align: left;
+              font-weight: 800;
+              font-size: 1.1rem;
+              cursor: pointer;
+              transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              box-shadow: 0 4px 0 #e2e8f0;
+          }
+
+          .magic-grade-btn:hover {
+              background: #f8fafc;
+              transform: translateY(2px);
+              box-shadow: 0 2px 0 #e2e8f0;
+          }
+
+          .magic-grade-btn.active {
+              background: #3b82f6;
+              border-color: #2563eb;
+              color: white;
+              box-shadow: 0 4px 0 #1d4ed8;
+              transform: translateY(-2px);
+          }
+          .magic-grade-btn.active:active {
+              transform: translateY(4px);
+              box-shadow: 0 0 0 #1d4ed8;
+          }
+
+          .magic-main {
+              flex: 1;
+              padding: 40px;
+              overflow-y: auto;
+          }
+
+          .magic-subject-dock {
+              display: flex;
+              gap: 15px;
+              margin-bottom: 40px;
+              flex-wrap: wrap;
+          }
+
+          .magic-subject-tab {
+              background: white;
+              border: 3px solid #e2e8f0;
+              padding: 12px 24px;
+              border-radius: 30px;
+              color: #64748b;
+              font-weight: 900;
+              font-size: 1.1rem;
+              cursor: pointer;
+              transition: all 0.2s;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              box-shadow: 0 4px 0 #e2e8f0;
+          }
+
+          .magic-subject-tab:hover {
+              transform: translateY(2px);
+              box-shadow: 0 2px 0 #e2e8f0;
+          }
+
+          .magic-subject-tab.active {
+              background: #fef08a;
+              border-color: #f59e0b;
+              color: #92400e;
+              box-shadow: 0 4px 0 #d97706;
+          }
+
+          .magic-story-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+              gap: 30px;
+          }
+
+          .magic-card {
+              background: white;
+              border: 4px solid #e2e8f0;
+              border-radius: 24px;
+              cursor: pointer;
+              transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+              overflow: hidden;
+              display: flex;
+              flex-direction: column;
+              box-shadow: 0 8px 0 #cbd5e1;
+          }
+
+          .magic-card:hover {
+              transform: translateY(-8px) rotate(-1deg);
+              border-color: #3b82f6;
+              box-shadow: 0 12px 0 #2563eb, 0 15px 20px rgba(59,130,246,0.3);
+          }
+
+          .magic-card-img-wrapper {
+              width: 100%;
+              height: 160px;
+              overflow: hidden;
+              border-bottom: 3px solid #e2e8f0;
+              background: #f1f5f9;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+          }
+
+          .magic-card-img-wrapper img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+          }
+
+          .magic-card-content {
+              padding: 20px;
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+          }
+
+          .magic-card-title {
+              font-size: 1.4rem;
+              color: #0f172a;
+              margin: 0 0 15px 0;
+              line-height: 1.3;
+              font-weight: 900;
+          }
+
+          .magic-card-badge {
+              align-self: flex-start;
+              background: #dbeafe;
+              color: #1e40af;
+              border: 2px solid #93c5fd;
+              padding: 6px 14px;
+              border-radius: 20px;
+              font-size: 0.9rem;
+              font-weight: 900;
+              margin-bottom: 15px;
+          }
+
+          .magic-card-footer {
+              margin-top: auto;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              color: #3b82f6;
+              font-weight: 900;
+              font-size: 1.1rem;
+              background: #f0f9ff;
+              padding: 10px 15px;
+              border-radius: 12px;
+          }
+
+          /* 🚀 KID-FRIENDLY READER STYLES */
+          .fun-reader-container {
+              max-width: 900px;
+              margin: 30px auto;
+              background: #fffbef; /* Soft cream paper color */
+              border: 4px solid #fcd34d;
+              border-radius: 32px;
+              padding: 40px;
+              box-shadow: 0 15px 0 #f59e0b, 0 20px 30px rgba(0,0,0,0.1);
+          }
+
+          .fun-text {
+              font-size: 1.5rem;
+              line-height: 1.8;
+              color: #334155;
+              white-space: pre-wrap;
+              font-weight: 600;
+          }
+
+          .fun-btn {
+              background: #10b981;
+              color: white;
+              border: 3px solid #047857;
+              padding: 14px 28px;
+              border-radius: 50px;
+              font-weight: 900;
+              font-size: 1.2rem;
+              cursor: pointer;
+              transition: all 0.2s;
+              box-shadow: 0 6px 0 #047857;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 10px;
+          }
+
+          .fun-btn:hover {
+              transform: translateY(2px);
+              box-shadow: 0 4px 0 #047857;
+          }
+          .fun-btn:active {
+              transform: translateY(6px);
+              box-shadow: 0 0 0 #047857;
+          }
+
+          .fun-btn-outline {
+              background: white;
+              color: #3b82f6;
+              border: 3px solid #3b82f6;
+              padding: 14px 28px;
+              border-radius: 50px;
+              font-weight: 900;
+              font-size: 1.1rem;
+              cursor: pointer;
+              transition: all 0.2s;
+              box-shadow: 0 4px 0 #2563eb;
+          }
+
+          .fun-btn-outline:hover {
+              transform: translateY(2px);
+              box-shadow: 0 2px 0 #2563eb;
+          }
+          .fun-btn-outline:active {
+              transform: translateY(4px);
+              box-shadow: 0 0 0 #2563eb;
+          }
+
+          .fun-radio-label {
+              display: flex;
+              align-items: center;
+              gap: 15px;
+              padding: 20px;
+              border-radius: 20px;
+              border: 3px solid #e2e8f0;
+              background: white;
+              cursor: pointer;
+              transition: all 0.2s;
+              margin-bottom: 12px;
+              box-shadow: 0 4px 0 #e2e8f0;
+          }
+
+          .fun-radio-label:hover {
+              border-color: #60a5fa;
+              transform: translateY(2px);
+              box-shadow: 0 2px 0 #93c5fd;
+          }
+
+          .fun-radio-label.selected {
+              border-color: #3b82f6;
+              background: #eff6ff;
+              box-shadow: 0 4px 0 #2563eb;
+              transform: scale(1.02);
+          }
+          
+          /* Add some bounce to icons */
+          @keyframes bounce {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-10px); }
+          }
+        `}
+      </style>
+
       {!storyDetails ? (
-        <div className="timeless-grid">
-          <aside className="timeless-sidebar">
-            <h2 className="sidebar-title">Grade Levels</h2>
-            <nav className="grade-nav">
+        <div className="magic-library-layout">
+          <aside className="magic-sidebar">
+            <h2 style={{ color: '#0f172a', fontSize: '1.8rem', marginBottom: '10px', fontWeight: '900', textAlign: 'center' }}>Levels 🎒</h2>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {orderedGrades.map((grade) => (
                 <button
                   key={grade}
-                  className={`grade-nav-item ${selectedGrade === grade ? 'active' : ''}`}
+                  className={`magic-grade-btn ${selectedGrade === grade ? 'active' : ''}`}
                   onClick={() => handleSelectGrade(grade)}
                 >
-                  <span className="grade-icon">📖</span> {grade.replace('_', ' ')}
+                  <span style={{ fontSize: '1.5rem' }}>📖</span> Grade {grade.replace('GRADE_', '').replace('_', ' ')}
                 </button>
               ))}
             </nav>
           </aside>
 
-          <main className="timeless-main">
-            <header className="main-header">
-              <div className="header-text-group">
-                <h1 className="grade-title">Explore {selectedGrade ? selectedGrade.replace('_', ' ') : 'Grade Levels'}</h1>
-                <p className="grade-subtitle">Select a subject to discover new stories and challenges.</p>
-              </div>
-              
-              {gradeSubjectMap[selectedGrade] && gradeSubjectMap[selectedGrade].length > 0 && (
-                <div className="innovative-subject-dock">
-                  {gradeSubjectMap[selectedGrade].map(subject => (
-                    <button
-                      key={subject}
-                      className={`subject-tab ${selectedSubject === subject ? 'active' : ''}`}
-                      onClick={() => handleSelectSubject(selectedGrade, subject)}
-                    >
-                      <span className="subject-icon">{getSubjectIcon(subject)}</span>
-                      <span className="subject-name">{subject.replace(/_/g, ' ')}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
+          <main className="magic-main">
+            <header style={{ marginBottom: '40px', background: 'white', padding: '30px', borderRadius: '24px', border: '4px dashed #fbbf24' }}>
+              <h1 style={{ fontSize: '3rem', margin: '0 0 10px 0', color: '#d97706', fontWeight: '900' }}>
+                Magic Story Library ✨
+              </h1>
+              <p style={{ color: '#64748b', fontSize: '1.3rem', margin: 0, fontWeight: 'bold' }}>Pick a subject to start your adventure!</p>
             </header>
+              
+            {gradeSubjectMap[selectedGrade] && gradeSubjectMap[selectedGrade].length > 0 && (
+              <div className="magic-subject-dock">
+                {gradeSubjectMap[selectedGrade].map(subject => (
+                  <button
+                    key={subject}
+                    className={`magic-subject-tab ${selectedSubject === subject ? 'active' : ''}`}
+                    onClick={() => handleSelectSubject(selectedGrade, subject)}
+                  >
+                    <span style={{ fontSize: '1.5rem' }}>{getSubjectIcon(subject)}</span>
+                    <span>{subject.replace(/_/g, ' ')}</span>
+                  </button>
+                ))}
+              </div>
+            )}
 
-            <section className="cards-container">
+            <section>
               {isLoadingStories ? (
-                <div className="loading-state">
-                  <div className="spinner"></div>
-                  <p>Synthesizing stories...</p>
+                <div style={{ textAlign: 'center', padding: '100px 0' }}>
+                  <div style={{ fontSize: '4rem', animation: 'bounce 1s infinite' }}>🪄</div>
+                  <p style={{ color: '#3b82f6', marginTop: '20px', fontSize: '1.5rem', fontWeight: 'bold' }}>Gathering magical stories...</p>
                 </div>
               ) : displayedStories.length > 0 ? (
                 <>
-                  <div className="story-grid small-cards">
-                    {displayedStories.map((story) => {
-                      return (
-                        <div key={story.id} className="timeless-card story-card-enhanced" onClick={() => fetchStoryDetails(story.id)}>
-                          {story.imageUrl && (
-                            <div className="story-card-image">
-                              <img src={story.imageUrl} alt={story.title} />
-                            </div>
-                          )}
-                          <div className="card-content story-content-clean">
-                            <h4 className="story-title">{story.title}</h4>
-                            {story.storyType && (
-                              <span className="story-type-badge">{story.storyType}</span>
-                            )}
+                  <div className="magic-story-grid">
+                    {displayedStories.map((story) => (
+                      <div key={story.id} className="magic-card" onClick={() => fetchStoryDetails(story.id)}>
+                        {story.imageUrl ? (
+                          <div className="magic-card-img-wrapper">
+                            <img src={story.imageUrl} alt={story.title} />
                           </div>
-                          <div className="card-footer story-footer">
-                            <span className="read-text">Start Reading</span>
-                            <span className="arrow">→</span>
+                        ) : (
+                          <div className="magic-card-img-wrapper">
+                            <span style={{ fontSize: '4rem' }}>📚</span>
+                          </div>
+                        )}
+                        <div className="magic-card-content">
+                          <h4 className="magic-card-title">{story.title}</h4>
+                          {story.storyType && (
+                            <span className="magic-card-badge">{story.storyType}</span>
+                          )}
+                          <div className="magic-card-footer">
+                            <span>Let's Read!</span>
+                            <span style={{ fontSize: '1.4rem' }}>🚀</span>
                           </div>
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
 
                   {totalPages > 1 && (
-                    <div className="pagination-controls">
-                      <button className="page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>← Prev</button>
-                      <span className="page-info">Page <strong>{currentPage}</strong> of {totalPages}</span>
-                      <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>Next →</button>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginTop: '50px' }}>
+                      <button className="fun-btn-outline" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>← Back</button>
+                      <span style={{ color: '#475569', fontSize: '1.2rem', fontWeight: 'bold' }}>Page <strong>{currentPage}</strong> of {totalPages}</span>
+                      <button className="fun-btn-outline" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>More →</button>
                     </div>
                   )}
                 </>
               ) : (
-                <div className="empty-state">
-                  <span className="empty-icon">📭</span>
-                  <h3>No Stories Found</h3>
-                  <p>Check back later or try a different subject.</p>
+                <div style={{ textAlign: 'center', padding: '80px 0', border: '4px dashed #93c5fd', borderRadius: '32px', background: 'rgba(255,255,255,0.5)' }}>
+                  <span style={{ fontSize: '5rem' }}>🕵️‍♂️</span>
+                  <h3 style={{ color: '#1e40af', fontSize: '2rem', marginTop: '20px', fontWeight: '900' }}>Oops! No stories here yet!</h3>
+                  <p style={{ color: '#475569', fontSize: '1.2rem', fontWeight: 'bold' }}>Try exploring a different subject or grade.</p>
                 </div>
               )}
             </section>
           </main>
         </div>
       ) : (
-        <div className="focus-reading-mode world-class-reader">
-          <button className="back-btn-elegant" onClick={() => {
+        <div style={{ padding: '20px', minHeight: '100vh' }}>
+          
+          <button className="fun-btn-outline" style={{ display: 'inline-flex', padding: '10px 20px', fontSize: '1rem', marginBottom: '20px', background: 'white' }} onClick={() => {
               window.speechSynthesis.cancel();
               setStoryDetails(null);
               navigate('/reading');
           }}>
-            <span className="back-icon">←</span>
-            <span>Back to Library</span>
+            ← Back to Library
           </button>
 
-          <div className="reading-canvas-premium">
-            <div className="story-header-elegant">
-              <div className="story-icon-large">📖</div>
-              <div className="story-header-content">
-                <h1 className="reading-title-elegant">{storyDetails.title}</h1>
-                <div className="story-metadata">
-                  <span className="metadata-item">
-                    <span className="meta-icon">📝</span>
-                    {storyDetails.questions?.length || 0} Questions
+          <div className="fun-reader-container">
+            <div style={{ display: 'flex', gap: '25px', alignItems: 'center', borderBottom: '4px dashed #fcd34d', paddingBottom: '30px', marginBottom: '40px' }}>
+              <div style={{ fontSize: '4.5rem', background: '#fef3c7', width: '100px', height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '24px', border: '3px solid #f59e0b', boxShadow: '0 6px 0 #f59e0b' }}>
+                📖
+              </div>
+              <div>
+                <h1 style={{ fontSize: '2.5rem', color: '#b45309', margin: '0 0 15px 0', lineHeight: 1.2, fontWeight: '900' }}>{storyDetails.title}</h1>
+                <div style={{ display: 'flex', gap: '15px' }}>
+                  <span style={{ background: '#dbeafe', color: '#1d4ed8', padding: '8px 16px', borderRadius: '50px', fontWeight: '900', border: '2px solid #93c5fd' }}>
+                    📝 {storyDetails.questions?.length || 0} Questions
                   </span>
-                  <span className="metadata-item">
-                    <span className="meta-icon">⏱️</span>
-                    {Math.ceil((storyDetails.content?.split(' ').length || 0) / 200)} min read
+                  <span style={{ background: '#d1fae5', color: '#047857', padding: '8px 16px', borderRadius: '50px', fontWeight: '900', border: '2px solid #6ee7b7' }}>
+                    ⏱️ {Math.ceil((storyDetails.content?.split(' ').length || 0) / 200)} min read
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="reading-content-elegant">
-              <div className="content-text">{storyDetails.content}</div>
+            <div className="fun-text" style={{ marginBottom: '50px' }}>
+              {storyDetails.content}
             </div>
 
-            <div className="action-bar-elegant">
-              <button className="tool-btn-elegant primary" onClick={playAll}>
-                <span className="btn-icon">🔊</span><span>Read Aloud</span>
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '60px', flexWrap: 'wrap' }}>
+              <button className="fun-btn" style={{ background: '#8b5cf6', borderColor: '#6d28d9', boxShadow: '0 6px 0 #6d28d9' }} onClick={playAll}>
+                🔊 Read Aloud
               </button>
-              <button className="tool-btn-elegant secondary" onClick={exportPDF}>
-                <span className="btn-icon">📄</span><span>Download PDF</span>
+              <button className="fun-btn-outline" onClick={exportPDF}>
+                📄 Download PDF
               </button>
-              <button className="tool-btn-elegant secondary" onClick={previewPDF}>
-                <span className="btn-icon">🖨</span><span>Preview</span>
+              <button className="fun-btn-outline" onClick={previewPDF}>
+                🖨 Preview PDF
               </button>
             </div>
 
-            <div className="assessment-section">
+            <div>
               {completed ? (
-                <div className="assessment-done-card">
-                  <div className="done-icon">🏆</div>
-                  <h3>Assessment Complete!</h3>
-                  <div className="score-display">
-                    <div className="score-label">Your Score</div>
-                    <div className="score-numbers">
-                      <span className="score-earned">{score}</span>
-                      <span className="score-divider">/</span>
-                      <span className="score-total">{storyDetails.questions.length}</span>
-                    </div>
-                    <div className="score-percentage">
-                      {Math.round((score / storyDetails.questions.length) * 100)}%
-                    </div>
+                <div style={{ textAlign: 'center', background: '#ecfdf5', border: '4px solid #34d399', padding: '50px', borderRadius: '32px', boxShadow: '0 10px 0 #10b981' }}>
+                  <div style={{ fontSize: '6rem', marginBottom: '20px', animation: 'bounce 2s infinite' }}>⭐</div>
+                  <h3 style={{ fontSize: '2.5rem', color: '#065f46', margin: '0 0 20px 0', fontWeight: '900' }}>You're a Star!</h3>
+                  <div style={{ display: 'inline-block', background: 'white', padding: '20px 50px', borderRadius: '30px', border: '4px solid #10b981', boxShadow: '0 8px 0 #059669' }}>
+                    <span style={{ fontSize: '4rem', color: '#10b981', fontWeight: '900' }}>{score}</span>
+                    <span style={{ fontSize: '2.5rem', color: '#94a3b8', margin: '0 15px' }}>/</span>
+                    <span style={{ fontSize: '3rem', color: '#0f172a', fontWeight: '900' }}>{storyDetails.questions.length}</span>
                   </div>
+                  <br/>
                   <button
-                    className="modern-submit-btn"
+                    className="fun-btn"
                     onClick={() => {
                       window.speechSynthesis.cancel();
                       setStoryDetails(null);
                       navigate('/reading');
                     }}
-                    style={{ marginTop: '20px' }}
+                    style={{ marginTop: '40px', background: '#3b82f6', borderColor: '#2563eb', boxShadow: '0 6px 0 #1d4ed8' }}
                   >
-                    Return to Library
+                    Read Another Story! 📚
                   </button>
                 </div>
               ) : (
                 storyDetails.questions && storyDetails.questions.length > 0 && (
-                  <div className="modern-question-box">
-                    <div className="question-header">
-                      <span className="q-badge">Question {questionIndex + 1} of {storyDetails.questions.length}</span>
+                  <div style={{ background: 'white', border: '4px solid #93c5fd', borderRadius: '32px', padding: '40px', boxShadow: '0 12px 0 #bfdbfe' }}>
+                    <div style={{ marginBottom: '30px', textAlign: 'center' }}>
+                      <span style={{ background: '#3b82f6', color: '#fff', padding: '10px 20px', borderRadius: '50px', fontWeight: '900', fontSize: '1.1rem' }}>
+                        QUESTION {questionIndex + 1} OF {storyDetails.questions.length}
+                      </span>
                     </div>
                     
-                    {/* FIX: Explicitly fallback to .question OR .name based on Backend Schema! */}
-                    <h3 className="q-text">
+                    <h3 style={{ fontSize: '1.8rem', color: '#0f172a', marginBottom: '30px', lineHeight: '1.4', fontWeight: '900', textAlign: 'center' }}>
                       {storyDetails.questions[questionIndex].question || storyDetails.questions[questionIndex].name}
                     </h3>
 
-                    <div className="modern-options">
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                       {Object.entries(storyDetails.questions[questionIndex].options).map(([key, value]) => {
                         const isMultiple = storyDetails.questions[questionIndex].meta?.answerType === 'MULTIPLE';
                         const isChecked = isMultiple 
@@ -594,7 +863,7 @@ export default function ReadingFlow() {
                           : selectedAnswer === key;
 
                         return (
-                          <label key={key} className={`modern-option-label ${isChecked ? 'selected' : ''}`}>
+                          <label key={key} className={`fun-radio-label ${isChecked ? 'selected' : ''}`}>
                             <input
                               type={isMultiple ? "checkbox" : "radio"}
                               name="option"
@@ -608,9 +877,12 @@ export default function ReadingFlow() {
                                   setSelectedAnswer(key);
                                 }
                               }}
+                              style={{ display: 'none' }}
                             />
-                            <div className="opt-indicator">{key}</div>
-                            <span className="opt-text">{value}</span>
+                            <div style={{ width: '45px', height: '45px', borderRadius: '50%', background: isChecked ? '#3b82f6' : '#f1f5f9', color: isChecked ? 'white' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '1.3rem', border: isChecked ? 'none' : '2px solid #cbd5e1' }}>
+                                {key}
+                            </div>
+                            <span style={{ fontSize: '1.3rem', color: isChecked ? '#1e40af' : '#475569', fontWeight: isChecked ? '900' : '600' }}>{value}</span>
                           </label>
                         );
                       })}
@@ -619,9 +891,10 @@ export default function ReadingFlow() {
                     <button
                       onClick={submitAnswer}
                       disabled={!selectedAnswer || (Array.isArray(selectedAnswer) && selectedAnswer.length === 0)}
-                      className="modern-submit-btn"
+                      className="fun-btn"
+                      style={{ width: '100%', marginTop: '30px', padding: '20px', fontSize: '1.4rem', opacity: (!selectedAnswer || (Array.isArray(selectedAnswer) && selectedAnswer.length === 0)) ? 0.5 : 1 }}
                     >
-                      Confirm Answer
+                      Check My Answer! 🎯
                     </button>
                   </div>
                 )

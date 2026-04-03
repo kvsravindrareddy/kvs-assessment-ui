@@ -29,7 +29,9 @@ const TIER_LIMITS = {
     assessmentsPerDay: 3,
     assessmentsTotal: 3,
     storiesPerDay: 2,
+    storiesTotal: 2, // Added missing total limit for guest
     gamesPerDay: 1,
+    gamesTotal: 1, // Added missing total limit for guest
     aiQuestionsPerMonth: 0,
     canSaveProgress: false,
     canDownloadCertificates: false,
@@ -40,19 +42,19 @@ const TIER_LIMITS = {
   },
   [SUBSCRIPTION_TIERS.STUDENT_FREE]: {
     assessmentsPerDay: 5,
-    assessmentsTotal: -1, // unlimited total
+    assessmentsTotal: -1, 
     storiesPerDay: 5,
-    gamesPerDay: -1, // FIX: Changed from 3 to -1 (unlimited for logged in users)
-    aiQuestionsPerMonth: -1, // unlimited for free users
+    gamesPerDay: -1, 
+    aiQuestionsPerMonth: -1, 
     canSaveProgress: true,
     canDownloadCertificates: false,
-    canAccessAI: true, // AI available for all logged-in users
+    canAccessAI: true, 
     showWatermark: false,
     canCreateClasses: false,
     maxStudents: 0
   },
   [SUBSCRIPTION_TIERS.STUDENT_INDIVIDUAL]: {
-    assessmentsPerDay: -1, // unlimited
+    assessmentsPerDay: -1, 
     assessmentsTotal: -1,
     storiesPerDay: -1,
     gamesPerDay: -1,
@@ -84,10 +86,10 @@ const TIER_LIMITS = {
     assessmentsTotal: -1,
     storiesPerDay: -1,
     gamesPerDay: -1,
-    aiQuestionsPerMonth: -1, // unlimited for free users
+    aiQuestionsPerMonth: -1, 
     canSaveProgress: true,
     canDownloadCertificates: false,
-    canAccessAI: true, // AI available for all logged-in users
+    canAccessAI: true, 
     showWatermark: false,
     canCreateClasses: true,
     maxClasses: 1,
@@ -177,8 +179,13 @@ const TIER_LIMITS = {
   }
 };
 
+// Helper function to safely get the plural form of the action key
+const getPluralKey = (action) => {
+    if (action === 'story') return 'stories';
+    return action + 's';
+};
+
 export const SubscriptionProvider = ({ children }) => {
-  // Get user's subscription tier from localStorage or default to GUEST
   const [subscriptionTier, setSubscriptionTier] = useState(() => {
     const saved = localStorage.getItem('subscriptionTier');
     if (saved) {
@@ -186,7 +193,6 @@ export const SubscriptionProvider = ({ children }) => {
       return saved;
     }
 
-    // Fallback: check if user is logged in and has tier in user object
     const userStr = localStorage.getItem('user');
     if (userStr) {
       try {
@@ -205,12 +211,10 @@ export const SubscriptionProvider = ({ children }) => {
     return SUBSCRIPTION_TIERS.GUEST;
   });
 
-  // Track daily usage
   const [usageStats, setUsageStats] = useState(() => {
     const saved = localStorage.getItem('usageStats');
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Reset if it's a new day
       const today = new Date().toDateString();
       if (parsed.date !== today) {
         return { date: today, assessments: 0, stories: 0, games: 0, aiQuestions: 0 };
@@ -220,13 +224,11 @@ export const SubscriptionProvider = ({ children }) => {
     return { date: new Date().toDateString(), assessments: 0, stories: 0, games: 0, aiQuestions: 0 };
   });
 
-  // Guest user tracking (total attempts)
   const [guestUsage, setGuestUsage] = useState(() => {
     const saved = localStorage.getItem('guestUsage');
     return saved ? JSON.parse(saved) : { totalAssessments: 0, totalStories: 0, totalGames: 0 };
   });
 
-  // Sync subscription tier when user logs in/out
   useEffect(() => {
     const handleStorageChange = () => {
       const newTier = localStorage.getItem('subscriptionTier');
@@ -236,10 +238,7 @@ export const SubscriptionProvider = ({ children }) => {
       }
     };
 
-    // Listen for storage events (from other tabs/windows)
     window.addEventListener('storage', handleStorageChange);
-
-    // Also check periodically (for same-tab changes)
     const intervalId = setInterval(handleStorageChange, 1000);
 
     return () => {
@@ -248,57 +247,41 @@ export const SubscriptionProvider = ({ children }) => {
     };
   }, [subscriptionTier]);
 
-  // Save to localStorage whenever subscription tier changes
   useEffect(() => {
-    console.log('SubscriptionContext: Saving tier to localStorage:', subscriptionTier);
     localStorage.setItem('subscriptionTier', subscriptionTier);
   }, [subscriptionTier]);
 
-  // Save usage stats to localStorage
   useEffect(() => {
     localStorage.setItem('usageStats', JSON.stringify(usageStats));
   }, [usageStats]);
 
-  // Save guest usage to localStorage
   useEffect(() => {
     localStorage.setItem('guestUsage', JSON.stringify(guestUsage));
   }, [guestUsage]);
 
-  // Get current tier limits
   const getLimits = () => {
     return TIER_LIMITS[subscriptionTier] || TIER_LIMITS[SUBSCRIPTION_TIERS.GUEST];
   };
 
-  // Check if user can perform an action
   const canPerformAction = (action) => {
     const limits = getLimits();
     const today = new Date().toDateString();
+    const pluralAction = getPluralKey(action);
 
-    // Reset usage if it's a new day
     if (usageStats.date !== today) {
       setUsageStats({ date: today, assessments: 0, stories: 0, games: 0, aiQuestions: 0 });
     }
 
     switch (action) {
       case 'assessment':
-        // For guests, check total limit
-        if (subscriptionTier === SUBSCRIPTION_TIERS.GUEST) {
-          return guestUsage.totalAssessments < limits.assessmentsTotal;
-        }
-        // For others, check daily limit
-        return limits.assessmentsPerDay === -1 || usageStats.assessments < limits.assessmentsPerDay;
-
       case 'story':
-        if (subscriptionTier === SUBSCRIPTION_TIERS.GUEST) {
-          return guestUsage.totalStories < limits.storiesPerDay;
-        }
-        return limits.storiesPerDay === -1 || usageStats.stories < limits.storiesPerDay;
-
       case 'game':
         if (subscriptionTier === SUBSCRIPTION_TIERS.GUEST) {
-          return guestUsage.totalGames < limits.gamesPerDay;
+            // Capitalize first letter for guest usage keys (e.g. totalStories)
+            const guestKey = `total${pluralAction.charAt(0).toUpperCase() + pluralAction.slice(1)}`;
+            return guestUsage[guestKey] < limits[`${pluralAction}Total`];
         }
-        return limits.gamesPerDay === -1 || usageStats.games < limits.gamesPerDay;
+        return limits[`${pluralAction}PerDay`] === -1 || usageStats[pluralAction] < limits[`${pluralAction}PerDay`];
 
       case 'ai':
         return limits.canAccessAI && (limits.aiQuestionsPerMonth === -1 || usageStats.aiQuestions < limits.aiQuestionsPerMonth);
@@ -323,48 +306,45 @@ export const SubscriptionProvider = ({ children }) => {
     }
   };
 
-  // Track usage
   const trackUsage = (action) => {
     const today = new Date().toDateString();
+    const pluralAction = getPluralKey(action);
 
     if (subscriptionTier === SUBSCRIPTION_TIERS.GUEST) {
-      // Track guest total usage
+      const guestKey = `total${pluralAction.charAt(0).toUpperCase() + pluralAction.slice(1)}`;
       setGuestUsage(prev => ({
         ...prev,
-        [`total${action.charAt(0).toUpperCase() + action.slice(1)}s`]: prev[`total${action.charAt(0).toUpperCase() + action.slice(1)}s`] + 1
+        [guestKey]: (prev[guestKey] || 0) + 1
       }));
     }
 
-    // Track daily usage
     setUsageStats(prev => {
       if (prev.date !== today) {
-        return { date: today, [action + 's']: 1 };
+        return { date: today, [pluralAction]: 1 };
       }
-      return { ...prev, [action + 's']: prev[action + 's'] + 1 };
+      return { ...prev, [pluralAction]: (prev[pluralAction] || 0) + 1 };
     });
   };
 
-  // Get remaining usage
   const getRemainingUsage = (action) => {
     const limits = getLimits();
     const today = new Date().toDateString();
+    const pluralAction = getPluralKey(action);
 
     if (usageStats.date !== today) {
-      return limits[`${action}sPerDay`];
+      return limits[`${pluralAction}PerDay`];
     }
 
     if (subscriptionTier === SUBSCRIPTION_TIERS.GUEST) {
-      if (action === 'assessment') return Math.max(0, limits.assessmentsTotal - guestUsage.totalAssessments);
-      if (action === 'story') return Math.max(0, limits.storiesPerDay - guestUsage.totalStories);
-      if (action === 'game') return Math.max(0, limits.gamesPerDay - guestUsage.totalGames);
+        const guestKey = `total${pluralAction.charAt(0).toUpperCase() + pluralAction.slice(1)}`;
+        return Math.max(0, limits[`${pluralAction}Total`] - (guestUsage[guestKey] || 0));
     }
 
-    const limit = limits[`${action}sPerDay`];
+    const limit = limits[`${pluralAction}PerDay`];
     if (limit === -1) return '∞';
-    return Math.max(0, limit - usageStats[action + 's']);
+    return Math.max(0, limit - (usageStats[pluralAction] || 0));
   };
 
-  // Check if feature is locked
   const isFeatureLocked = (feature) => {
     const limits = getLimits();
 
@@ -388,12 +368,11 @@ export const SubscriptionProvider = ({ children }) => {
     }
   };
 
-  // Get upgrade prompt message
   const getUpgradeMessage = (feature) => {
     const messages = {
       assessment: `You've reached your assessment limit. Upgrade to get unlimited access!`,
       story: `You've used all your free stories. Upgrade for unlimited reading!`,
-      game: `Please sign up or log in for a free account to play unlimited games!`, // Updated copy
+      game: `Please sign up or log in for a free account to play unlimited games!`, 
       ai: `AI Tutor is only available for paid subscribers. Upgrade now!`,
       certificate: `Download certificates with a paid subscription!`,
       analytics: `Detailed analytics available for paid users only.`,
@@ -405,7 +384,6 @@ export const SubscriptionProvider = ({ children }) => {
     return messages[feature] || 'Upgrade to unlock this feature!';
   };
 
-  // Get recommended tier for upgrade
   const getRecommendedTier = (userRole) => {
     if (userRole === 'STUDENT') return SUBSCRIPTION_TIERS.STUDENT_INDIVIDUAL;
     if (userRole === 'PARENT') return SUBSCRIPTION_TIERS.FAMILY_PLAN;
