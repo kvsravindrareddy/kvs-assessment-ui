@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import jsPDF from 'jspdf';
 import CONFIG from '../../Config';
 import { useSubscription } from '../../context/SubscriptionContext';
 import { useAuth } from '../../context/AuthContext';
@@ -286,8 +285,10 @@ export default function ReadingFlow() {
     speakNext(0);
   };
 
-  const generatePDF = (preview = false) => {
+  const generatePDF = async (preview = false) => {
     if (!storyDetails) return;
+    // Dynamically import jsPDF only when the user requests a PDF — keeps it out of the main bundle
+    const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();

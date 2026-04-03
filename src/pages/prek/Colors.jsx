@@ -1,48 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import '../../css/Colors.css';
+
+// Static data defined once at module level — not recreated on every render
+const COLORS = [
+  { name: 'Red', hex: '#FF0000', emoji: '🔴' },
+  { name: 'Blue', hex: '#0000FF', emoji: '🔵' },
+  { name: 'Yellow', hex: '#FFFF00', emoji: '🟡' },
+  { name: 'Green', hex: '#00FF00', emoji: '🟢' },
+  { name: 'Orange', hex: '#FFA500', emoji: '🟠' },
+  { name: 'Purple', hex: '#800080', emoji: '🟣' },
+  { name: 'Pink', hex: '#FFC0CB', emoji: '🎀' },
+  { name: 'Brown', hex: '#8B4513', emoji: '🟤' },
+  { name: 'Black', hex: '#000000', emoji: '⚫' },
+  { name: 'White', hex: '#FFFFFF', emoji: '⚪' },
+  { name: 'Gray', hex: '#808080', emoji: '🔘' },
+  { name: 'Cyan', hex: '#00FFFF', emoji: '💠' },
+  { name: 'Magenta', hex: '#FF00FF', emoji: '💮' },
+  { name: 'Lime', hex: '#00FF00', emoji: '💚' },
+  { name: 'Indigo', hex: '#4B0082', emoji: '💙' },
+  { name: 'Turquoise', hex: '#40E0D0', emoji: '💎' }
+];
+
+const COLOR_EXAMPLES = {
+  'Red': ['Apple', 'Strawberry', 'Fire Truck'],
+  'Blue': ['Sky', 'Ocean', 'Blueberry'],
+  'Yellow': ['Sun', 'Banana', 'Lemon'],
+  'Green': ['Grass', 'Tree', 'Frog'],
+  'Orange': ['Orange', 'Carrot', 'Pumpkin'],
+  'Purple': ['Grapes', 'Eggplant', 'Lavender'],
+  'Pink': ['Flower', 'Flamingo', 'Pig'],
+  'Brown': ['Chocolate', 'Bear', 'Tree Bark'],
+  'Black': ['Night', 'Cat', 'Tire'],
+  'White': ['Snow', 'Cloud', 'Milk'],
+  'Gray': ['Elephant', 'Stone', 'Rain Cloud'],
+  'Cyan': ['Aquamarine', 'Tropical Water'],
+  'Magenta': ['Fuchsia Flower', 'Neon Light'],
+  'Lime': ['Lime Fruit', 'Neon Sign'],
+  'Indigo': ['Night Sky', 'Deep Ocean'],
+  'Turquoise': ['Gemstone', 'Tropical Sea']
+};
 
 const Colors = ({ audioEnabled = true }) => {
   const [selectedColor, setSelectedColor] = useState(null);
 
-  const colors = [
-    { name: 'Red', hex: '#FF0000', emoji: '🔴' },
-    { name: 'Blue', hex: '#0000FF', emoji: '🔵' },
-    { name: 'Yellow', hex: '#FFFF00', emoji: '🟡' },
-    { name: 'Green', hex: '#00FF00', emoji: '🟢' },
-    { name: 'Orange', hex: '#FFA500', emoji: '🟠' },
-    { name: 'Purple', hex: '#800080', emoji: '🟣' },
-    { name: 'Pink', hex: '#FFC0CB', emoji: '🎀' },
-    { name: 'Brown', hex: '#8B4513', emoji: '🟤' },
-    { name: 'Black', hex: '#000000', emoji: '⚫' },
-    { name: 'White', hex: '#FFFFFF', emoji: '⚪' },
-    { name: 'Gray', hex: '#808080', emoji: '🔘' },
-    { name: 'Cyan', hex: '#00FFFF', emoji: '💠' },
-    { name: 'Magenta', hex: '#FF00FF', emoji: '💮' },
-    { name: 'Lime', hex: '#00FF00', emoji: '💚' },
-    { name: 'Indigo', hex: '#4B0082', emoji: '💙' },
-    { name: 'Turquoise', hex: '#40E0D0', emoji: '💎' }
-  ];
-
-  const colorExamples = {
-    'Red': ['Apple', 'Strawberry', 'Fire Truck'],
-    'Blue': ['Sky', 'Ocean', 'Blueberry'],
-    'Yellow': ['Sun', 'Banana', 'Lemon'],
-    'Green': ['Grass', 'Tree', 'Frog'],
-    'Orange': ['Orange', 'Carrot', 'Pumpkin'],
-    'Purple': ['Grapes', 'Eggplant', 'Lavender'],
-    'Pink': ['Flower', 'Flamingo', 'Pig'],
-    'Brown': ['Chocolate', 'Bear', 'Tree Bark'],
-    'Black': ['Night', 'Cat', 'Tire'],
-    'White': ['Snow', 'Cloud', 'Milk'],
-    'Gray': ['Elephant', 'Stone', 'Rain Cloud'],
-    'Cyan': ['Aquamarine', 'Tropical Water'],
-    'Magenta': ['Fuchsia Flower', 'Neon Light'],
-    'Lime': ['Lime Fruit', 'Neon Sign'],
-    'Indigo': ['Night Sky', 'Deep Ocean'],
-    'Turquoise': ['Gemstone', 'Tropical Sea']
-  };
-
-  const speakColor = (colorName, examples) => {
+  const speakColor = useCallback((colorName, examples) => {
     if (audioEnabled) {
       const synth = window.speechSynthesis;
       // Cancel any ongoing speech first
@@ -52,13 +53,19 @@ const Colors = ({ audioEnabled = true }) => {
       utterance.rate = 0.8;
       synth.speak(utterance);
     }
-  };
+  }, [audioEnabled]);
 
-  const handleColorClick = (color) => {
+  const handleColorClick = useCallback((color) => {
     setSelectedColor(color);
-    const examples = colorExamples[color.name] || [];
+    const examples = COLOR_EXAMPLES[color.name] || [];
     speakColor(color.name, examples);
-  };
+  }, [speakColor]);
+
+  const handleReplay = useCallback(() => {
+    if (selectedColor) {
+      speakColor(selectedColor.name, COLOR_EXAMPLES[selectedColor.name] || []);
+    }
+  }, [selectedColor, speakColor]);
 
   return (
     <div className="colors-container">
@@ -68,9 +75,9 @@ const Colors = ({ audioEnabled = true }) => {
       </div>
 
       <div className="colors-grid">
-        {colors.map((color, index) => (
+        {COLORS.map((color) => (
           <div
-            key={index}
+            key={color.name}
             className={`color-card ${selectedColor?.name === color.name ? 'selected' : ''}`}
             onClick={() => handleColorClick(color)}
           >
@@ -96,15 +103,12 @@ const Colors = ({ audioEnabled = true }) => {
           <div className="color-examples">
             <p>Things that are {selectedColor.name.toLowerCase()}:</p>
             <div className="examples-list">
-              {(colorExamples[selectedColor.name] || []).map((example, idx) => (
-                <span key={idx} className="example-tag">{example}</span>
+              {(COLOR_EXAMPLES[selectedColor.name] || []).map((example) => (
+                <span key={example} className="example-tag">{example}</span>
               ))}
             </div>
           </div>
-          <button
-            className="replay-button"
-            onClick={() => speakColor(selectedColor.name, colorExamples[selectedColor.name] || [])}
-          >
+          <button className="replay-button" onClick={handleReplay}>
             Play Again
           </button>
         </div>

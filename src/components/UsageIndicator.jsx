@@ -52,4 +52,4 @@ const UsageIndicator = ({ type = 'assessment', showInHeader = false }) => {
   return null;
 };
 
-export default UsageIndicator;
+export default React.memo(UsageIndicator);

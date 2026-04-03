@@ -82,8 +82,8 @@ const SubjectCard = ({ subject }) => {
         <div className="weak-topics-section">
           <div className="weak-topics-header">Areas to Improve</div>
           <div className="weak-topics-list">
-            {weakTopics.slice(0, 3).map((topic, index) => (
-              <span key={index} className="weak-topic-tag">
+            {weakTopics.slice(0, 3).map((topic) => (
+              <span key={topic} className="weak-topic-tag">
                 {topic}
               </span>
             ))}
@@ -101,4 +101,4 @@ const SubjectCard = ({ subject }) => {
   );
 };
 
-export default SubjectCard;
+export default React.memo(SubjectCard);

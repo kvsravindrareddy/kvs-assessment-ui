@@ -1,25 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import '../../css/Shapes.css';
+
+// Static data defined once at module level — not recreated on every render
+const SHAPES = [
+  { name: 'Circle', icon: '⭕', color: '#FF6B6B', sides: 0 },
+  { name: 'Square', icon: '⬛', color: '#4ECDC4', sides: 4 },
+  { name: 'Triangle', icon: '🔺', color: '#FFE66D', sides: 3 },
+  { name: 'Rectangle', icon: '▭', color: '#95E1D3', sides: 4 },
+  { name: 'Pentagon', icon: '⬟', color: '#C7CEEA', sides: 5 },
+  { name: 'Hexagon', icon: '⬡', color: '#FFDAB9', sides: 6 },
+  { name: 'Star', icon: '⭐', color: '#FFD700', sides: 10 },
+  { name: 'Heart', icon: '❤️', color: '#FF69B4', sides: 0 },
+  { name: 'Diamond', icon: '💎', color: '#87CEEB', sides: 4 },
+  { name: 'Oval', icon: '⬭', color: '#DDA0DD', sides: 0 },
+  { name: 'Octagon', icon: '⯃', color: '#F4A460', sides: 8 },
+  { name: 'Crescent', icon: '🌙', color: '#F0E68C', sides: 0 }
+];
 
 const Shapes = ({ audioEnabled = true }) => {
   const [selectedShape, setSelectedShape] = useState(null);
 
-  const shapes = [
-    { name: 'Circle', icon: '⭕', color: '#FF6B6B', sides: 0 },
-    { name: 'Square', icon: '⬛', color: '#4ECDC4', sides: 4 },
-    { name: 'Triangle', icon: '🔺', color: '#FFE66D', sides: 3 },
-    { name: 'Rectangle', icon: '▭', color: '#95E1D3', sides: 4 },
-    { name: 'Pentagon', icon: '⬟', color: '#C7CEEA', sides: 5 },
-    { name: 'Hexagon', icon: '⬡', color: '#FFDAB9', sides: 6 },
-    { name: 'Star', icon: '⭐', color: '#FFD700', sides: 10 },
-    { name: 'Heart', icon: '❤️', color: '#FF69B4', sides: 0 },
-    { name: 'Diamond', icon: '💎', color: '#87CEEB', sides: 4 },
-    { name: 'Oval', icon: '⬭', color: '#DDA0DD', sides: 0 },
-    { name: 'Octagon', icon: '⯃', color: '#F4A460', sides: 8 },
-    { name: 'Crescent', icon: '🌙', color: '#F0E68C', sides: 0 }
-  ];
-
-  const speakShape = (shapeName, sides) => {
+  const speakShape = useCallback((shapeName, sides) => {
     if (audioEnabled) {
       const synth = window.speechSynthesis;
       // Cancel any ongoing speech first
@@ -32,12 +33,18 @@ const Shapes = ({ audioEnabled = true }) => {
       utterance.rate = 0.8;
       synth.speak(utterance);
     }
-  };
+  }, [audioEnabled]);
 
-  const handleShapeClick = (shape) => {
+  const handleShapeClick = useCallback((shape) => {
     setSelectedShape(shape);
     speakShape(shape.name, shape.sides);
-  };
+  }, [speakShape]);
+
+  const handleReplay = useCallback(() => {
+    if (selectedShape) {
+      speakShape(selectedShape.name, selectedShape.sides);
+    }
+  }, [selectedShape, speakShape]);
 
   return (
     <div className="shapes-container">
@@ -47,9 +54,9 @@ const Shapes = ({ audioEnabled = true }) => {
       </div>
 
       <div className="shapes-grid">
-        {shapes.map((shape, index) => (
+        {SHAPES.map((shape) => (
           <div
-            key={index}
+            key={shape.name}
             className={`shape-card ${selectedShape?.name === shape.name ? 'selected' : ''}`}
             onClick={() => handleShapeClick(shape)}
             style={{ '--shape-color': shape.color }}
@@ -71,10 +78,7 @@ const Shapes = ({ audioEnabled = true }) => {
               ? `A ${selectedShape.name.toLowerCase()} has ${selectedShape.sides} sides.`
               : `A ${selectedShape.name.toLowerCase()} is a curved shape.`}
           </p>
-          <button
-            className="replay-button"
-            onClick={() => speakShape(selectedShape.name, selectedShape.sides)}
-          >
+          <button className="replay-button" onClick={handleReplay}>
             Play Again
           </button>
         </div>

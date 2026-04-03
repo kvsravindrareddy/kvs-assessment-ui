@@ -3,7 +3,7 @@ import axios from 'axios';
 import CONFIG from '../Config';
 import './StreakWidget.css';
 
-export default function StreakWidget({ onStreakClick }) {
+function StreakWidget({ onStreakClick }) {
     const [streak, setStreak] = useState(null);
     const [showAnimation, setShowAnimation] = useState(false);
 
@@ -68,3 +68,5 @@ export default function StreakWidget({ onStreakClick }) {
         </div>
     );
 }
+
+export default React.memo(StreakWidget);
