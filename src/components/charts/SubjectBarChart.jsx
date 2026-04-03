@@ -2,6 +2,53 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 
 /**
+ * Color mapping for different score ranges.
+ * Defined at module level to avoid recreation on every render.
+ */
+const getBarColor = (score) => {
+  if (score >= 90) return '#10b981'; // Green for A+
+  if (score >= 80) return '#3b82f6'; // Blue for A
+  if (score >= 70) return '#8b5cf6'; // Purple for B+
+  if (score >= 60) return '#f59e0b'; // Orange for B
+  return '#ef4444'; // Red for below 60
+};
+
+/**
+ * Custom tooltip for the subject bar chart.
+ * Defined outside the parent component so it is not recreated on every render.
+ */
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div style={{
+        background: 'white',
+        padding: '12px 16px',
+        borderRadius: '8px',
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+      }}>
+        <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: '#1e293b' }}>{data.subject}</p>
+        <p style={{ margin: '4px 0', color: '#3b82f6', fontSize: '0.9rem' }}>
+          Average: <strong>{data.averageScore}%</strong>
+        </p>
+        {data.letterGrade && (
+          <p style={{ margin: '4px 0', color: '#8b5cf6', fontSize: '0.9rem' }}>
+            Grade: <strong>{data.letterGrade}</strong>
+          </p>
+        )}
+        {data.totalExams && (
+          <p style={{ margin: '4px 0', color: '#64748b', fontSize: '0.85rem' }}>
+            Exams: {data.totalExams}
+          </p>
+        )}
+      </div>
+    );
+  }
+  return null;
+};
+
+/**
  * Subject Bar Chart Component
  *
  * Displays subject-wise performance comparison using Recharts BarChart
@@ -15,46 +62,6 @@ const SubjectBarChart = ({ data, title = "Subject-wise Performance" }) => {
       </div>
     );
   }
-
-  // Color mapping for different score ranges
-  const getBarColor = (score) => {
-    if (score >= 90) return '#10b981'; // Green for A+
-    if (score >= 80) return '#3b82f6'; // Blue for A
-    if (score >= 70) return '#8b5cf6'; // Purple for B+
-    if (score >= 60) return '#f59e0b'; // Orange for B
-    return '#ef4444'; // Red for below 60
-  };
-
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div style={{
-          background: 'white',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-        }}>
-          <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: '#1e293b' }}>{data.subject}</p>
-          <p style={{ margin: '4px 0', color: '#3b82f6', fontSize: '0.9rem' }}>
-            Average: <strong>{data.averageScore}%</strong>
-          </p>
-          {data.letterGrade && (
-            <p style={{ margin: '4px 0', color: '#8b5cf6', fontSize: '0.9rem' }}>
-              Grade: <strong>{data.letterGrade}</strong>
-            </p>
-          )}
-          {data.totalExams && (
-            <p style={{ margin: '4px 0', color: '#64748b', fontSize: '0.85rem' }}>
-              Exams: {data.totalExams}
-            </p>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <div style={{ background: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #e2e8f0' }}>
@@ -91,4 +98,4 @@ const SubjectBarChart = ({ data, title = "Subject-wise Performance" }) => {
   );
 };
 
-export default SubjectBarChart;
+export default React.memo(SubjectBarChart);

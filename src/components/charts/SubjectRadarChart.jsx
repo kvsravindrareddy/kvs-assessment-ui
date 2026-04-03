@@ -2,6 +2,30 @@ import React from 'react';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, ResponsiveContainer, Tooltip } from 'recharts';
 
 /**
+ * Custom tooltip for the subject radar chart.
+ * Defined outside the parent component so it is not recreated on every render.
+ */
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{
+        background: 'white',
+        padding: '12px 16px',
+        borderRadius: '8px',
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+      }}>
+        <p style={{ margin: '0 0 4px 0', fontWeight: '600', color: '#1e293b' }}>{payload[0].payload.subject}</p>
+        <p style={{ margin: '4px 0', color: '#3b82f6', fontSize: '0.9rem' }}>
+          Score: <strong>{payload[0].value}%</strong>
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
+/**
  * Subject Radar Chart Component
  *
  * Displays multi-dimensional subject performance comparison using Recharts RadarChart
@@ -15,26 +39,6 @@ const SubjectRadarChart = ({ data, title = "Subject Performance Comparison" }) =
       </div>
     );
   }
-
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div style={{
-          background: 'white',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-        }}>
-          <p style={{ margin: '0 0 4px 0', fontWeight: '600', color: '#1e293b' }}>{payload[0].payload.subject}</p>
-          <p style={{ margin: '4px 0', color: '#3b82f6', fontSize: '0.9rem' }}>
-            Score: <strong>{payload[0].value}%</strong>
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <div style={{ background: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #e2e8f0' }}>
@@ -71,4 +75,4 @@ const SubjectRadarChart = ({ data, title = "Subject Performance Comparison" }) =
   );
 };
 
-export default SubjectRadarChart;
+export default React.memo(SubjectRadarChart);

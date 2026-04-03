@@ -1,5 +1,6 @@
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+// jsPDF and jspdf-autotable are loaded on first use via PDFGenerator.init()
+// so they are excluded from the main bundle and only fetched when a PDF is needed.
+let _jsPDF = null;
 
 /**
  * Common PDF Generator Utility
@@ -52,6 +53,17 @@ let CURRENCY_IMAGES = {
 
 export const PDFGenerator = {
   /**
+   * Lazily loads jsPDF + jspdf-autotable on first call and caches the result.
+   * Must be awaited before calling any generate* method.
+   */
+  async init() {
+    if (!_jsPDF) {
+      const mod = await import('jspdf');
+      await import('jspdf-autotable');
+      _jsPDF = mod.default;
+    }
+  },
+  /**
    * Set currency images (loaded from external source)
    */
   setCurrencyImages(images) {
@@ -63,7 +75,7 @@ export const PDFGenerator = {
    * Generate Multiplication Tables with proper 2-column layout
    */
   generateMultiplicationTable(from, to, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, `Multiplication Tables (${from} to ${to})`, includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
 
     let yPosition = 40;
@@ -122,7 +134,7 @@ export const PDFGenerator = {
    * Generate Addition/Subtraction/Multiplication/Division worksheets with table format
    */
   generateMathProblems(type, count, maxNumber, difficulty, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     const title = `${type.charAt(0).toUpperCase() + type.slice(1)} Worksheet`;
     addHeader(doc, title, includeAnswers ? 'ANSWER KEY' : `${difficulty.toUpperCase()} Level`);
 
@@ -204,7 +216,7 @@ export const PDFGenerator = {
    * Generate Number Writing worksheet with proper grid
    */
   generateNumberWritingWorksheet(from, to, percentage) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, `Number Writing Practice (${from} to ${to})`, `Fill in ${percentage}% of the missing numbers`);
 
     const tableData = [];
@@ -257,7 +269,7 @@ export const PDFGenerator = {
    * Generate Mixed Operations worksheet with table format
    */
   generateMixedOperationsWorksheet(count, maxNumber, difficulty, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, 'Mixed Operations Worksheet', includeAnswers ? 'ANSWER KEY' : `${difficulty.toUpperCase()} Level`);
 
     const operations = ['+', '-', '×', '÷'];
@@ -351,7 +363,7 @@ export const PDFGenerator = {
    * 🚀 FIX: Perfectly aligned question text sharing the same line as "Q1)"
    */
   generateCustomQuestionWorksheet(questions, options = {}) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     const {
       title = 'Worksheet',
       grade = '',
@@ -510,7 +522,7 @@ export const PDFGenerator = {
    * Generate Simple Addition Worksheet (vertical format)
    */
   generateSimpleAdditionWorksheet(count, maxNumber, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, 'Simple Addition', includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
 
     let yPosition = 40;
@@ -567,7 +579,7 @@ export const PDFGenerator = {
    * Generate Simple Subtraction Worksheet (vertical format)
    */
   generateSimpleSubtractionWorksheet(count, maxNumber, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, 'Simple Subtraction', includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
 
     let yPosition = 40;
@@ -628,7 +640,7 @@ export const PDFGenerator = {
    * Generate Simple Multiplication Worksheet (vertical format)
    */
   generateSimpleMultiplicationWorksheet(count, maxNumber, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, 'Simple Multiplication', includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
 
     let yPosition = 40;
@@ -685,7 +697,7 @@ export const PDFGenerator = {
    * Generate Simple Division Worksheet (vertical format)
    */
   generateSimpleDivisionWorksheet(count, maxDividend, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, 'Simple Division', includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
 
     let yPosition = 40;
@@ -775,7 +787,7 @@ export const PDFGenerator = {
    * Generate Roman Numerals Basic Worksheet (I-X)
    */
   generateRomanNumeralsBasicWorksheet(count, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, 'Roman Numerals (I - X)', includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
 
     let yPosition = 45;
@@ -816,7 +828,7 @@ export const PDFGenerator = {
    * Generate Roman Numerals Advanced Worksheet (X-M)
    */
   generateRomanNumeralsAdvancedWorksheet(count, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, 'Roman Numerals (X - M)', includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
 
     let yPosition = 45;
@@ -878,7 +890,7 @@ export const PDFGenerator = {
    * Generate Roman to Arabic Conversion Worksheet
    */
   generateRomanToArabicWorksheet(count, maxNumber, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, 'Roman Numerals to Numbers', includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
 
     let yPosition = 45;
@@ -919,7 +931,7 @@ export const PDFGenerator = {
    * Generate Arabic to Roman Conversion Worksheet
    */
   generateArabicToRomanWorksheet(count, maxNumber, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, 'Numbers to Roman Numerals', includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
 
     let yPosition = 45;
@@ -1030,7 +1042,7 @@ export const PDFGenerator = {
    * Generate Professional Time & Clock Worksheet
    */
   generateTimeClockWorksheet(count, difficulty, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, 'Time & Clock Reading', includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
 
     let yPosition = 48;
@@ -1382,7 +1394,7 @@ export const PDFGenerator = {
    * Generate Professional Money & Currency Worksheet
    */
   generateMoneyCurrencyWorksheet(count, difficulty, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, 'Money & Currency', includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
 
     let yPosition = 48;
@@ -1595,7 +1607,7 @@ export const PDFGenerator = {
    * Generate Professional Measurements Worksheet
    */
   generateMeasurementsWorksheet(count, difficulty, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, 'Measurements & Conversions', includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
 
     let yPosition = 48;
@@ -1679,7 +1691,7 @@ export const PDFGenerator = {
    * Generate Patterns & Sequences Worksheet
    */
   generatePatternsWorksheet(count, difficulty, includeAnswers = false) {
-    const doc = new jsPDF();
+    const doc = new _jsPDF();
     addHeader(doc, 'Patterns & Sequences', includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
 
     let yPosition = 45;

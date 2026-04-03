@@ -1,69 +1,81 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
-// Auth
-import Login from './pages/auth/Login';
-import Signup from './pages/auth/Signup';
-import UserProfile from './pages/auth/UserProfile';
-import ForgotPassword from './pages/auth/ForgotPassword';
-import ResetPassword from './pages/auth/ResetPassword';
-
-// 🎮 NEW GAMES IMPORTS
-import MathBalance from './pages/games/MathBalance';
-import NextInPattern from './pages/games/cognitive/NextInPattern';
-
-// Admin Pages
-import AdminLayout from './pages/admin/AdminLayout';
-import Dashboard from './pages/admin/Dashboard';
-import QuestionManagement from './pages/admin/QuestionManagement';
-import StoryManagement from './pages/admin/StoryManagement';
-import UsersManagement from './pages/admin/UsersManagement';
-import Analytics from './pages/admin/Analytics';
-import Settings from './pages/admin/Settings';
-import FlashMessageManager from './pages/admin/FlashMessageManager';
-import ContentLibrary from './pages/admin/ContentLibrary';
-import WorksheetManager from './pages/admin/WorksheetManager';
-import FeatureAccessControl from './pages/admin/FeatureAccessControl';
-import AboutUs from './pages/admin/AboutUs';
-import PrivacyPolicy from './pages/admin/PrivacyPolicy';
-import TermsOfService from './pages/admin/TermsOfService';
-
-// Landing Page
-import LandingPage from './pages/landing/LandingPage';
-
-// Assessment Pages
-import GradeSelection from './pages/GradeSelection';
-import SubjectSelection from './pages/SubjectSelection';
-import AssessmentConfig from './pages/AssessmentConfig';
-import AnswerKey from './pages/AnswerKey';
-import AssessmentsHub from './pages/assessments/AssessmentsHub'; // <-- Added Import
-import MathByGrade from './pages/assessments/MathByGrade'; // <-- Math By Grade Import
-import ChallengeArena from './pages/assessments/ChallengeArena'; // <-- Challenge Arena Import
-import LeaderboardView from './pages/assessments/LeaderboardView'; // <-- Leaderboard View Import
-import ITLearningHub from './pages/it-learning/ITLearningHub'; // <-- IT Learning Hub Import
-
-// Parent Pages
-import ParentMoments from './pages/parent/ParentMoments';
-
-// Protected Route & Dashboard
+// These are layout/wrapper components used on every route — keep them eager
 import ProtectedRoute from './components/ProtectedRoute';
 import UnifiedDashboard from './pages/dashboard/UnifiedDashboard';
-import SpeedMathChallenge from './pages/assessments/SpeedMathChallenge';
-import SubjectAssessments from './pages/assessments/SubjectAssessments';
-import StudentGradingDashboard from './pages/student/StudentGradingDashboard';
-
-import ScienceLab from './pages/science/ScienceLab';
-import GrammarHub from './pages/language/GrammarHub';
-import VocabularyHub from './pages/language/VocabularyHub';
-
-// Old App Content (existing features)
+// Old App Content (existing features) — catch-all, must be eager
 import App from './App';
 
-import CompetitiveExamHub from './pages/assessments/CompetitiveExamHub';
-import CompetitiveAssessmentFlow from './pages/assessments/CompetitiveAssessmentFlow';
-import CriticalThinkingHub from './pages/assessments/CriticalThinkingHub';
-import SpecialtyContentManager from './pages/admin/SpecialtyContentManager';
-//import CompetitiveWorksheetPrint from './pages/assessments/CompetitiveWorksheetPrint';
+// Lazy-loaded page components — each is split into its own JS chunk
+// Auth
+const Login = lazy(() => import('./pages/auth/Login'));
+const Signup = lazy(() => import('./pages/auth/Signup'));
+const UserProfile = lazy(() => import('./pages/auth/UserProfile'));
+const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'));
+
+// 🎮 Games
+const MathBalance = lazy(() => import('./pages/games/MathBalance'));
+const NextInPattern = lazy(() => import('./pages/games/cognitive/NextInPattern'));
+
+// Admin Pages
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const QuestionManagement = lazy(() => import('./pages/admin/QuestionManagement'));
+const StoryManagement = lazy(() => import('./pages/admin/StoryManagement'));
+const UsersManagement = lazy(() => import('./pages/admin/UsersManagement'));
+const Analytics = lazy(() => import('./pages/admin/Analytics'));
+const Settings = lazy(() => import('./pages/admin/Settings'));
+const FlashMessageManager = lazy(() => import('./pages/admin/FlashMessageManager'));
+const ContentLibrary = lazy(() => import('./pages/admin/ContentLibrary'));
+const WorksheetManager = lazy(() => import('./pages/admin/WorksheetManager'));
+const FeatureAccessControl = lazy(() => import('./pages/admin/FeatureAccessControl'));
+const AboutUs = lazy(() => import('./pages/admin/AboutUs'));
+const PrivacyPolicy = lazy(() => import('./pages/admin/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/admin/TermsOfService'));
+const SpecialtyContentManager = lazy(() => import('./pages/admin/SpecialtyContentManager'));
+
+// Landing Page
+const LandingPage = lazy(() => import('./pages/landing/LandingPage'));
+
+// Assessment Pages
+const GradeSelection = lazy(() => import('./pages/GradeSelection'));
+const SubjectSelection = lazy(() => import('./pages/SubjectSelection'));
+const AssessmentConfig = lazy(() => import('./pages/AssessmentConfig'));
+const AnswerKey = lazy(() => import('./pages/AnswerKey'));
+const MathByGrade = lazy(() => import('./pages/assessments/MathByGrade'));
+const ChallengeArena = lazy(() => import('./pages/assessments/ChallengeArena'));
+const LeaderboardView = lazy(() => import('./pages/assessments/LeaderboardView'));
+const SpeedMathChallenge = lazy(() => import('./pages/assessments/SpeedMathChallenge'));
+const SubjectAssessments = lazy(() => import('./pages/assessments/SubjectAssessments'));
+const CompetitiveExamHub = lazy(() => import('./pages/assessments/CompetitiveExamHub'));
+const CompetitiveAssessmentFlow = lazy(() => import('./pages/assessments/CompetitiveAssessmentFlow'));
+const CriticalThinkingHub = lazy(() => import('./pages/assessments/CriticalThinkingHub'));
+
+// IT Learning
+const ITLearningHub = lazy(() => import('./pages/it-learning/ITLearningHub'));
+
+// Parent Pages
+const ParentMoments = lazy(() => import('./pages/parent/ParentMoments'));
+
+// Student
+const StudentGradingDashboard = lazy(() => import('./pages/student/StudentGradingDashboard'));
+
+// Science / Language
+const ScienceLab = lazy(() => import('./pages/science/ScienceLab'));
+const GrammarHub = lazy(() => import('./pages/language/GrammarHub'));
+const VocabularyHub = lazy(() => import('./pages/language/VocabularyHub'));
+
+// Fallback shown while a lazy chunk is loading
+const PageLoader = () => (
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontSize: '1.2rem', color: '#64748b' }}>
+    Loading...
+  </div>
+);
+
+// Wraps an element in a Suspense boundary with the shared PageLoader fallback
+const S = (element) => <Suspense fallback={<PageLoader />}>{element}</Suspense>;
 
 /**
  * Application Router Configuration
@@ -72,7 +84,7 @@ import SpecialtyContentManager from './pages/admin/SpecialtyContentManager';
 export const router = createBrowserRouter([
   {
     path: '/competitive-hub',
-    element: (
+    element: S(
       <UnifiedDashboard>
         <CompetitiveExamHub />
       </UnifiedDashboard>
@@ -80,50 +92,48 @@ export const router = createBrowserRouter([
   },
   {
     path: '/competitive-assessment/:examId',
-    element: (
+    element: S(
       <UnifiedDashboard>
         <CompetitiveAssessmentFlow />
       </UnifiedDashboard>
     )
   },
-  // {
-  //   path: '/competitive-worksheet/:examId',
-  //   element: <CompetitiveWorksheetPrint /> // No Dashboard wrapper so it prints purely full-screen!
-  // },
   {
     path: '/landing',
-    element: <LandingPage />
+    element: S(<LandingPage />)
   },
   {
     path: '/login',
-    element: <Login />
+    element: S(<Login />)
   },
   {
     path: '/signup',
-    element: <Signup />
+    element: S(<Signup />)
   },
   {
     path: '/forgot-password',
-    element: <ForgotPassword />
+    element: S(<ForgotPassword />)
   },
   {
     path: '/reset-password',
-    element: <ResetPassword />
+    element: S(<ResetPassword />)
   },
   {
     path: '/profile',
     element: (
       <ProtectedRoute>
         {/* WRAPPED UserProfile inside UnifiedDashboard so navigation stays visible! */}
-        <UnifiedDashboard>
-          <UserProfile />
-        </UnifiedDashboard>
+        {S(
+          <UnifiedDashboard>
+            <UserProfile />
+          </UnifiedDashboard>
+        )}
       </ProtectedRoute>
     )
   },
   {
     path: '/assessments/speed-math',
-    element: (
+    element: S(
       <UnifiedDashboard>
         <SpeedMathChallenge />
       </UnifiedDashboard>
@@ -131,7 +141,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/assessments/subject-assessments',
-    element: (
+    element: S(
       <UnifiedDashboard>
         <SubjectAssessments />
       </UnifiedDashboard>
@@ -141,9 +151,11 @@ export const router = createBrowserRouter([
     path: '/student/grading-dashboard',
     element: (
       <ProtectedRoute>
-        <UnifiedDashboard>
-          <StudentGradingDashboard />
-        </UnifiedDashboard>
+        {S(
+          <UnifiedDashboard>
+            <StudentGradingDashboard />
+          </UnifiedDashboard>
+        )}
       </ProtectedRoute>
     )
   },
@@ -173,7 +185,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/assessments/math-by-grade',
-    element: (
+    element: S(
       <UnifiedDashboard>
         <MathByGrade />
       </UnifiedDashboard>
@@ -181,11 +193,11 @@ export const router = createBrowserRouter([
   },
   {
     path: '/assessments/challenge-arena',
-    element: <ChallengeArena />
+    element: S(<ChallengeArena />)
   },
   {
     path: '/assessments/leaderboard',
-    element: (
+    element: S(
       <UnifiedDashboard>
         <LeaderboardView />
       </UnifiedDashboard>
@@ -193,7 +205,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/it-learning-hub',
-    element: (
+    element: S(
       <UnifiedDashboard>
         <ITLearningHub />
       </UnifiedDashboard>
@@ -203,9 +215,11 @@ export const router = createBrowserRouter([
     path: '/parent/moments',
     element: (
       <ProtectedRoute requiredRole={['PARENT']}>
-        <UnifiedDashboard>
-          <ParentMoments />
-        </UnifiedDashboard>
+        {S(
+          <UnifiedDashboard>
+            <ParentMoments />
+          </UnifiedDashboard>
+        )}
       </ProtectedRoute>
     )
   },
@@ -213,7 +227,7 @@ export const router = createBrowserRouter([
     path: '/admin',
     element: (
       <ProtectedRoute requiredRole={['ADMIN', 'SUPER_ADMIN']}>
-        <AdminLayout />
+        {S(<AdminLayout />)}
       </ProtectedRoute>
     ),
     children: [
@@ -223,90 +237,90 @@ export const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <Dashboard />
+        element: S(<Dashboard />)
       },
       {
         path: 'questions',
-        element: <QuestionManagement />
+        element: S(<QuestionManagement />)
       },
       {
         path: 'stories',
-        element: <StoryManagement />
+        element: S(<StoryManagement />)
       },
       {
         path: 'users',
-        element: <UsersManagement />
+        element: S(<UsersManagement />)
       },
       {
         path: 'analytics',
-        element: <Analytics />
+        element: S(<Analytics />)
       },
       {
         path: 'settings',
-        element: <Settings />
+        element: S(<Settings />)
       },
       {
         path: 'flash-messages',
-        element: <FlashMessageManager />
+        element: S(<FlashMessageManager />)
       },
       {
         path: 'feature-access',
-        element: <FeatureAccessControl />
+        element: S(<FeatureAccessControl />)
       },
       {
         path: 'content-library',
         children: [
           {
             index: true,
-            element: <ContentLibrary />
+            element: S(<ContentLibrary />)
           },
           {
             path: 'worksheets',
-            element: <WorksheetManager />
+            element: S(<WorksheetManager />)
           }
         ]
       },
       {
         path: 'specialty-content',
-        element: <SpecialtyContentManager />
+        element: S(<SpecialtyContentManager />)
       }
     ]
   },
   {
     path: '/select-grade',
-    element: <GradeSelection />
+    element: S(<GradeSelection />)
   },
   {
     path: '/select-subject/:gradeCode',
-    element: <SubjectSelection />
+    element: S(<SubjectSelection />)
   },
   {
     path: '/configure-assessment/:gradeCode/:subjectCode',
-    element: <AssessmentConfig />
+    element: S(<AssessmentConfig />)
   },
   {
     path: '/answer-key/:assessmentId',
-    element: <AnswerKey />
+    element: S(<AnswerKey />)
   },
   {
     path: '/games/math-balance',
-    element: <MathBalance />
+    element: S(<MathBalance />)
   },
   {
     path: '/games/next-pattern',
-    element: <NextInPattern />
+    element: S(<NextInPattern />)
   },
   {
     path: '/about',
-    element: <AboutUs />
+    element: S(<AboutUs />)
   },
   {
     path: '/privacy',
-    element: <PrivacyPolicy />
+    element: S(<PrivacyPolicy />)
   },
   {
     path: '/terms',
-    element: <TermsOfService />
+    element: S(<TermsOfService />)
   },
   {
     path: '/*',
@@ -314,19 +328,19 @@ export const router = createBrowserRouter([
   },
   {
     path: '/assessments/science-lab',
-    element: <UnifiedDashboard><ScienceLab /></UnifiedDashboard>
+    element: S(<UnifiedDashboard><ScienceLab /></UnifiedDashboard>)
   },
   {
     path: '/assessments/grammar-hub',
-    element: <UnifiedDashboard><GrammarHub /></UnifiedDashboard>
+    element: S(<UnifiedDashboard><GrammarHub /></UnifiedDashboard>)
   },
   {
     path: '/assessments/vocabulary-hub',
-    element: <UnifiedDashboard><VocabularyHub /></UnifiedDashboard>
+    element: S(<UnifiedDashboard><VocabularyHub /></UnifiedDashboard>)
   },
   {
     path: '/assessments/critical-thinking',
-    element: <UnifiedDashboard><CriticalThinkingHub /></UnifiedDashboard>
+    element: S(<UnifiedDashboard><CriticalThinkingHub /></UnifiedDashboard>)
   }
 ], {
   future: {

@@ -233,9 +233,10 @@ export default function WorksheetsHub() {
         return doc;
     };
 
-    const generateFromTemplate = (template, includeAnswers, print = false) => {
+    const generateFromTemplate = async (template, includeAnswers, print = false) => {
         setLoading(true);
         try {
+            await PDFGenerator.init();
             const doc = generatePDFForTemplate(template, includeAnswers);
             if (print) {
                 PDFGenerator.printPDF(doc);
@@ -249,9 +250,10 @@ export default function WorksheetsHub() {
         }
     };
 
-    const generateCustom = (includeAnswers, print = false) => {
+    const generateCustom = async (includeAnswers, print = false) => {
         setLoading(true);
         try {
+            await PDFGenerator.init();
             const params = customParams[activeCategory];
             let doc = generatePDFForTemplate(params, includeAnswers);
             
@@ -274,9 +276,10 @@ export default function WorksheetsHub() {
         }));
     };
 
-    const previewWorksheet = (template) => {
+    const previewWorksheet = async (template) => {
         try {
             setLoading(true);
+            await PDFGenerator.init();
             let doc = generatePDFForTemplate(template, false);
             const pdfBlob = doc.output('blob');
             const pdfUrl = URL.createObjectURL(pdfBlob);

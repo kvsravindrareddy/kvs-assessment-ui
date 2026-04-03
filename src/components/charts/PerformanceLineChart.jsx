@@ -2,6 +2,32 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 /**
+ * Custom tooltip for the performance line chart.
+ * Defined outside the parent component so it is not recreated on every render.
+ */
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{
+        background: 'white',
+        padding: '12px 16px',
+        borderRadius: '8px',
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+      }}>
+        <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: '#1e293b' }}>{label}</p>
+        {payload.map((entry, index) => (
+          <p key={index} style={{ margin: '4px 0', color: entry.color, fontSize: '0.9rem' }}>
+            {entry.name}: <strong>{entry.value}%</strong>
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
+/**
  * Performance Line Chart Component
  *
  * Displays score trends over time using Recharts LineChart
@@ -15,28 +41,6 @@ const PerformanceLineChart = ({ data, title = "Performance Trend" }) => {
       </div>
     );
   }
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div style={{
-          background: 'white',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-        }}>
-          <p style={{ margin: '0 0 8px 0', fontWeight: '600', color: '#1e293b' }}>{label}</p>
-          {payload.map((entry, index) => (
-            <p key={index} style={{ margin: '4px 0', color: entry.color, fontSize: '0.9rem' }}>
-              {entry.name}: <strong>{entry.value}%</strong>
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <div style={{ background: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #e2e8f0' }}>
@@ -77,4 +81,4 @@ const PerformanceLineChart = ({ data, title = "Performance Trend" }) => {
   );
 };
 
-export default PerformanceLineChart;
+export default React.memo(PerformanceLineChart);

@@ -1,43 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import '../../css/Alphabets.css';
+
+// Static data defined once at module level — not recreated on every render
+const ALPHABET_DATA = {
+  A: { word: 'Apple', emoji: '🍎' },
+  B: { word: 'Ball', emoji: '⚽' },
+  C: { word: 'Cat', emoji: '🐱' },
+  D: { word: 'Dog', emoji: '🐶' },
+  E: { word: 'Elephant', emoji: '🐘' },
+  F: { word: 'Fish', emoji: '🐟' },
+  G: { word: 'Grapes', emoji: '🍇' },
+  H: { word: 'House', emoji: '🏠' },
+  I: { word: 'Ice Cream', emoji: '🍦' },
+  J: { word: 'Juice', emoji: '🧃' },
+  K: { word: 'Kite', emoji: '🪁' },
+  L: { word: 'Lion', emoji: '🦁' },
+  M: { word: 'Monkey', emoji: '🐵' },
+  N: { word: 'Nest', emoji: '🪺' },
+  O: { word: 'Orange', emoji: '🍊' },
+  P: { word: 'Penguin', emoji: '🐧' },
+  Q: { word: 'Queen', emoji: '👸' },
+  R: { word: 'Rabbit', emoji: '🐰' },
+  S: { word: 'Star', emoji: '⭐' },
+  T: { word: 'Tree', emoji: '🌳' },
+  U: { word: 'Umbrella', emoji: '☂️' },
+  V: { word: 'Violin', emoji: '🎻' },
+  W: { word: 'Watermelon', emoji: '🍉' },
+  X: { word: 'Xylophone', emoji: '🎵' },
+  Y: { word: 'Yacht', emoji: '⛵' },
+  Z: { word: 'Zebra', emoji: '🦓' }
+};
+
+const LETTERS = Object.keys(ALPHABET_DATA);
 
 const Alphabets = ({ audioEnabled = true }) => {
   const [selectedLetter, setSelectedLetter] = useState(null);
   const [letterType, setLetterType] = useState('uppercase');
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const alphabetData = {
-    A: { word: 'Apple', emoji: '🍎' },
-    B: { word: 'Ball', emoji: '⚽' },
-    C: { word: 'Cat', emoji: '🐱' },
-    D: { word: 'Dog', emoji: '🐶' },
-    E: { word: 'Elephant', emoji: '🐘' },
-    F: { word: 'Fish', emoji: '🐟' },
-    G: { word: 'Grapes', emoji: '🍇' },
-    H: { word: 'House', emoji: '🏠' },
-    I: { word: 'Ice Cream', emoji: '🍦' },
-    J: { word: 'Juice', emoji: '🧃' },
-    K: { word: 'Kite', emoji: '🪁' },
-    L: { word: 'Lion', emoji: '🦁' },
-    M: { word: 'Monkey', emoji: '🐵' },
-    N: { word: 'Nest', emoji: '🪺' },
-    O: { word: 'Orange', emoji: '🍊' },
-    P: { word: 'Penguin', emoji: '🐧' },
-    Q: { word: 'Queen', emoji: '👸' },
-    R: { word: 'Rabbit', emoji: '🐰' },
-    S: { word: 'Star', emoji: '⭐' },
-    T: { word: 'Tree', emoji: '🌳' },
-    U: { word: 'Umbrella', emoji: '☂️' },
-    V: { word: 'Violin', emoji: '🎻' },
-    W: { word: 'Watermelon', emoji: '🍉' },
-    X: { word: 'Xylophone', emoji: '🎵' },
-    Y: { word: 'Yacht', emoji: '⛵' },
-    Z: { word: 'Zebra', emoji: '🦓' }
-  };
-
-  const letters = Object.keys(alphabetData);
-
-  const speakLetter = (letter, word) => {
+  const speakLetter = useCallback((letter, word) => {
     if (audioEnabled) {
       const synth = window.speechSynthesis;
       // Cancel any ongoing speech first
@@ -64,12 +65,12 @@ const Alphabets = ({ audioEnabled = true }) => {
 
       synth.speak(utterance);
     }
-  };
+  }, [audioEnabled]);
 
-  const handleLetterClick = (letter) => {
+  const handleLetterClick = useCallback((letter) => {
     setSelectedLetter(letter);
     setIsAnimating(true);
-    const data = alphabetData[letter];
+    const data = ALPHABET_DATA[letter];
     speakLetter(letter, data.word);
 
     // Reset animation after 3 seconds
@@ -77,7 +78,10 @@ const Alphabets = ({ audioEnabled = true }) => {
       setIsAnimating(false);
       setSelectedLetter(null);
     }, 3000);
-  };
+  }, [speakLetter]);
+
+  const setUppercase = useCallback(() => setLetterType('uppercase'), []);
+  const setLowercase = useCallback(() => setLetterType('lowercase'), []);
 
   const getDisplayLetter = (letter) => {
     if (letterType === 'uppercase') return letter;
@@ -94,21 +98,21 @@ const Alphabets = ({ audioEnabled = true }) => {
       <div className="letter-type-selector">
         <button
           className={`type-button ${letterType === 'uppercase' ? 'active' : ''}`}
-          onClick={() => setLetterType('uppercase')}
+          onClick={setUppercase}
         >
           ABC (Uppercase)
         </button>
         <button
           className={`type-button ${letterType === 'lowercase' ? 'active' : ''}`}
-          onClick={() => setLetterType('lowercase')}
+          onClick={setLowercase}
         >
           abc (Lowercase)
         </button>
       </div>
 
       <div className="alphabets-grid">
-        {letters.map((letter, index) => {
-          const data = alphabetData[letter];
+        {LETTERS.map((letter, index) => {
+          const data = ALPHABET_DATA[letter];
           const isSelected = selectedLetter === letter && isAnimating;
           return (
             <div
