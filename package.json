@@ -25,7 +25,7 @@
     "build": "DISABLE_ESLINT_PLUGIN=true react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "react-scripts lint"
+    "lint": "eslint src"
   },
   "eslintConfig": {
     "extends": [

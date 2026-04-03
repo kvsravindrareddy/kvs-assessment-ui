@@ -71,7 +71,7 @@ function AppContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
-  const [locationState, setLocationState] = useState({ latitude: null, longitude: null }); // eslint-disable-line no-unused-vars
+  const [, setLocationState] = useState({ latitude: null, longitude: null });
   const [gradeData] = useState({});
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
