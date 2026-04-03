@@ -1,51 +1,56 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import './App.css';
 import './css/footer.css';
 import kivoLogo from './assets/kivo.png';
 
 import { getLocation } from './utils/location';
-import Contactus from './pages/admin/Contactus';
-import AboutUs from './pages/admin/AboutUs';
-import Subscribe from './pages/admin/Subscribe';
-import PrivacyPolicy from './pages/admin/PrivacyPolicy';
-import TermsOfService from './pages/admin/TermsOfService';
-import OurInnovation from './pages/admin/OurInnovation';
-import HowItWorks from './pages/admin/HowItWorks';
-import FAQ from './pages/admin/FAQ';
-import SuccessStories from './pages/admin/SuccessStories';
-import PlatformStats from './pages/admin/PlatformStats';
-import SystemHealth from './pages/admin/SystemHealth';
-import Leaderboard from './pages/admin/Leaderboard';
-import Rewards from './pages/admin/Rewards';
-import IdeaHub from './pages/admin/IdeaHub';
-import ReportBug from './pages/admin/ReportBug';
-import AIHub from './pages/ai/AIHub';
 import Footer from './footer';
 import EarlyEducation from './components/EarlyEducation';
 import AssessmentComponents from './components/AssessmentComponents';
-import LoadGradeData from './pages/config/LoadGradeData';
 import ModernHomePage from './components/ModernHomePage';
-import News from './pages/news/News';
-import AssessmentFlow from './pages/random/AssessmentFlow';
-import ReadingFlow from './pages/reading/ReadingFlow';
-import GamesHub from './pages/games/GamesHub';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { SubscriptionProvider, useSubscription } from './context/SubscriptionContext';
+import { SubscriptionProvider } from './context/SubscriptionContext';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import UnifiedDashboard from './pages/dashboard/UnifiedDashboard';
-import PricingPage from './pages/subscription/PricingPage';
-import UsageIndicator from './components/UsageIndicator';
 import ErrorReportButton from './components/ErrorReportButton';
 import IdeaSubmitButton from './components/IdeaSubmitButton';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import AssessmentsHub from './pages/assessments/AssessmentsHub';
-import WorksheetsHub from './pages/worksheets/WorksheetsHub';
 import EnhancedSearch from './components/EnhancedSearch';
 import FlashMessages from './components/FlashMessages';
 import StreakWidget from './components/StreakWidget';
 import StreakModal from './components/StreakModal';
+
+// Lazy-loaded section components — only downloaded when the user navigates to them
+const Contactus = lazy(() => import('./pages/admin/Contactus'));
+const AboutUs = lazy(() => import('./pages/admin/AboutUs'));
+const Subscribe = lazy(() => import('./pages/admin/Subscribe'));
+const PrivacyPolicy = lazy(() => import('./pages/admin/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/admin/TermsOfService'));
+const OurInnovation = lazy(() => import('./pages/admin/OurInnovation'));
+const HowItWorks = lazy(() => import('./pages/admin/HowItWorks'));
+const FAQ = lazy(() => import('./pages/admin/FAQ'));
+const SuccessStories = lazy(() => import('./pages/admin/SuccessStories'));
+const PlatformStats = lazy(() => import('./pages/admin/PlatformStats'));
+const SystemHealth = lazy(() => import('./pages/admin/SystemHealth'));
+const Leaderboard = lazy(() => import('./pages/admin/Leaderboard'));
+const Rewards = lazy(() => import('./pages/admin/Rewards'));
+const IdeaHub = lazy(() => import('./pages/admin/IdeaHub'));
+const ReportBug = lazy(() => import('./pages/admin/ReportBug'));
+const AIHub = lazy(() => import('./pages/ai/AIHub'));
+const AssessmentFlow = lazy(() => import('./pages/random/AssessmentFlow'));
+const ReadingFlow = lazy(() => import('./pages/reading/ReadingFlow'));
+const GamesHub = lazy(() => import('./pages/games/GamesHub'));
+const PricingPage = lazy(() => import('./pages/subscription/PricingPage'));
+const AssessmentsHub = lazy(() => import('./pages/assessments/AssessmentsHub'));
+const WorksheetsHub = lazy(() => import('./pages/worksheets/WorksheetsHub'));
+
+const PageLoader = () => (
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', fontSize: '1.2rem', color: '#64748b' }}>
+    Loading...
+  </div>
+);
 
 function AppContent() {
   const [activeSection, setActiveSection] = useState('Home');
@@ -63,11 +68,11 @@ function AppContent() {
     else if (path.includes('/ai-hub')) setActiveSection('AI');
     else if (path.includes('/worksheets')) setActiveSection('Worksheets');
     else if (path === '/' && activeSection !== 'Home') setActiveSection('Home');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
-  const [expandedSection, setExpandedSection] = useState(null);
-  const [locationState, setLocationState] = useState({ latitude: null, longitude: null });
-  const [gradeData, setGradeData] = useState({});
+  const [locationState, setLocationState] = useState({ latitude: null, longitude: null }); // eslint-disable-line no-unused-vars
+  const [gradeData] = useState({});
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [selectedGame, setSelectedGame] = useState(null);
@@ -78,8 +83,7 @@ function AppContent() {
   const [showSignup, setShowSignup] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [showStreakModal, setShowStreakModal] = useState(false);
-  const { user, logout, isAdmin } = useAuth();
-  const { subscriptionTier, SUBSCRIPTION_TIERS, getRemainingUsage } = useSubscription();
+  const { user, logout } = useAuth();
 
   const isAdminUser = user && (
     user.role === 'SUPER_ADMIN' ||
@@ -95,9 +99,6 @@ function AppContent() {
   const [showStudentNav, setShowStudentNav] = useState(!isAdminUser);
 
   const isGuestUser = !user;
-  const isFreeTier = subscriptionTier === SUBSCRIPTION_TIERS.GUEST ||
-                     subscriptionTier === SUBSCRIPTION_TIERS.STUDENT_FREE ||
-                     subscriptionTier === SUBSCRIPTION_TIERS.TEACHER_FREE;
 
   const prekOptions = ['Alphabets', 'Numbers', 'Shapes', 'Colors'];
   const mathOptions = ['Random Assessment', 'Generate Numbers', 'Word Problems', 'Counting Money'];
@@ -157,10 +158,6 @@ function AppContent() {
     else if (option === 'AI') navigate('/ai-hub');
     else if (option === 'Worksheets') navigate('/worksheets');
     else if (option === 'Home') navigate('/');
-  };
-
-  const toggleSection = (section) => {
-    setExpandedSection(prev => (prev === section ? null : section));
   };
 
   const handleSearchResultClick = (feature) => {
@@ -414,34 +411,36 @@ function AppContent() {
       )}
 
       {/* NEW: Renders the beautiful Assessments Hub when clicked */}
-      {activeSection === 'AssessmentsHub' && <AssessmentsHub />}
-      {activeSection === 'Worksheets' && <WorksheetsHub />}
+      {activeSection === 'AssessmentsHub' && <Suspense fallback={<PageLoader />}><AssessmentsHub /></Suspense>}
+      {activeSection === 'Worksheets' && <Suspense fallback={<PageLoader />}><WorksheetsHub /></Suspense>}
 
       {activeSection === 'Dashboard' && <UnifiedDashboard />}
-      {activeSection === 'Pricing' && <PricingPage />}
-      {activeSection === 'AI' && <AIHub audioEnabled={audioEnabled} />}
+      {activeSection === 'Pricing' && <Suspense fallback={<PageLoader />}><PricingPage /></Suspense>}
+      {activeSection === 'AI' && <Suspense fallback={<PageLoader />}><AIHub audioEnabled={audioEnabled} /></Suspense>}
       {prekOptions.includes(activeSection) && <EarlyEducation option={activeSection} audioEnabled={audioEnabled} />}
       {mathOptions.includes(activeSection) && <AssessmentComponents option={activeSection} audioEnabled={audioEnabled} />}
-      {activeSection === 'Subscribe' && <Subscribe />}
-      {activeSection === 'Contact' && <Contactus />}
-      {activeSection === 'About Us' && <AboutUs />}
-      {activeSection === 'Our Innovation' && <OurInnovation />}
-      {activeSection === 'How It Works' && <HowItWorks />}
-      {activeSection === 'FAQ' && <FAQ />}
-      {activeSection === 'Success Stories' && <SuccessStories />}
-      {activeSection === 'Platform Stats' && <PlatformStats />}
-      {activeSection === 'System Health' && <SystemHealth />}
-      {activeSection === 'Leaderboard' && <Leaderboard />}
-      {activeSection === 'Rewards' && <Rewards />}
-      {activeSection === 'Idea Hub' && <IdeaHub />}
-      {activeSection === 'Report Bug' && <ReportBug />}
-      {activeSection === 'Privacy' && <PrivacyPolicy />}
-      {activeSection === 'Terms' && <TermsOfService />}
+      {activeSection === 'Subscribe' && <Suspense fallback={<PageLoader />}><Subscribe /></Suspense>}
+      {activeSection === 'Contact' && <Suspense fallback={<PageLoader />}><Contactus /></Suspense>}
+      {activeSection === 'About Us' && <Suspense fallback={<PageLoader />}><AboutUs /></Suspense>}
+      {activeSection === 'Our Innovation' && <Suspense fallback={<PageLoader />}><OurInnovation /></Suspense>}
+      {activeSection === 'How It Works' && <Suspense fallback={<PageLoader />}><HowItWorks /></Suspense>}
+      {activeSection === 'FAQ' && <Suspense fallback={<PageLoader />}><FAQ /></Suspense>}
+      {activeSection === 'Success Stories' && <Suspense fallback={<PageLoader />}><SuccessStories /></Suspense>}
+      {activeSection === 'Platform Stats' && <Suspense fallback={<PageLoader />}><PlatformStats /></Suspense>}
+      {activeSection === 'System Health' && <Suspense fallback={<PageLoader />}><SystemHealth /></Suspense>}
+      {activeSection === 'Leaderboard' && <Suspense fallback={<PageLoader />}><Leaderboard /></Suspense>}
+      {activeSection === 'Rewards' && <Suspense fallback={<PageLoader />}><Rewards /></Suspense>}
+      {activeSection === 'Idea Hub' && <Suspense fallback={<PageLoader />}><IdeaHub /></Suspense>}
+      {activeSection === 'Report Bug' && <Suspense fallback={<PageLoader />}><ReportBug /></Suspense>}
+      {activeSection === 'Privacy' && <Suspense fallback={<PageLoader />}><PrivacyPolicy /></Suspense>}
+      {activeSection === 'Terms' && <Suspense fallback={<PageLoader />}><TermsOfService /></Suspense>}
       {activeSection === 'AssessmentFlow' && (
-        <AssessmentFlow preSelectedCategory={selectedGrade} preSelectedType={selectedSubject} audioEnabled={audioEnabled} />
+        <Suspense fallback={<PageLoader />}>
+          <AssessmentFlow preSelectedCategory={selectedGrade} preSelectedType={selectedSubject} audioEnabled={audioEnabled} />
+        </Suspense>
       )}
-      {activeSection === 'Reading' && <ReadingFlow audioEnabled={audioEnabled} />}
-      {activeSection === 'Games' && <GamesHub preSelectedGame={selectedGame} audioEnabled={audioEnabled} />}
+      {activeSection === 'Reading' && <Suspense fallback={<PageLoader />}><ReadingFlow audioEnabled={audioEnabled} /></Suspense>}
+      {activeSection === 'Games' && <Suspense fallback={<PageLoader />}><GamesHub preSelectedGame={selectedGame} audioEnabled={audioEnabled} /></Suspense>}
 
       <div style={{ clear: 'both' }}>
         <Footer onNavigate={handleNavigationClick} />

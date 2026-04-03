@@ -26,6 +26,7 @@ export default function OfflineMode() {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const detectNetwork = () => {

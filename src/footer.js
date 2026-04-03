@@ -22,63 +22,63 @@ function Footer({onNavigate}) {
           {/* Column 1: Company */}
           <div className="footer-nav-column">
             <h4 className="footer-nav-title">Company</h4>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('About Us'); }} className="nav-link">
+            <button type="button" onClick={() => onNavigate('About Us')} className="nav-link">
               <span className="link-icon">▸</span>About
-            </a>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Our Innovation'); }} className="nav-link">
+            </button>
+            <button type="button" onClick={() => onNavigate('Our Innovation')} className="nav-link">
               <span className="link-icon">▸</span>Innovation
-            </a>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Contact'); }} className="nav-link">
+            </button>
+            <button type="button" onClick={() => onNavigate('Contact')} className="nav-link">
               <span className="link-icon">▸</span>Contact
-            </a>
+            </button>
           </div>
 
           {/* Column 2: Resources */}
           <div className="footer-nav-column">
             <h4 className="footer-nav-title">Resources</h4>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('How It Works'); }} className="nav-link">
+            <button type="button" onClick={() => onNavigate('How It Works')} className="nav-link">
               <span className="link-icon">▸</span>How It Works
-            </a>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('FAQ'); }} className="nav-link">
+            </button>
+            <button type="button" onClick={() => onNavigate('FAQ')} className="nav-link">
               <span className="link-icon">▸</span>FAQ
-            </a>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Success Stories'); }} className="nav-link">
+            </button>
+            <button type="button" onClick={() => onNavigate('Success Stories')} className="nav-link">
               <span className="link-icon">▸</span>Success
-            </a>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Platform Stats'); }} className="nav-link">
+            </button>
+            <button type="button" onClick={() => onNavigate('Platform Stats')} className="nav-link">
               <span className="link-icon">▸</span>Platform Stats
-            </a>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('System Health'); }} className="nav-link">
+            </button>
+            <button type="button" onClick={() => onNavigate('System Health')} className="nav-link">
               <span className="link-icon">▸</span>Health
-            </a>
+            </button>
           </div>
 
           {/* Column 3: Platform */}
           <div className="footer-nav-column">
             <h4 className="footer-nav-title">Platform</h4>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Home'); }} className="nav-link">
+            <button type="button" onClick={() => onNavigate('Home')} className="nav-link">
               <span className="link-icon">▸</span>Home
-            </a>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Pricing'); }} className="nav-link">
+            </button>
+            <button type="button" onClick={() => onNavigate('Pricing')} className="nav-link">
               <span className="link-icon">▸</span>Pricing
-            </a>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Leaderboard'); }} className="nav-link">
+            </button>
+            <button type="button" onClick={() => onNavigate('Leaderboard')} className="nav-link">
               <span className="link-icon">▸</span>Leaderboard
-            </a>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Rewards'); }} className="nav-link">
+            </button>
+            <button type="button" onClick={() => onNavigate('Rewards')} className="nav-link">
               <span className="link-icon">▸</span>Rewards
-            </a>
+            </button>
           </div>
 
           {/* Column 4: Community */}
           <div className="footer-nav-column">
             <h4 className="footer-nav-title">Community</h4>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Idea Hub'); }} className="nav-link">
+            <button type="button" onClick={() => onNavigate('Idea Hub')} className="nav-link">
               <span className="link-icon">▸</span>Idea Hub
-            </a>
-            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Report Bug'); }} className="nav-link">
+            </button>
+            <button type="button" onClick={() => onNavigate('Report Bug')} className="nav-link">
               <span className="link-icon">▸</span>Report Bug
-            </a>
+            </button>
           </div>
         </nav>
 
@@ -100,9 +100,9 @@ function Footer({onNavigate}) {
 
         {/* Minimalist Legal */}
         <div className="footer-legal">
-          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Privacy'); }}>Privacy</a>
+          <button type="button" onClick={() => onNavigate('Privacy')} className="nav-link">Privacy</button>
           <span className="legal-dot">•</span>
-          <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('Terms'); }}>Terms</a>
+          <button type="button" onClick={() => onNavigate('Terms')} className="nav-link">Terms</button>
           <span className="legal-dot">•</span>
           <span className="copyright">© 2026 KiVO Learning International</span>
         </div>

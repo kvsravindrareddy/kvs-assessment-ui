@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import SuperAdminDashboard from './roles/SuperAdminDashboard';
-import TeacherDashboard from './roles/TeacherDashboard';
-import ParentDashboard from './roles/ParentDashboard';
-import StudentDashboard from './roles/StudentDashboard';
-import CounselorDashboard from './roles/CounselorDashboard';
-import ContentCreatorDashboard from './roles/ContentCreatorDashboard';
 import './UnifiedDashboard.css';
+
+const SuperAdminDashboard = lazy(() => import('./roles/SuperAdminDashboard'));
+const TeacherDashboard = lazy(() => import('./roles/TeacherDashboard'));
+const ParentDashboard = lazy(() => import('./roles/ParentDashboard'));
+const StudentDashboard = lazy(() => import('./roles/StudentDashboard'));
+const CounselorDashboard = lazy(() => import('./roles/CounselorDashboard'));
+const ContentCreatorDashboard = lazy(() => import('./roles/ContentCreatorDashboard'));
 
 const UnifiedDashboard = ({ children }) => {
   const { user, activeRole, switchRole, getAccessibleRoles, ROLES, loading } = useAuth();
@@ -232,7 +233,11 @@ const UnifiedDashboard = ({ children }) => {
       </div>
 
       <div className="dashboard-content">
-        {children ? children : <DashboardComponent />}
+        {children ? children : (
+          <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem', color: '#666' }}><div className="spinner"></div><p style={{ marginLeft: '1rem' }}>Loading dashboard...</p></div>}>
+            <DashboardComponent />
+          </Suspense>
+        )}
       </div>
     </div>
   );
