@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
 import { useSubscription } from '../../context/SubscriptionContext';
 import './PricingPage.css';
 
 const PricingPage = ({ onClose }) => {
-  const { user } = useAuth();
   const { subscriptionTier, SUBSCRIPTION_TIERS } = useSubscription();
   const [billingCycle, setBillingCycle] = useState('annual'); // 'monthly' or 'annual'
 

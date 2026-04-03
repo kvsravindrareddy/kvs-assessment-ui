@@ -115,10 +115,12 @@ export function hasRealImages(images) {
   return hasBills || hasCoins;
 }
 
-export default {
+const currencyImageLoader = {
   loadCurrencyImages,
   getBillImage,
   getCoinImage,
   hasRealImages,
   CURRENCY_PATHS
 };
+
+export default currencyImageLoader;

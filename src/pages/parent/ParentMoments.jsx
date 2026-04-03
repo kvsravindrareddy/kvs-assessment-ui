@@ -10,6 +10,7 @@ export default function ParentMoments() {
 
     useEffect(() => {
         fetchMoments();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filter]);
 
     const fetchMoments = async () => {
@@ -68,19 +69,6 @@ export default function ParentMoments() {
             fetchMoments();
         } catch (error) {
             console.error('Error sharing moment:', error);
-        }
-    };
-
-    const getMomentIcon = (type) => {
-        switch (type) {
-            case 'DAILY_SUMMARY': return '📊';
-            case 'MILESTONE': return '🎯';
-            case 'LEVEL_UP': return '⬆️';
-            case 'STREAK': return '🔥';
-            case 'BADGE': return '🏅';
-            case 'BOSS_DEFEAT': return '👑';
-            case 'WORLD_COMPLETE': return '🌍';
-            default: return '⭐';
         }
     };
 

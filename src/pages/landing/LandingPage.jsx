@@ -16,6 +16,7 @@ const LandingPage = () => {
       setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
     }, 5000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const features = [
@@ -205,7 +206,7 @@ const LandingPage = () => {
       <header className="landing-header">
         <div className="header-container">
           <div className="logo-section">
-            <img src={kivoLogo} alt="KiVO Learning" className="logo-image" style={{height: '60px', width: 'auto', backgroundColor: 'transparent', border: 'none'}} />
+            <img src={kivoLogo} alt="KiVO Learning" className="logo-image" width="60" height="60" style={{height: '60px', width: 'auto', backgroundColor: 'transparent', border: 'none'}} />
           </div>
 
           <nav className="header-nav">
@@ -509,7 +510,7 @@ const LandingPage = () => {
           <div className="footer-grid">
             <div className="footer-column">
               <div className="footer-logo">
-                <img src={kivoLogo} alt="KiVO Learning" className="logo-image" style={{height: '50px', width: 'auto', backgroundColor: 'transparent', border: 'none'}} />
+                <img src={kivoLogo} alt="KiVO Learning" className="logo-image" width="50" height="50" style={{height: '50px', width: 'auto', backgroundColor: 'transparent', border: 'none'}} />
               </div>
               <p className="footer-description">
                 AI-powered learning platform for students, teachers, and schools worldwide.

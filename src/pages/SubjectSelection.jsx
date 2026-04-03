@@ -12,6 +12,7 @@ const SubjectSelection = () => {
 
   useEffect(() => {
     fetchGradeInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gradeCode]);
 
   const fetchGradeInfo = async () => {

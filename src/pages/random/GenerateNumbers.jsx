@@ -18,7 +18,6 @@ const GenerateNumbers = () => {
   const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
   const numbersPerPage = 100;
   const cellsPerRow = 10;
-  const rowsPerPage = 10;
 
   const handleGenerateNumbers = async () => {
     try {

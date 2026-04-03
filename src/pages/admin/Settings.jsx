@@ -27,6 +27,7 @@ export default function Settings() {
 
   useEffect(() => {
     fetchAiConfigs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProvider]);
 
   const fetchAiConfigs = async () => {

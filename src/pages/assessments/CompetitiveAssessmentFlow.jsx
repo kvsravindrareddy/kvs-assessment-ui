@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
@@ -31,8 +31,6 @@ export default function CompetitiveAssessmentFlow() {
     const [qCache, setQCache] = useState({}); 
     const [answers, setAnswers] = useState({}); 
     const [statuses, setStatuses] = useState({}); 
-
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     const getQDetails = (qNode) => {
         if (!qNode) return { qText: '', qOptions: {}, actualAnswer: 'N/A', explanation: '' };
@@ -181,6 +179,7 @@ export default function CompetitiveAssessmentFlow() {
 
         const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
         return () => clearInterval(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loading, isSubmitted, showPrintView, isCompiling, timeLeft]);
 
     const formatTime = (seconds) => {
@@ -413,7 +412,7 @@ export default function CompetitiveAssessmentFlow() {
                 <div className="print-container" style={{ background: 'white', color: 'black', padding: '40px', maxWidth: '850px', margin: '0 auto', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
                     
                     <div className="print-header" style={{ textAlign: 'center', marginBottom: '20px', borderBottom: '2px solid black', paddingBottom: '20px' }}>
-                        <img src="/kivo-logo.png" alt="KiVO Learning" style={{ height: '60px', objectFit: 'contain', marginBottom: '10px' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                        <img src="/kivo-logo.png" alt="KiVO Learning" width="60" height="60" style={{ height: '60px', objectFit: 'contain', marginBottom: '10px' }} onError={(e) => { e.target.style.display = 'none'; }} />
                         <h2 style={{ margin: '0 0 5px 0', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '24px' }}>KiVO Learning International</h2>
                         <h3 style={{ margin: '0 0 15px 0', color: '#555' }}>{exam.examName} {isSubmitted ? 'PERFORMANCE REPORT' : 'MOCK PAPER'}</h3>
                         

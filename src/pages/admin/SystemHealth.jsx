@@ -21,6 +21,7 @@ const SystemHealth = () => {
       const interval = setInterval(fetchHealthData, 10000); // Refresh every 10 seconds
       return () => clearInterval(interval);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoRefresh]);
 
   const fetchHealthData = async () => {
@@ -465,9 +466,6 @@ const SystemHealth = () => {
                   { label: 'Disk Usage', value: healthData.performance.diskUsage, unit: '%', max: 100, icon: '💾', color: '#00bcd4' }
                 ].map((metric, index) => {
                   const percentage = Math.min((metric.value / metric.max) * 100, 100);
-                  const displayValue = metric.unit === ''
-                    ? metric.value.toLocaleString()
-                    : metric.value + metric.unit;
 
                   return (
                     <div

@@ -37,6 +37,7 @@ const AssessmentFlow = ({ preSelectedCategory = '', preSelectedType = '' }) => {
   useEffect(() => {
     axios.get(adminConfigURL).then(res => setCategoriesData(res.data)).catch(console.error);
     axios.get(`${configURL}/complexity`).then(res => setComplexities(res.data)).catch(console.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

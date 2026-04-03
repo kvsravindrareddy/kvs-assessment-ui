@@ -27,6 +27,7 @@ export default function StudentMetricsDashboard() {
 
   useEffect(() => {
     fetchDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   if (!data) return <div className="metrics-dashboard-container"><h2>Loading your progress...</h2></div>;
@@ -65,16 +66,6 @@ export default function StudentMetricsDashboard() {
     } catch (err) {
         alert("Failed to end session.");
     }
-  };
-
-  const getSessionRating = (score, total) => {
-    if (!total || total === 0) return '⭐';
-    const accuracy = (score / total) * 100;
-    if (accuracy >= 95) return '⭐⭐⭐⭐⭐';
-    if (accuracy >= 80) return '⭐⭐⭐⭐';
-    if (accuracy >= 60) return '⭐⭐⭐';
-    if (accuracy >= 40) return '⭐⭐';
-    return '⭐';
   };
 
   const getCategoryDisplay = (type) => {

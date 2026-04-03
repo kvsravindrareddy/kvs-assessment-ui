@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../context/AuthContext';
 import './PremiumGames.css';
 
 const GameOf24 = ({ audioEnabled = true }) => {
-  const { user } = useAuth();
   const [numbers, setNumbers] = useState([]);
   const [userExpression, setUserExpression] = useState('');
   const [score, setScore] = useState(0);
@@ -88,6 +86,7 @@ const GameOf24 = ({ audioEnabled = true }) => {
       }
 
       // Evaluate the expression using Function constructor (safer than eval)
+      // eslint-disable-next-line no-new-func
       const result = Function('"use strict"; return (' + expr + ')')();
 
       if (Math.abs(result - 24) < 0.001) {
@@ -196,7 +195,6 @@ const GameOf24 = ({ audioEnabled = true }) => {
   }
 
   if (gameOver) {
-    const accuracy = solved > 0 ? 100 : 0;
     return (
       <div className="premium-game-container">
         <div className="game-over">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './TicTacToe.css';
 
 const TicTacToe = ({ audioEnabled = true }) => {

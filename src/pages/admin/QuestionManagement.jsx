@@ -2,15 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getConfig } from '../../Config';
 import {
-  PlusIcon,
   MagnifyingGlassIcon,
-  FunnelIcon,
   ArrowPathIcon,
   TrashIcon,
   PencilIcon,
   EyeIcon,
   CloudArrowUpIcon,
-  DocumentArrowDownIcon
 } from '@heroicons/react/24/outline';
 
 const QuestionManagement = () => {
@@ -50,6 +47,7 @@ const QuestionManagement = () => {
 
   useEffect(() => {
     loadInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadInitialData = async () => {
@@ -116,6 +114,7 @@ const QuestionManagement = () => {
 
   useEffect(() => {
     filterQuestions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questions, searchTerm, filters]);
 
   const filterQuestions = () => {

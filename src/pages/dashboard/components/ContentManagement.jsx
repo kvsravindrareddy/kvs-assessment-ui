@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from '../../../context/AuthContext';
 import { getConfig } from '../../../Config';
 import axios from 'axios';
 import './ContentManagement.css';
 
 const ContentManagement = () => {
-  const { user } = useAuth();
   const config = getConfig();
   const fileInputRef = useRef(null);
 
@@ -20,9 +18,9 @@ const ContentManagement = () => {
 
   // Worksheet form state
   const [worksheetForm, setWorksheetForm] = useState({ grade: '', subject: '', topic: '', difficulty: 'MEDIUM', count: 20, randomize: true });
-  const [worksheetQueryType, setWorksheetQueryType] = useState('by-grade');
-  const [loadedWorksheetQuestions, setLoadedWorksheetQuestions] = useState([]);
-  const [worksheetResponseTime, setWorksheetResponseTime] = useState(null);
+  const [worksheetQueryType] = useState('by-grade');
+  const [, setLoadedWorksheetQuestions] = useState([]);
+  const [, setWorksheetResponseTime] = useState(null);
 
   // Questions & Stories form state
   const [questionForm, setQuestionForm] = useState({ complexity: 'MEDIUM', type: '', answerType: 'SINGLE', category: '', source: 'CHATGPT', numberOfQuestions: 10 });
@@ -63,7 +61,9 @@ const ContentManagement = () => {
     }
   }, [config.ADMIN_BASE_URL]);
 
-  useEffect(() => { loadStatistics(); loadGradesAndSubjects(); }, [loadStatistics]);
+  useEffect(() => { loadStatistics(); loadGradesAndSubjects(); },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [loadStatistics]);
 
   const loadGradesAndSubjects = async () => {
     try {

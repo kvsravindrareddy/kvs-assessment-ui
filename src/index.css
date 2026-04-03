@@ -1,6 +1,5 @@
 /* index.css */
-
-@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+/* Fredoka One font is loaded asynchronously via <link> in index.html to avoid render-blocking */
 
 html {
   scroll-behavior: smooth;

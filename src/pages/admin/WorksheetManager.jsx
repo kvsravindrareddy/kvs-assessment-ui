@@ -52,6 +52,7 @@ export default function WorksheetManager() {
     useEffect(() => {
         fetchTemplates();
         fetchStatistics();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filters]);
 
     const fetchTemplates = async () => {
@@ -112,7 +113,7 @@ export default function WorksheetManager() {
                 createdBy: 'admin'
             };
 
-            const response = await axios.post(
+            await axios.post(
                 `${CONFIG.development.ADMIN_API_URL}/v1/content-library/worksheets/generate`,
                 payload,
                 { headers: { Authorization: `Bearer ${token}` } }

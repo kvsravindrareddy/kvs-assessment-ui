@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import CONFIG from '../../Config';
 import "../../css/LegalPages.css";
 
 const ReportBug = () => {
-  const location = useLocation();
   const { user } = useAuth();
   const [bugTitle, setBugTitle] = useState('');
   const [bugDescription, setBugDescription] = useState('');

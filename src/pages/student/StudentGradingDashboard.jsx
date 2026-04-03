@@ -24,6 +24,7 @@ const StudentGradingDashboard = () => {
 
   useEffect(() => {
     fetchDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchDashboard = async () => {

@@ -56,5 +56,8 @@
   "bugs": {
     "url": "https://github.com/kvsravindrareddy/kvs-assessment-ui/issues"
   },
-  "homepage": "."
+  "homepage": ".",
+  "devDependencies": {
+    "sharp": "^0.34.5"
+  }
 }

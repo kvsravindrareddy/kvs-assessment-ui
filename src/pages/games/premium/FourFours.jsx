@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../context/AuthContext';
+import React, { useState } from 'react';
 import './PremiumGames.css';
 
 const FourFours = ({ audioEnabled = true }) => {
-  const { user } = useAuth();
   const [targetNumber, setTargetNumber] = useState(1);
   const [userExpression, setUserExpression] = useState('');
   const [score, setScore] = useState(0);
@@ -49,7 +47,6 @@ const FourFours = ({ audioEnabled = true }) => {
                  .replace(/!/g, ''); // Handle factorial separately
 
       // Check for factorial
-      let factorialCount = (userExpression.match(/!/g) || []).length;
 
       // Simple factorial implementation
       if (userExpression.includes('4!')) {
@@ -63,6 +60,7 @@ const FourFours = ({ audioEnabled = true }) => {
       }
 
       // Evaluate using Function constructor (safer than eval)
+      // eslint-disable-next-line no-new-func
       const result = Function('"use strict"; return (' + expr + ')')();
 
       if (Math.abs(result - targetNumber) < 0.001) {

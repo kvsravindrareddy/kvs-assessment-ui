@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import CONFIG from '../../Config';
 
 export default function MathByGrade() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const resumeAssessmentId = searchParams.get('resumeId');
-
   const currentUserId = user ? (user.id || user.email || 'GUEST_USER') : 'GUEST_USER';
 
   const [orderedGrades, setOrderedGrades] = useState([]);
@@ -87,6 +84,7 @@ export default function MathByGrade() {
     };
 
     loadGradesAndSubjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getQDetails = (qNode) => {
@@ -283,7 +281,7 @@ export default function MathByGrade() {
               
               <div className="print-wrapper" style={{ background: 'white', padding: '40px', maxWidth: '850px', margin: '0 auto', border: '4px solid #16a34a', borderRadius: '24px', boxShadow: '0 8px 30px rgba(0,0,0,0.1)' }}>
                   <div style={{ textAlign: 'center', borderBottom: '3px dashed #16a34a', paddingBottom: '20px', marginBottom: '30px' }}>
-                      <img src="/kivo-logo.png" alt="KiVO Learning" style={{ height: '70px', objectFit: 'contain', marginBottom: '15px' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                      <img src="/kivo-logo.png" alt="KiVO Learning" width="70" height="70" style={{ height: '70px', objectFit: 'contain', marginBottom: '15px' }} onError={(e) => { e.target.style.display = 'none'; }} />
                       <h2 style={{ margin: '0 0 5px 0', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '28px', color: '#16a34a' }}>Math Explorer Report 🧭</h2>
                       
                       {completed && <div style={{ fontSize: '1.5rem', margin: '15px 0', background: '#f0fdf4', display: 'inline-block', padding: '10px 30px', borderRadius: '50px', border: '2px solid #22c55e' }}>Score: <strong>{score} / {assessmentData.count}</strong></div>}

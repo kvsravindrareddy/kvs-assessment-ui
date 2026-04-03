@@ -5,7 +5,7 @@ import './StreakWidget.css';
 
 function StreakWidget({ onStreakClick }) {
     const [streak, setStreak] = useState(null);
-    const [showAnimation, setShowAnimation] = useState(false);
+    const [showAnimation] = useState(false);
 
     useEffect(() => {
         fetchStreak();

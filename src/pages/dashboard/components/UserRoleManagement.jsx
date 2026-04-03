@@ -4,7 +4,7 @@ import axios from 'axios';
 import './UserRoleManagement.css';
 
 const UserRoleManagement = () => {
-  const { user, ROLES } = useAuth();
+  const { ROLES } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
