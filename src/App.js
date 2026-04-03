@@ -179,7 +179,7 @@ function AppContent() {
       <div className="header">
         <div className="brand-section">
           <div className="logo-container">
-            <img src={kivoLogo} alt="KiVO Learning" className="logo-image" style={{maxWidth: '300px', marginBottom: '1rem', backgroundColor: 'transparent', border: 'none'}} />
+            <img src={kivoLogo} alt="KiVO Learning" className="logo-image" style={{height: '60px', width: 'auto', backgroundColor: 'transparent', border: 'none'}} />
           </div>
         </div>
         <div className="welcome-message">
