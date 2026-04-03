@@ -448,15 +448,15 @@ export default function ReadingFlow() {
           }
 
           .magic-grade-btn.active {
-              background: #3b82f6;
-              border-color: #2563eb;
+              background: #1d4ed8;
+              border-color: #1e40af;
               color: white;
-              box-shadow: 0 4px 0 #1d4ed8;
+              box-shadow: 0 4px 0 #1e3a8a;
               transform: translateY(-2px);
           }
           .magic-grade-btn.active:active {
               transform: translateY(4px);
-              box-shadow: 0 0 0 #1d4ed8;
+              box-shadow: 0 0 0 #1e3a8a;
           }
 
           .magic-main {
@@ -768,7 +768,7 @@ export default function ReadingFlow() {
               ) : (
                 <div style={{ textAlign: 'center', padding: '80px 0', border: '4px dashed #93c5fd', borderRadius: '32px', background: 'rgba(255,255,255,0.5)' }}>
                   <span style={{ fontSize: '5rem' }}>🕵️‍♂️</span>
-                  <h3 style={{ color: '#1e40af', fontSize: '2rem', marginTop: '20px', fontWeight: '900' }}>Oops! No stories here yet!</h3>
+                  <h2 style={{ color: '#1e40af', fontSize: '2rem', marginTop: '20px', fontWeight: '900' }}>Oops! No stories here yet!</h2>
                   <p style={{ color: '#475569', fontSize: '1.2rem', fontWeight: 'bold' }}>Try exploring a different subject or grade.</p>
                 </div>
               )}
@@ -824,7 +824,7 @@ export default function ReadingFlow() {
               {completed ? (
                 <div style={{ textAlign: 'center', background: '#ecfdf5', border: '4px solid #34d399', padding: '50px', borderRadius: '32px', boxShadow: '0 10px 0 #10b981' }}>
                   <div style={{ fontSize: '6rem', marginBottom: '20px', animation: 'bounce 2s infinite' }}>⭐</div>
-                  <h3 style={{ fontSize: '2.5rem', color: '#065f46', margin: '0 0 20px 0', fontWeight: '900' }}>You're a Star!</h3>
+                  <h2 style={{ fontSize: '2.5rem', color: '#065f46', margin: '0 0 20px 0', fontWeight: '900' }}>You're a Star!</h2>
                   <div style={{ display: 'inline-block', background: 'white', padding: '20px 50px', borderRadius: '30px', border: '4px solid #10b981', boxShadow: '0 8px 0 #059669' }}>
                     <span style={{ fontSize: '4rem', color: '#10b981', fontWeight: '900' }}>{score}</span>
                     <span style={{ fontSize: '2.5rem', color: '#94a3b8', margin: '0 15px' }}>/</span>
@@ -852,9 +852,9 @@ export default function ReadingFlow() {
                       </span>
                     </div>
                     
-                    <h3 style={{ fontSize: '1.8rem', color: '#0f172a', marginBottom: '30px', lineHeight: '1.4', fontWeight: '900', textAlign: 'center' }}>
+                    <h2 style={{ fontSize: '1.8rem', color: '#0f172a', marginBottom: '30px', lineHeight: '1.4', fontWeight: '900', textAlign: 'center' }}>
                       {storyDetails.questions[questionIndex].question || storyDetails.questions[questionIndex].name}
-                    </h3>
+                    </h2>
 
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       {Object.entries(storyDetails.questions[questionIndex].options).map(([key, value]) => {
