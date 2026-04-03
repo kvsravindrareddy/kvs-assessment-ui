@@ -117,88 +117,60 @@ export const WORKSHEET_TEMPLATES = {
   ],
 
   addition: [
-    // Beginner Level (1-20)
     { id: 1, name: 'Addition 1-10 (20 problems)', count: 20, max: 10, difficulty: 'beginner', description: 'Single digit addition' },
     { id: 2, name: 'Addition 1-20 (30 problems)', count: 30, max: 20, difficulty: 'beginner', description: 'Numbers up to 20' },
     { id: 3, name: 'Addition 1-20 (50 problems)', count: 50, max: 20, difficulty: 'beginner', description: 'Extended practice' },
-
-    // Easy Level (1-50)
     { id: 4, name: 'Addition 1-30 (20 problems)', count: 20, max: 30, difficulty: 'easy', description: 'Two-digit introduction' },
     { id: 5, name: 'Addition 1-50 (25 problems)', count: 25, max: 50, difficulty: 'easy', description: 'Easy two-digit' },
     { id: 6, name: 'Addition 1-50 (40 problems)', count: 40, max: 50, difficulty: 'easy', description: 'Extended two-digit' },
-
-    // Medium Level (1-100)
     { id: 7, name: 'Addition 1-100 (20 problems)', count: 20, max: 100, difficulty: 'medium', description: 'Standard two-digit' },
     { id: 8, name: 'Addition 1-100 (30 problems)', count: 30, max: 100, difficulty: 'medium', description: 'Medium practice' },
     { id: 9, name: 'Addition 1-100 (50 problems)', count: 50, max: 100, difficulty: 'medium', description: 'Comprehensive practice' },
-
-    // Hard Level (1-500)
     { id: 10, name: 'Addition 1-200 (25 problems)', count: 25, max: 200, difficulty: 'hard', description: 'Three-digit introduction' },
     { id: 11, name: 'Addition 1-500 (30 problems)', count: 30, max: 500, difficulty: 'hard', description: 'Large numbers' },
     { id: 12, name: 'Addition 1-1000 (20 problems)', count: 20, max: 1000, difficulty: 'hard', description: 'Four-digit challenge' }
   ],
 
   subtraction: [
-    // Beginner Level
     { id: 1, name: 'Subtraction 1-10 (20 problems)', count: 20, max: 10, difficulty: 'beginner', description: 'Single digit subtraction' },
     { id: 2, name: 'Subtraction 1-20 (30 problems)', count: 30, max: 20, difficulty: 'beginner', description: 'Numbers up to 20' },
     { id: 3, name: 'Subtraction 1-20 (50 problems)', count: 50, max: 20, difficulty: 'beginner', description: 'Extended practice' },
-
-    // Easy Level
     { id: 4, name: 'Subtraction 1-30 (20 problems)', count: 20, max: 30, difficulty: 'easy', description: 'Two-digit introduction' },
     { id: 5, name: 'Subtraction 1-50 (25 problems)', count: 25, max: 50, difficulty: 'easy', description: 'Easy two-digit' },
     { id: 6, name: 'Subtraction 1-50 (40 problems)', count: 40, max: 50, difficulty: 'easy', description: 'Extended two-digit' },
-
-    // Medium Level
     { id: 7, name: 'Subtraction 1-100 (20 problems)', count: 20, max: 100, difficulty: 'medium', description: 'Standard two-digit' },
     { id: 8, name: 'Subtraction 1-100 (30 problems)', count: 30, max: 100, difficulty: 'medium', description: 'Medium practice' },
     { id: 9, name: 'Subtraction 1-100 (50 problems)', count: 50, max: 100, difficulty: 'medium', description: 'Comprehensive practice' },
-
-    // Hard Level
     { id: 10, name: 'Subtraction 1-200 (25 problems)', count: 25, max: 200, difficulty: 'hard', description: 'Three-digit introduction' },
     { id: 11, name: 'Subtraction 1-500 (30 problems)', count: 30, max: 500, difficulty: 'hard', description: 'Large numbers' },
     { id: 12, name: 'Subtraction 1-1000 (20 problems)', count: 20, max: 1000, difficulty: 'hard', description: 'Four-digit challenge' }
   ],
 
   multiplication: [
-    // Beginner Level (Tables 1-5)
     { id: 1, name: 'Multiplication Tables 1-5 (20 problems)', count: 20, max: 5, difficulty: 'beginner', description: 'Easy tables' },
     { id: 2, name: 'Multiplication Tables 1-5 (30 problems)', count: 30, max: 5, difficulty: 'beginner', description: 'Basic practice' },
     { id: 3, name: 'Multiplication Tables 1-5 (50 problems)', count: 50, max: 5, difficulty: 'beginner', description: 'Extended basic' },
-
-    // Easy Level (Tables 1-10)
     { id: 4, name: 'Multiplication Tables 1-10 (20 problems)', count: 20, max: 10, difficulty: 'easy', description: 'Standard tables' },
     { id: 5, name: 'Multiplication Tables 1-10 (30 problems)', count: 30, max: 10, difficulty: 'easy', description: 'Common practice' },
     { id: 6, name: 'Multiplication Tables 1-10 (50 problems)', count: 50, max: 10, difficulty: 'easy', description: 'Comprehensive' },
-
-    // Medium Level (Tables 1-12)
     { id: 7, name: 'Multiplication Tables 1-12 (25 problems)', count: 25, max: 12, difficulty: 'medium', description: 'Complete tables' },
     { id: 8, name: 'Multiplication Tables 1-12 (40 problems)', count: 40, max: 12, difficulty: 'medium', description: 'Full practice' },
     { id: 9, name: 'Multiplication Tables 1-12 (60 problems)', count: 60, max: 12, difficulty: 'medium', description: 'Extended practice' },
-
-    // Hard Level (Tables up to 20)
     { id: 10, name: 'Multiplication Tables 1-15 (30 problems)', count: 30, max: 15, difficulty: 'hard', description: 'Advanced tables' },
     { id: 11, name: 'Multiplication Tables 1-20 (40 problems)', count: 40, max: 20, difficulty: 'hard', description: 'Expert level' },
     { id: 12, name: 'Multiplication Mixed (50 problems)', count: 50, max: 20, difficulty: 'hard', description: 'Random challenge' }
   ],
 
   division: [
-    // Beginner Level
     { id: 1, name: 'Division by 1-5 (20 problems)', count: 20, max: 50, difficulty: 'beginner', description: 'Simple division' },
     { id: 2, name: 'Division up to 50 (25 problems)', count: 25, max: 50, difficulty: 'beginner', description: 'Basic practice' },
     { id: 3, name: 'Division up to 50 (40 problems)', count: 40, max: 50, difficulty: 'beginner', description: 'Extended basic' },
-
-    // Easy Level
     { id: 4, name: 'Division up to 100 (20 problems)', count: 20, max: 100, difficulty: 'easy', description: 'Two-digit dividends' },
     { id: 5, name: 'Division up to 100 (30 problems)', count: 30, max: 100, difficulty: 'easy', description: 'Standard practice' },
     { id: 6, name: 'Division up to 100 (50 problems)', count: 50, max: 100, difficulty: 'easy', description: 'Comprehensive' },
-
-    // Medium Level
     { id: 7, name: 'Division up to 144 (25 problems)', count: 25, max: 144, difficulty: 'medium', description: 'Tables up to 12' },
     { id: 8, name: 'Division up to 200 (30 problems)', count: 30, max: 200, difficulty: 'medium', description: 'Larger dividends' },
     { id: 9, name: 'Division up to 200 (50 problems)', count: 50, max: 200, difficulty: 'medium', description: 'Extended practice' },
-
-    // Hard Level
     { id: 10, name: 'Division up to 500 (30 problems)', count: 30, max: 500, difficulty: 'hard', description: 'Three-digit division' },
     { id: 11, name: 'Division up to 1000 (40 problems)', count: 40, max: 1000, difficulty: 'hard', description: 'Large numbers' },
     { id: 12, name: 'Division Mixed (50 problems)', count: 50, max: 1000, difficulty: 'hard', description: 'Expert challenge' }
@@ -218,25 +190,47 @@ export const WORKSHEET_TEMPLATES = {
   ],
 
   mixedOperations: [
-    // Beginner Level
     { id: 1, name: 'Mixed Ops 1-20 (20 problems)', count: 20, max: 20, difficulty: 'beginner', description: 'All four operations' },
     { id: 2, name: 'Mixed Ops 1-20 (30 problems)', count: 30, max: 20, difficulty: 'beginner', description: 'Basic mixed' },
     { id: 3, name: 'Mixed Ops 1-20 (50 problems)', count: 50, max: 20, difficulty: 'beginner', description: 'Extended basic' },
-
-    // Easy Level
     { id: 4, name: 'Mixed Ops 1-50 (20 problems)', count: 20, max: 50, difficulty: 'easy', description: 'Two-digit mixed' },
     { id: 5, name: 'Mixed Ops 1-50 (30 problems)', count: 30, max: 50, difficulty: 'easy', description: 'Standard mixed' },
     { id: 6, name: 'Mixed Ops 1-50 (50 problems)', count: 50, max: 50, difficulty: 'easy', description: 'Comprehensive' },
-
-    // Medium Level
     { id: 7, name: 'Mixed Ops 1-100 (25 problems)', count: 25, max: 100, difficulty: 'medium', description: 'All operations' },
     { id: 8, name: 'Mixed Ops 1-100 (40 problems)', count: 40, max: 100, difficulty: 'medium', description: 'Standard practice' },
     { id: 9, name: 'Mixed Ops 1-100 (60 problems)', count: 60, max: 100, difficulty: 'medium', description: 'Extended practice' },
-
-    // Hard Level
     { id: 10, name: 'Mixed Ops 1-200 (30 problems)', count: 30, max: 200, difficulty: 'hard', description: 'Three-digit mixed' },
     { id: 11, name: 'Mixed Ops 1-500 (40 problems)', count: 40, max: 500, difficulty: 'hard', description: 'Large numbers' },
     { id: 12, name: 'Mixed Ops Challenge (50 problems)', count: 50, max: 1000, difficulty: 'hard', description: 'Expert challenge' }
+  ],
+
+  english4Line: [
+    { id: 1, name: 'Blank 4-Line Paper', text: '', lines: 12, description: 'Standard blank 4-line paper for practice' },
+    { id: 2, name: 'Alphabet Tracing (A-M)', text: 'A B C D E F G H I J K L M', lines: 12, description: 'Uppercase tracing (A-M)' },
+    { id: 3, name: 'Alphabet Tracing (N-Z)', text: 'N O P Q R S T U V W X Y Z', lines: 12, description: 'Uppercase tracing (N-Z)' },
+    { id: 4, name: 'Lowercase Tracing (a-m)', text: 'a b c d e f g h i j k l m', lines: 12, description: 'Lowercase tracing (a-m)' },
+    { id: 5, name: 'Lowercase Tracing (n-z)', text: 'n o p q r s t u v w x y z', lines: 12, description: 'Lowercase tracing (n-z)' }
+  ],
+
+  hindi2Line: [
+    { id: 1, name: 'Blank 2-Line Paper', text: '', lines: 10, description: 'Standard blank 2-line paper' },
+    { id: 2, name: 'Generic Practice', text: 'A a B b C c D d E e F f', lines: 10, description: '2-line spacing practice' }
+  ],
+
+  mathGrid: [
+    { id: 1, name: 'Medium Grid (10mm)', gridSize: 10, description: 'Standard math squares' },
+    { id: 2, name: 'Small Grid (5mm)', gridSize: 5, description: 'Small math squares' },
+    { id: 3, name: 'Large Grid (15mm)', gridSize: 15, description: 'Large squares for beginners' }
+  ],
+
+  cursiveWriting: [
+    { id: 1, name: 'Blank Cursive 4-Line', text: '', lines: 12, description: 'Blank paper for cursive' },
+    { id: 2, name: 'Cursive Alphabets', text: 'Aa Bb Cc Dd Ee Ff Gg', lines: 12, description: 'Basic cursive letters' },
+    { id: 3, name: 'Cursive Words', text: 'apple banana cat dog', lines: 12, description: 'Simple cursive words' }
+  ],
+  storyPaper: [
+    { id: 1, name: 'Standard Story Paper', lines: 8, is4Line: false, description: 'Half picture box, half standard writing lines' },
+    { id: 2, name: 'Primary Story Paper (4-Line)', lines: 5, is4Line: true, description: 'Half picture box, half 4-line writing lines for early learners' }
   ]
 };
 
