@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import CONFIG from '../../Config';
-import './MathByGrade.css';
 
 export default function MathByGrade() {
   const { user } = useAuth();
@@ -17,78 +16,47 @@ export default function MathByGrade() {
   const [gradeData, setGradeData] = useState({});
   const [gradesLoading, setGradesLoading] = useState(true);
 
-  const [selectedGrade, setSelectedGrade] = useState(null);
+  const [selectedGrade, setSelectedGrade] = useState('');
   const [showConfigDialog, setShowConfigDialog] = useState(false);
 
   const [numberOfQuestions, setNumberOfQuestions] = useState(10);
-  const [complexity, setComplexity] = useState('SIMPLE');
+  const [complexity, setComplexity] = useState('MEDIUM');
 
-  const [assessmentId, setAssessmentId] = useState(null);
-  const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [totalQuestions, setTotalQuestions] = useState(0);
-  const [questionIndex, setQuestionIndex] = useState(1);
+  const [assessmentData, setAssessmentData] = useState(null);
+  const [qCache, setQCache] = useState({});
+  const [answers, setAnswers] = useState({});
+  const [answerKey, setAnswerKey] = useState([]);
 
-  const [selectedAnswer, setSelectedAnswer] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(1);
   const [score, setScore] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+  const [isCompiling, setIsCompiling] = useState(false);
+  const [compileProgress, setCompileProgress] = useState("");
+  const [showPrintView, setShowPrintView] = useState(false);
+  const [printConfig, setPrintConfig] = useState({ showAnswers: true, showExplanations: true });
   const [errorMessage, setErrorMessage] = useState('');
-
-  const [timeElapsed, setTimeElapsed] = useState(0);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [bookmarkedQuestions, setBookmarkedQuestions] = useState(new Set());
 
   const baseUrl = CONFIG.development.GATEWAY_URL || CONFIG.development.ADMIN_BASE_URL;
   const loadAssessmentURL = `${baseUrl}/v1/assessment/questions/load`;
-  const startAssessmentURL = `${baseUrl}/v1/assessment/questions/start`;
-  const submitAnswerURL = `${baseUrl}/v1/assessment/questions/submit-answer`;
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const toggleBookmark = () => {
-    setBookmarkedQuestions(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(questionIndex)) newSet.delete(questionIndex);
-      else newSet.add(questionIndex);
-      return newSet;
-    });
-  };
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
   useEffect(() => {
     const loadGradesAndSubjects = async () => {
       try {
         setGradesLoading(true);
-        const CACHE_KEY = 'kivo_dynamic_grades_cache';
-        const CACHE_TTL_KEY = 'kivo_dynamic_grades_cache_time';
-        const CACHE_DURATION = 1000 * 60 * 60; 
-
-        let activeGrades = [];
-        const cachedData = localStorage.getItem(CACHE_KEY);
-        const cachedTime = localStorage.getItem(CACHE_TTL_KEY);
-
-        if (cachedData && cachedTime && (Date.now() - parseInt(cachedTime) < CACHE_DURATION)) {
-            activeGrades = JSON.parse(cachedData);
-        } else {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(
-              `${baseUrl}/admin-assessment/v1/grade-subjects`,
-              { headers: { Authorization: token ? `Bearer ${token}` : '' } }
-            );
-            
-            activeGrades = (response.data || []).filter(g => g.isActive);
-            activeGrades.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
-            
-            localStorage.setItem(CACHE_KEY, JSON.stringify(activeGrades));
-            localStorage.setItem(CACHE_TTL_KEY, Date.now().toString());
-        }
+        const token = localStorage.getItem('token');
+        const response = await axios.get(
+          `${baseUrl}/admin-assessment/v1/grade-subjects`,
+          { headers: { Authorization: token ? `Bearer ${token}` : '' } }
+        );
         
-        const mathGradesList = [];
+        let activeGrades = (response.data || []).filter(g => g.isActive);
+        activeGrades.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+        
         const mathSubjMap = {};
+        const validGradesList = [];
         
         activeGrades.forEach(g => {
           const mathSubjects = (g.subjects || [])
@@ -97,24 +65,24 @@ export default function MathByGrade() {
                   name.toUpperCase().includes('MATH') || 
                   name.toUpperCase().includes('ALGEBRA') || 
                   name.toUpperCase().includes('GEOMETRY') || 
-                  name.toUpperCase().includes('CALCULUS')
+                  name.toUpperCase().includes('CALCULUS') ||
+                  name.toUpperCase().includes('NUMBERS')
               );
 
           if (mathSubjects.length > 0) {
-              mathGradesList.push(g.gradeCode);
+              validGradesList.push(g);
               mathSubjMap[g.gradeCode] = mathSubjects;
           }
         });
 
-        setOrderedGrades(mathGradesList);
+        setOrderedGrades(validGradesList);
         setGradeData(mathSubjMap);
 
-        if (mathGradesList.length > 0) {
-          const defaultGrade = mathGradesList.includes('V') ? 'V' : mathGradesList[0];
-          setSelectedGrade(defaultGrade);
+        if (validGradesList.length > 0) {
+          setSelectedGrade(validGradesList[0].gradeCode);
         }
       } catch (error) {
-        console.error('Error loading grades and subjects:', error);
+        console.error('Error loading curriculum:', error);
       } finally {
         setGradesLoading(false);
       }
@@ -124,73 +92,51 @@ export default function MathByGrade() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    let interval;
-    if (isTimerRunning && !completed) {
-      interval = setInterval(() => { setTimeElapsed(prev => prev + 1); }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isTimerRunning, completed]);
-
-  useEffect(() => {
-    if (resumeAssessmentId && currentUserId) {
-      resumeAssessment(resumeAssessmentId);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resumeAssessmentId, currentUserId]);
-
-  const resumeAssessment = async (assId) => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const dashboardURL = `${CONFIG.development.ADMIN_BASE_URL}/v1/assessment/dashboard/student?userId=${encodeURIComponent(currentUserId)}`;
-      const dashboardRes = await axios.get(dashboardURL, { headers: { 'Authorization': `Bearer ${token}` } });
-      const session = dashboardRes.data.continueLearning?.find(s => s.assessmentId === assId);
-
-      if (!session) {
-        setErrorMessage('Assessment session not found. Please start a new assessment.');
-        setLoading(false);
-        return;
-      }
-
-      const nextQuestionIndex = (session.lastAttemptedIndex || 0) + 1;
-      const res = await axios.post(startAssessmentURL, {
-        userId: currentUserId,
-        email: user?.email || '',
-        assessmentId: assId,
-        questionIndex: nextQuestionIndex
-      }, { headers: { 'Authorization': `Bearer ${token}` } });
-
-      const questionData = res.data?.question?.question || res.data;
-
-      setAssessmentId(assId);
-      setTotalQuestions(session.totalQuestions);
-      setCurrentQuestion(questionData);
-      setQuestionIndex(nextQuestionIndex);
-      setScore(session.score || 0);
-      setSelectedAnswer('');
-      setCompleted(false);
-
-      if (session.assessmentName) {
-        const gradeMatch = session.assessmentName.match(/Grade\s+(\S+)/);
-        if (gradeMatch && gradeMatch[1]) setSelectedGrade(gradeMatch[1].replace(/[()]/g, ''));
-      }
-
-      setIsTimerRunning(true);
-    } catch (err) {
-      console.error('Error resuming assessment:', err);
-      setErrorMessage('Unable to resume assessment. Please start a new one.');
-    } finally {
-      setLoading(false);
-    }
+  const getQDetails = (qNode) => {
+    if (!qNode) return { qText: '', qOptions: {}, actualAnswer: 'N/A', explanation: '' };
+    const qText = qNode.question?.name || qNode.name || qNode.questionText || "Data corrupted";
+    const qOptions = qNode.question?.options || qNode.options || {};
+    const actualAnswer = qNode.correctAnswer || "N/A";
+    const explanation = qNode.explanation || "";
+    return { qText, qOptions, actualAnswer, explanation };
   };
 
-  const openConfigDialog = () => {
-    if (!selectedGrade) return;
-    setShowConfigDialog(true);
-    setErrorMessage(''); 
-    setNumberOfQuestions(10);
-    setComplexity('SIMPLE');
+  const compilePaper = async (assessmentId, totalQs) => {
+      setIsCompiling(true);
+      const token = localStorage.getItem('token');
+      const newCache = { ...qCache };
+      
+      for(let i = 1; i <= totalQs; i++) {
+          if (!newCache[i]) {
+              setCompileProgress(`Gathering puzzle piece ${i} of ${totalQs}...`);
+              let success = false;
+              let attempts = 0;
+              while (!success && attempts < 3) {
+                  try {
+                      const qRes = await axios.post(`${baseUrl}/v1/assessment/questions/start`, {
+                          userId: currentUserId.toString(), email: user?.email || '',
+                          assessmentId: assessmentId, questionIndex: i
+                      }, { headers: { Authorization: `Bearer ${token}` } });
+                      
+                      let qData = qRes.data.question || qRes.data;
+                      if (qRes.data.questions && Array.isArray(qRes.data.questions)) qData = qRes.data.questions[0];
+                      
+                      if (qRes.data.correctAnswer) qData.correctAnswer = qRes.data.correctAnswer;
+                      if (qRes.data.explanation) qData.explanation = qRes.data.explanation;
+                      
+                      newCache[i] = qData;
+                      success = true;
+                      await sleep(150); 
+                  } catch (e) {
+                      attempts++;
+                      await sleep(1000);
+                  }
+              }
+          }
+      }
+      setQCache(newCache);
+      setIsCompiling(false);
+      return newCache;
   };
 
   const startAssessment = async () => {
@@ -208,7 +154,7 @@ export default function MathByGrade() {
       const token = localStorage.getItem('token');
 
       const loadRes = await axios.post(loadAssessmentURL, {
-        userId: currentUserId,
+        userId: currentUserId.toString(),
         email: user?.email || '',
         category: selectedGrade,
         type: mathSubject,
@@ -218,333 +164,385 @@ export default function MathByGrade() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
-      const newAssessmentId = loadRes.data.assessmentId;
-      const totalQs = loadRes.data.numberOfQuestions || numberOfQuestions;
+      const assId = loadRes.data.assessmentId;
+      const qCount = loadRes.data.numberOfQuestions || numberOfQuestions;
 
-      setAssessmentId(newAssessmentId);
-      setTotalQuestions(totalQs);
-
-      await fetchQuestion(newAssessmentId, 1);
+      setAssessmentData({ id: assId, count: qCount, subject: mathSubject });
+      
+      compilePaper(assId, qCount);
 
       setShowConfigDialog(false);
+      setAnswerKey([]);
+      setCurrentIndex(1);
       setScore(0);
-      setSelectedAnswer('');
+      setAnswers({});
       setCompleted(false);
-      setTimeElapsed(0);
-      setIsTimerRunning(true);
-      setBookmarkedQuestions(new Set());
-
     } catch (err) {
-      console.error('Error starting math assessment:', err);
-      const errorMsg = err.response?.data?.message || 'Could not load questions. Please ensure content is available for this Grade.';
-      setErrorMessage(errorMsg);
+      setErrorMessage('Could not load questions. Please ensure content is generated for this Grade.');
       setShowConfigDialog(true);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchQuestion = async (assId, index) => {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(startAssessmentURL, {
-          userId: currentUserId,
-          email: user?.email || '',
-          assessmentId: assId,
-          questionIndex: index
-      }, { headers: { 'Authorization': `Bearer ${token}` } });
-
-      const questionData = res.data?.question?.question || res.data;
-      setCurrentQuestion(questionData);
-      setQuestionIndex(index);
-  };
-
-  const submitAnswer = async () => {
-    if (!assessmentId || !currentQuestion || !selectedAnswer) return;
-    const isLastQuestion = questionIndex === totalQuestions;
-
-    try {
-      const token = localStorage.getItem('token');
-      const payload = {
-        userId: currentUserId,
-        email: user?.email || '',
-        assessmentId: assessmentId,
-        questionIndex: questionIndex,
-        userAnswer: [selectedAnswer]
-      };
-
-      const res = await axios.post(submitAnswerURL, payload, { headers: { 'Authorization': `Bearer ${token}` } });
-
-      if (res.data && res.data.score !== undefined) {
-          setScore(res.data.score);
+  const submitAnswer = async (selectedOption) => {
+      const isLastQuestion = currentIndex === assessmentData.count;
+      setAnswers(prev => ({ ...prev, [currentIndex]: selectedOption }));
+      
+      try {
+          const token = localStorage.getItem('token');
+          const res = await axios.post(`${baseUrl}/v1/assessment/questions/submit-answer`, {
+              assessmentId: assessmentData.id, userId: currentUserId.toString(), email: user?.email || '',
+              questionIndex: currentIndex, userAnswer: [selectedOption]
+          }, { headers: { Authorization: `Bearer ${token}` } });
+          
+          if (res.data && res.data.score !== undefined) {
+              setScore(res.data.score); // Sync exact backend score
+          }
+      } catch (e) { 
+          console.error("Failed to sync answer");
       }
-      setSelectedAnswer('');
 
-      if (!isLastQuestion) {
-          await fetchQuestion(assessmentId, questionIndex + 1);
-      } else {
+      if (isLastQuestion) {
           setCompleted(true);
-          setIsTimerRunning(false);
+          try {
+              const token = localStorage.getItem('token');
+              await axios.post(`${baseUrl}/v1/assessment/questions/submit`, {
+                  userId: currentUserId.toString(), email: user?.email || '', assessmentId: assessmentData.id, reason: "Math Explorer Completed"
+              }, { headers: { Authorization: `Bearer ${token}` } });
+              
+              const akRes = await axios.get(`${baseUrl}/v1/assessment/questions/${assessmentData.id}/answer-key?userId=${currentUserId.toString()}`, {
+                  headers: { Authorization: `Bearer ${token}` }
+              });
+              
+              if (akRes.data?.data?.answers) {
+                  setAnswerKey(akRes.data.data.answers);
+              }
+          } catch (e) {}
+      } else {
+          setCurrentIndex(prev => prev + 1);
       }
-    } catch (err) {
-      console.error("Failed to submit answer:", err);
-      setErrorMessage("Failed to submit answer. Please try again.");
-    }
   };
 
-  const endAssessmentEarly = async () => {
-    if (!window.confirm("Are you sure you want to end early? Your score will be saved.")) return;
-    try {
-        const token = localStorage.getItem('token');
-        await axios.post(`${CONFIG.development.GATEWAY_URL}/api/assessment/end-session`, null, {
-            params: {
-                userId: currentUserId,
-                assessmentId: assessmentId,
-                assessmentType: gradeData[selectedGrade]?.[0] || 'MATH'
-            },
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        setCompleted(true);
-        setIsTimerRunning(false);
-    } catch (err) {
-        alert("Failed to end assessment.");
-    }
-  };
+  // --- RENDERING VIEWS ---
 
-  if (gradesLoading || (loading && resumeAssessmentId)) {
-    return (
-      <div className="math-nextgen-container">
-        <div style={{ background: '#ffffff', borderRadius: '24px', padding: '100px 20px', boxShadow: '0 10px 40px rgba(0,0,0,0.05)', textAlign: 'center', marginTop: '10vh' }}>
-          <div style={{ fontSize: '4rem', marginBottom: '20px', animation: 'pulse 2s infinite' }}>{gradesLoading ? '📚' : '⏳'}</div>
-          <h2 style={{ fontSize: '2rem', color: '#0f172a', fontWeight: '800' }}>
-            {gradesLoading ? 'Loading Curriculum...' : 'Resuming Your Assessment...'}
-          </h2>
-          <p style={{ color: '#64748b', fontSize: '1.1rem' }}>Please wait a moment</p>
-        </div>
+  if (gradesLoading || loading) return (
+      <div style={{ background: '#f0fdf4', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ fontSize: '6rem', animation: 'bounce 1s infinite' }}>🧭</div>
+          <h2 style={{ color: '#16a34a', fontSize: '2rem', fontWeight: '900', marginTop: '20px' }}>Packing your backpack...</h2>
       </div>
-    );
+  );
+
+  if (isCompiling && !assessmentData) return (
+      <div style={{ background: '#f0fdf4', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ fontSize: '5rem', animation: 'spin 3s linear infinite' }}>⚙️</div>
+          <h2 style={{ color: '#16a34a', fontSize: '1.5rem', fontWeight: '900', marginTop: '20px' }}>{compileProgress}</h2>
+      </div>
+  );
+
+  if (showPrintView) {
+      return (
+          <div style={{ background: 'white', minHeight: '100vh', padding: '40px', fontFamily: '"Comic Sans MS", "Nunito", sans-serif', color: 'black' }}>
+              <style>
+                  {`
+                      @media print {
+                          html, body, #root, .app-container, .unified-dashboard-container, .dashboard-content { 
+                              height: auto !important; min-height: auto !important; overflow: visible !important; background: white !important; margin: 0 !important; padding: 0 !important; position: static !important;
+                          }
+                          .no-print { display: none !important; }
+                          
+                          /* 🚀 FIX: Removed borders in print view to avoid multi-page cutoff issues */
+                          .print-wrapper { 
+                              box-shadow: none !important; 
+                              padding: 0 !important; 
+                              max-width: 100% !important; 
+                              margin: 0 !important; 
+                              border: none !important; 
+                              border-radius: 0 !important; 
+                          }
+                          
+                          * { color: black !important; }
+                          @page { margin: 15mm; size: auto; }
+                          .page-break { page-break-inside: avoid; margin-bottom: 30px; }
+                      }
+                  `}
+              </style>
+              
+              <div className="no-print" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '20px', borderRadius: '12px', border: '2px solid #cbd5e1' }}>
+                  <div style={{ display: 'flex', gap: '20px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                          <input type="checkbox" checked={printConfig.showAnswers} onChange={e => setPrintConfig({...printConfig, showAnswers: e.target.checked})} /> Show Answers
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 'bold', opacity: printConfig.showAnswers ? 1 : 0.5 }}>
+                          <input type="checkbox" disabled={!printConfig.showAnswers} checked={printConfig.showExplanations} onChange={e => setPrintConfig({...printConfig, showExplanations: e.target.checked})} /> Show Explanations
+                      </label>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                      <button onClick={() => setShowPrintView(false)} style={{ padding: '10px 20px', background: '#e2e8f0', color: '#0f172a', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Close Report</button>
+                      <button onClick={() => window.print()} style={{ padding: '10px 30px', background: '#16a34a', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>🖨️ Print Document</button>
+                  </div>
+              </div>
+              
+              {/* Web view retains border, Print view drops it */}
+              <div className="print-wrapper" style={{ background: 'white', padding: '40px', maxWidth: '850px', margin: '0 auto', border: '4px solid #16a34a', borderRadius: '24px', boxShadow: '0 8px 30px rgba(0,0,0,0.1)' }}>
+                  <div style={{ textAlign: 'center', borderBottom: '3px dashed #16a34a', paddingBottom: '20px', marginBottom: '30px' }}>
+                      <img src="/kivo-logo.png" alt="KiVO Learning" style={{ height: '70px', objectFit: 'contain', marginBottom: '15px' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                      <h2 style={{ margin: '0 0 5px 0', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '28px', color: '#16a34a' }}>Math Explorer Report 🧭</h2>
+                      
+                      {completed && <div style={{ fontSize: '1.5rem', margin: '15px 0', background: '#f0fdf4', display: 'inline-block', padding: '10px 30px', borderRadius: '50px', border: '2px solid #22c55e' }}>Score: <strong>{score} / {assessmentData.count}</strong></div>}
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px', background: '#f8fafc', padding: '15px', borderRadius: '12px', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                          <span>Student: {user?.username || user?.email || '_________________'}</span>
+                          <span>{orderedGrades.find(g => g.gradeCode === selectedGrade)?.gradeName || selectedGrade}</span>
+                          <span>Date: {new Date().toLocaleDateString()}</span>
+                      </div>
+                  </div>
+                  
+                  {Array.from({ length: assessmentData.count }).map((_, i) => {
+                      const qIndex = i + 1;
+                      const { qText, qOptions, actualAnswer: cachedAnswer, explanation: cachedExp } = getQDetails(qCache[qIndex]);
+                      const userAnswer = answers[qIndex] || 'Skipped';
+                      
+                      const keyItem = answerKey.find(a => a.questionIndex === qIndex);
+                      const actualAnswer = (keyItem && keyItem.correctAnswer && keyItem.correctAnswer !== 'N/A') ? keyItem.correctAnswer : cachedAnswer;
+                      const explanation = (keyItem && keyItem.explanation) ? keyItem.explanation : cachedExp;
+                      
+                      const isCorrect = userAnswer === actualAnswer;
+                      
+                      return (
+                          <div key={qIndex} className="page-break" style={{ paddingBottom: '20px', borderBottom: '2px dashed #e2e8f0', marginBottom: '20px' }}>
+                              <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
+                                  <strong style={{ fontSize: '1.4rem', color: '#3b82f6' }}>{qIndex}.</strong>
+                                  <span style={{ fontSize: '1.3rem', fontWeight: 'bold' }}>{qText}</span>
+                              </div>
+                              
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', paddingLeft: '40px', marginBottom: '15px', fontSize: '1.1rem' }}>
+                                  {Object.entries(qOptions).map(([k, v]) => (
+                                      <div key={k}><strong>({k})</strong> {v}</div>
+                                  ))}
+                              </div>
+                              
+                              {completed ? (
+                                  <div style={{ marginLeft: '40px', background: isCorrect ? '#f0fdf4' : '#fef2f2', padding: '15px', borderRadius: '12px', border: `2px solid ${isCorrect ? '#22c55e' : '#ef4444'}` }}>
+                                      <div style={{ fontSize: '1.1rem' }}>
+                                          <span>Your Answer: <strong style={{color: isCorrect ? '#16a34a' : '#dc2626'}}>{userAnswer}</strong></span>
+                                          <span style={{ margin: '0 15px', color: '#cbd5e1' }}>|</span>
+                                          <span>Correct Answer: <strong style={{color: '#16a34a'}}>{actualAnswer}</strong></span>
+                                      </div>
+                                      {printConfig.showExplanations && explanation && (
+                                          <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '2px dashed #cbd5e1', color: '#475569', fontStyle: 'italic' }}>
+                                              <strong>💡 How to solve it:</strong> {explanation}
+                                          </div>
+                                      )}
+                                  </div>
+                              ) : (
+                                  <div style={{ marginLeft: '40px', marginTop: '15px', fontSize: '1.2rem', color: '#94a3b8' }}>
+                                      Your Answer: ____________________
+                                  </div>
+                              )}
+
+                              {!completed && printConfig.showAnswers && (
+                                  <div style={{ marginLeft: '40px', marginTop: '15px', background: '#f8fafc', padding: '15px', borderRadius: '12px', border: '2px solid #cbd5e1' }}>
+                                      <strong style={{ color: '#16a34a', fontSize: '1.1rem' }}>Correct Answer: {actualAnswer}</strong>
+                                      {printConfig.showExplanations && explanation && (
+                                          <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '2px dashed #e2e8f0', color: '#475569', fontStyle: 'italic' }}>
+                                              <strong>💡 How to solve it:</strong> {explanation}
+                                          </div>
+                                      )}
+                                  </div>
+                              )}
+                          </div>
+                      );
+                  })}
+
+                  {/* 🚀 FIX: Document Footer for clean ending */}
+                  <div style={{ textAlign: 'center', marginTop: '40px', paddingTop: '20px', borderTop: '2px solid #e2e8f0', color: '#94a3b8', fontSize: '0.9rem', fontStyle: 'italic' }}>
+                      *** End of Report ***
+                  </div>
+              </div>
+          </div>
+      );
   }
 
-  const renderMainPanel = () => {
-    if (completed) {
-      return (
-        <div className="math-panel-content" style={{ textAlign: 'center', padding: '40px 0' }}>
-          <div style={{ fontSize: '6rem', marginBottom: '20px' }}>🏆</div>
-          <h2 style={{ fontSize: '2.8rem', color: '#0f172a', margin: '0 0 10px 0', fontWeight: '900' }}>Test Complete!</h2>
-          
-          <div style={{ background: '#f8fafc', padding: '30px 60px', borderRadius: '30px', display: 'inline-block', margin: '40px 0', border: '2px solid #e2e8f0' }}>
-              <span style={{ fontSize: '5rem', color: '#10b981', fontWeight: '900', lineHeight: '1' }}>{score}</span> 
-              <span style={{ fontSize: '2.5rem', color: '#cbd5e1', margin: '0 20px' }}>/</span> 
-              <span style={{ fontSize: '3rem', color: '#64748b', fontWeight: 'bold', lineHeight: '1' }}>{totalQuestions}</span>
-          </div>
-          
-          <div style={{ fontSize: '1.2rem', color: '#475569', marginBottom: '40px', fontWeight: '600' }}>
-            {score === totalQuestions && "🎉 Perfect Score! Outstanding!"}
-            {score >= totalQuestions * 0.8 && score < totalQuestions && "⭐ Great job! Keep it up!"}
-            {score >= totalQuestions * 0.6 && score < totalQuestions * 0.8 && "👍 Good work! Practice makes perfect!"}
-            {score < totalQuestions * 0.6 && "💪 Keep practicing! You'll improve!"}
-          </div>
-
-          <button onClick={() => setAssessmentId(null)} className="math-action-btn">
-            Take Another Math Test 📐
-          </button>
-        </div>
-      );
-    }
-
-    if (currentQuestion && assessmentId) {
-      return (
-        <div className="math-panel-content">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '15px' }}>
-              <div style={{ background: '#ecfdf5', padding: '10px 24px', borderRadius: '30px', fontWeight: 'bold', color: '#065f46', border: '1px solid #a7f3d0' }}>
-                📐 {gradeData[selectedGrade]?.[0]?.replace(/_/g, ' ') || 'Mathematics'}
-              </div>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                  <span style={{ background: '#fef3c7', color: '#d97706', padding: '8px 16px', borderRadius: '20px', fontWeight: '700' }}>
-                      ⏱️ {formatTime(timeElapsed)}
-                  </span>
-                  <span style={{ background: '#eff6ff', color: '#2563eb', padding: '8px 16px', borderRadius: '20px', fontWeight: '700' }}>
-                      Q: {questionIndex} / {totalQuestions}
-                  </span>
-              </div>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-            <button onClick={toggleBookmark} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', color: bookmarkedQuestions.has(questionIndex) ? '#f59e0b' : '#94a3b8', fontWeight: '600' }}>
-                {bookmarkedQuestions.has(questionIndex) ? '🔖 Bookmarked' : '📑 Bookmark'}
-            </button>
-          </div>
-          
-          <h3 style={{ fontSize: '1.8rem', color: '#0f172a', marginBottom: '40px', lineHeight: '1.4', fontWeight: '800' }}>
-            {currentQuestion.name || currentQuestion.question || "Unable to display question text"}
-          </h3>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '40px' }}>
-              {Object.entries(currentQuestion.options || {}).map(([key, value]) => {
-                const isChecked = selectedAnswer === key;
-                return (
-                    <label key={key} style={{ padding: '20px', borderRadius: '16px', border: `2px solid ${isChecked ? '#10b981' : '#e2e8f0'}`, background: isChecked ? '#ecfdf5' : 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s', boxShadow: isChecked ? '0 4px 15px rgba(16, 185, 129, 0.1)' : 'none' }}>
-                      <input type="radio" name="option" value={key} checked={isChecked} onChange={() => setSelectedAnswer(key)} style={{ display: 'none' }} />
-                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: isChecked ? '#10b981' : '#f1f5f9', color: isChecked ? 'white' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '1.1rem' }}>{key}</div>
-                      <span style={{ fontSize: '1.15rem', color: isChecked ? '#065f46' : '#334155', fontWeight: isChecked ? '700' : '500' }}>{value}</span>
-                    </label>
-                );
-              })}
-          </div>
-
-          <div style={{ display: 'flex', gap: '16px' }}>
-              <button onClick={submitAnswer} disabled={!selectedAnswer} className="math-action-btn" style={{ flex: 2, margin: 0 }}>
-                  Submit Answer 🎯
-              </button>
-              <button onClick={endAssessmentEarly} className="math-action-btn" style={{ flex: 1, margin: 0, background: '#fee2e2', color: '#ef4444', boxShadow: 'none' }}>
-                  End 🛑
-              </button>
-          </div>
-        </div>
-      );
-    }
-
-    if (showConfigDialog) {
-      return (
-        <div className="math-panel-content">
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '30px' }}>
-            <button onClick={() => setShowConfigDialog(false)} style={{ background: '#f1f5f9', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', color: '#475569', marginRight: '20px' }}>←</button>
-            <h2 style={{ fontSize: '2rem', color: '#0f172a', margin: 0, fontWeight: '900' }}>Test Setup</h2>
-          </div>
-
-          {errorMessage && (
-            <div className="clean-error-alert">
-              <span>⚠️</span>
-              <p>{errorMessage}</p>
-            </div>
-          )}
-
-          <div className="config-grid">
-            <div className="config-group">
-              <label>📊 Number of Questions</label>
-              <select value={numberOfQuestions} onChange={(e) => setNumberOfQuestions(parseInt(e.target.value))} className="modern-select">
-                <option value={5}>5 Questions (Quick)</option>
-                <option value={10}>10 Questions (Standard)</option>
-                <option value={15}>15 Questions</option>
-                <option value={20}>20 Questions (Challenge)</option>
-              </select>
-            </div>
-
-            <div className="config-group">
-              <label>🎯 Difficulty Level</label>
-              <div className="difficulty-pill-grid">
-                {[
-                  { value: 'SIMPLE', label: 'Easy', icon: '😊' },
-                  { value: 'MEDIUM', label: 'Medium', icon: '🤔' },
-                  { value: 'COMPLEX', label: 'Hard', icon: '🧠' }
-                ].map(level => (
-                  <button key={level.value} onClick={() => setComplexity(level.value)} className={`difficulty-pill ${complexity === level.value ? 'active' : ''}`}>
-                    <span className="difficulty-icon">{level.icon}</span>
-                    {level.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <button onClick={startAssessment} disabled={loading} className="math-action-btn">
-            {loading ? 'Initializing Core...' : 'Generate Assessment 🚀'}
-          </button>
-        </div>
-      );
-    }
-
-    const hasMath = gradeData[selectedGrade] && gradeData[selectedGrade].length > 0;
-    return (
-      <>
-        <div className="math-ambient-bg">
-            <span className="ambient-1">∑</span>
-            <span className="ambient-2">π</span>
-            <span className="ambient-3">√</span>
-            <span className="ambient-4">∫</span>
-            <span className="ambient-5">∞</span>
-        </div>
-        <div className="math-panel-content">
-          <div className="math-hero-header">
-            <h1 className="math-main-title">Math Core</h1>
-            <p className="math-subtitle">Master the fundamentals of Grade {selectedGrade?.replace('GRADE_', '').replace('_', ' ')}</p>
-          </div>
-
-          {hasMath ? (
-            <div className="modern-subject-card">
-              <div className="modern-subject-icon">📐</div>
-              <h3 className="modern-subject-title">{gradeData[selectedGrade][0].replace(/_/g, ' ')}</h3>
-              <p className="modern-subject-desc">Adaptive problem solving</p>
-            </div>
-          ) : (
-            <div className="modern-subject-card" style={{ borderColor: '#f1f5f9', opacity: 0.7 }}>
-              <div className="modern-subject-icon" style={{ background: '#f8fafc', color: '#94a3b8' }}>📭</div>
-              <h3 className="modern-subject-title" style={{ color: '#64748b' }}>Not Available</h3>
-              <p className="modern-subject-desc">No curriculum assigned to this grade.</p>
-            </div>
-          )}
-
-          <button onClick={openConfigDialog} disabled={!hasMath} className="math-action-btn">
-            Configure Module ⚙️
-          </button>
-        </div>
-      </>
-    );
-  };
-
   return (
-    <div className="math-nextgen-container">
-        
-      {/* 🚀 NEW TOP NAVIGATION BAR */}
-      <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', padding: '0 20px', paddingTop: '20px' }}>
-          <button 
-              onClick={() => navigate('/')} 
-              style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#475569', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}
-              onMouseEnter={(e) => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#94a3b8'; }}
-              onMouseLeave={(e) => { e.target.style.background = '#ffffff'; e.target.style.borderColor = '#cbd5e1'; }}
-          >
-              🏠 Home
-          </button>
-          <button 
-              onClick={() => navigate('/assessments')} 
-              style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#475569', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}
-              onMouseEnter={(e) => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#94a3b8'; }}
-              onMouseLeave={(e) => { e.target.style.background = '#ffffff'; e.target.style.borderColor = '#cbd5e1'; }}
-          >
-              ← Back to Hub
-          </button>
+    <div style={{ background: '#f0fdf4', color: '#334155', minHeight: '100vh', fontFamily: '"Nunito", "Comic Sans MS", sans-serif' }}>
+      
+      {/* 🚀 KID-FRIENDLY CSS INJECTION */}
+      <style>
+        {`
+          .explorer-layout { display: flex; min-height: calc(100vh - 60px); }
+          .explorer-sidebar {
+              width: 300px; background: white; border-right: 4px dashed #86efac; padding: 30px 20px;
+              display: flex; flex-direction: column; gap: 15px; box-shadow: 5px 0 20px rgba(0,0,0,0.03); z-index: 10;
+          }
+          .grade-btn {
+              background: white; border: 3px solid #e2e8f0; color: #64748b; padding: 18px 20px; border-radius: 20px;
+              text-align: left; font-weight: 900; font-size: 1.2rem; cursor: pointer; transition: all 0.2s;
+              display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 0 #e2e8f0;
+          }
+          .grade-btn:hover { background: #f8fafc; transform: translateY(2px); box-shadow: 0 2px 0 #e2e8f0; }
+          .grade-btn.active {
+              background: #10b981; border-color: #047857; color: white; box-shadow: 0 4px 0 #065f46; transform: translateY(-2px);
+          }
+          .explorer-main { flex: 1; padding: 40px; overflow-y: auto; }
+          
+          .fun-btn {
+              background: #3b82f6; color: white; border: 3px solid #1d4ed8; padding: 16px 32px; border-radius: 50px;
+              font-weight: 900; font-size: 1.3rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 6px 0 #1d4ed8;
+              display: inline-flex; align-items: center; justify-content: center; gap: 10px; text-transform: uppercase;
+          }
+          .fun-btn:hover { transform: translateY(2px); box-shadow: 0 4px 0 #1d4ed8; }
+          .fun-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #1d4ed8; }
+          .fun-btn:disabled { background: #94a3b8; border-color: #475569; box-shadow: 0 6px 0 #475569; cursor: not-allowed; }
+
+          .nav-top-btn {
+              background: white; border: 3px solid #cbd5e1; color: #475569; padding: 10px 20px; border-radius: 16px;
+              font-weight: 900; cursor: pointer; box-shadow: 0 4px 0 #cbd5e1; transition: 0.2s; display: flex; align-items: center; gap: 8px;
+          }
+          .nav-top-btn:hover { transform: translateY(2px); box-shadow: 0 2px 0 #cbd5e1; }
+
+          .radio-card {
+              background: white; border: 4px solid #e2e8f0; padding: 25px; border-radius: 24px; cursor: pointer;
+              transition: all 0.2s; display: flex; alignItems: center; gap: 20px; box-shadow: 0 6px 0 #cbd5e1; margin-bottom: 15px;
+          }
+          .radio-card:hover { border-color: #60a5fa; transform: translateY(2px); box-shadow: 0 4px 0 #93c5fd; }
+          .radio-card.selected { border-color: #3b82f6; background: #eff6ff; box-shadow: 0 4px 0 #2563eb; transform: scale(1.02); }
+        `}
+      </style>
+
+      <div style={{ display: 'flex', gap: '15px', padding: '20px 30px 0 30px' }}>
+          <button className="nav-top-btn" onClick={() => navigate('/')}>🏠 Home</button>
+          <button className="nav-top-btn" onClick={() => navigate('/assessments')}>← Back to Hub</button>
       </div>
 
-      <div className="math-dashboard-layout">
-        {(!assessmentId && !showConfigDialog && !completed) && (
-            <aside className="math-vertical-sidebar">
-                <div className="sidebar-header">Academic Level</div>
-                <div className="vertical-grade-list">
-                    {orderedGrades.length > 0 ? (
-                        orderedGrades.map(grade => {
-                            const hasMath = gradeData[grade] && gradeData[grade].length > 0;
-                            return (
-                                <button
-                                    key={grade}
-                                    onClick={() => hasMath && setSelectedGrade(grade)}
-                                    disabled={!hasMath}
-                                    className={`vertical-grade-btn ${selectedGrade === grade ? 'active' : ''} ${!hasMath ? 'disabled' : ''}`}
-                                >
-                                    <span>Grade {grade.replace('GRADE_', '').replace('_', ' ')}</span>
-                                    {hasMath && <div className="grade-checkmark">✓</div>}
-                                </button>
-                            );
-                        })
-                    ) : (
-                        <div style={{ color: '#94a3b8', fontSize: '0.95rem', padding: '10px' }}>No curriculum data available.</div>
-                    )}
-                </div>
-            </aside>
-        )}
+      {!assessmentData && !showConfigDialog ? (
+        <div className="explorer-layout">
+          <aside className="explorer-sidebar">
+            <h2 style={{ color: '#0f172a', fontSize: '1.8rem', textAlign: 'center', fontWeight: '900', marginBottom: '10px' }}>Basecamps ⛺</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {orderedGrades.map((g) => (
+                <button
+                  key={g.gradeCode}
+                  className={`grade-btn ${selectedGrade === g.gradeCode ? 'active' : ''}`}
+                  onClick={() => setSelectedGrade(g.gradeCode)}
+                >
+                  <span style={{ fontSize: '1.6rem' }}>🎒</span> {g.gradeName}
+                </button>
+              ))}
+            </div>
+          </aside>
 
-        <main className="math-main-panel" style={{ gridColumn: (assessmentId || showConfigDialog || completed) ? '1 / -1' : 'auto' }}>
-            {renderMainPanel()}
-        </main>
-      </div>
+          <main className="explorer-main">
+            <div style={{ background: 'white', borderRadius: '32px', padding: '50px', border: '4px dashed #fbbf24', textAlign: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+              <div style={{ fontSize: '5rem', marginBottom: '20px', animation: 'bounce 2s infinite' }}>🧭</div>
+              <h1 style={{ fontSize: '3.5rem', color: '#d97706', fontWeight: '900', margin: '0 0 15px 0' }}>Math Explorer</h1>
+              <p style={{ color: '#64748b', fontSize: '1.3rem', fontWeight: 'bold', marginBottom: '40px' }}>
+                Get ready for a math adventure tailored to <strong>{orderedGrades.find(g => g.gradeCode === selectedGrade)?.gradeName || 'your grade'}</strong>!
+              </p>
+              
+              {gradeData[selectedGrade] && gradeData[selectedGrade].length > 0 ? (
+                  <div style={{ background: '#f0fdf4', border: '3px solid #4ade80', borderRadius: '24px', padding: '30px', display: 'inline-block', marginBottom: '40px' }}>
+                      <div style={{ fontSize: '3rem', marginBottom: '10px' }}>📐</div>
+                      <h3 style={{ margin: 0, color: '#16a34a', fontSize: '1.5rem', fontWeight: '900' }}>{gradeData[selectedGrade][0].replace(/_/g, ' ')}</h3>
+                  </div>
+              ) : (
+                  <div style={{ background: '#fef2f2', border: '3px solid #f87171', borderRadius: '24px', padding: '30px', display: 'inline-block', marginBottom: '40px' }}>
+                      <h3 style={{ margin: 0, color: '#dc2626', fontSize: '1.5rem', fontWeight: '900' }}>No paths found in this sector.</h3>
+                  </div>
+              )}
+              
+              <div style={{ display: 'block' }}>
+                <button onClick={() => setShowConfigDialog(true)} disabled={!gradeData[selectedGrade] || gradeData[selectedGrade].length === 0} className="fun-btn" style={{ background: '#10b981', borderColor: '#047857', boxShadow: '0 6px 0 #047857' }}>
+                    Pack your Bag! 🎒
+                </button>
+              </div>
+            </div>
+          </main>
+        </div>
+      ) : showConfigDialog ? (
+          <div style={{ maxWidth: '700px', margin: '50px auto', background: 'white', borderRadius: '32px', padding: '50px', border: '4px solid #3b82f6', boxShadow: '0 15px 0 #2563eb' }}>
+              <button onClick={() => setShowConfigDialog(false)} className="nav-top-btn" style={{ marginBottom: '30px' }}>← Wait, go back</button>
+              
+              <h2 style={{ textAlign: 'center', fontSize: '2.5rem', color: '#1d4ed8', fontWeight: '900', margin: '0 0 30px 0' }}>Choose Your Path 🗺️</h2>
+              
+              {errorMessage && (
+                  <div style={{ background: '#fef2f2', color: '#dc2626', padding: '15px', borderRadius: '16px', fontWeight: 'bold', marginBottom: '20px', border: '2px solid #f87171', textAlign: 'center' }}>
+                      ⚠️ {errorMessage}
+                  </div>
+              )}
+
+              <div style={{ marginBottom: '30px' }}>
+                  <label style={{ display: 'block', fontWeight: '900', color: '#475569', marginBottom: '10px', fontSize: '1.2rem' }}>How many puzzles? 🧩</label>
+                  <select value={numberOfQuestions} onChange={(e) => setNumberOfQuestions(parseInt(e.target.value))} style={{ width: '100%', padding: '15px 20px', fontSize: '1.2rem', borderRadius: '16px', border: '3px solid #cbd5e1', fontWeight: 'bold', outline: 'none' }}>
+                      <option value={5}>5 Puzzles (Quick Trip)</option>
+                      <option value={10}>10 Puzzles (Standard Trek)</option>
+                      <option value={20}>20 Puzzles (Epic Journey)</option>
+                  </select>
+              </div>
+
+              <div style={{ marginBottom: '40px' }}>
+                  <label style={{ display: 'block', fontWeight: '900', color: '#475569', marginBottom: '10px', fontSize: '1.2rem' }}>How tricky? 🤔</label>
+                  <div style={{ display: 'flex', gap: '15px' }}>
+                      {['EASY', 'MEDIUM', 'HARD'].map(level => (
+                          <button key={level} onClick={() => setComplexity(level)} style={{ flex: 1, padding: '15px', borderRadius: '16px', fontWeight: '900', fontSize: '1.1rem', cursor: 'pointer', transition: '0.2s', border: complexity === level ? '3px solid #f59e0b' : '3px solid #e2e8f0', background: complexity === level ? '#fef3c7' : 'white', color: complexity === level ? '#b45309' : '#64748b' }}>
+                              {level === 'EASY' && '😊 Easy'}
+                              {level === 'MEDIUM' && '🤔 Tricky'}
+                              {level === 'HARD' && '🧠 Expert'}
+                          </button>
+                      ))}
+                  </div>
+              </div>
+
+              <button onClick={startAssessment} disabled={loading} className="fun-btn" style={{ width: '100%', padding: '20px', fontSize: '1.5rem' }}>
+                  {loading ? 'Rolling out Map...' : 'Start Expedition! 🚀'}
+              </button>
+          </div>
+      ) : completed ? (
+          <div style={{ maxWidth: '800px', margin: '50px auto', textAlign: 'center', background: 'white', border: '4px solid #10b981', padding: '60px', borderRadius: '40px', boxShadow: '0 15px 0 #059669' }}>
+              <div style={{ fontSize: '7rem', marginBottom: '20px', animation: 'bounce 2s infinite' }}>🏅</div>
+              <h2 style={{ fontSize: '3.5rem', color: '#047857', fontWeight: '900', margin: '0 0 20px 0' }}>Expedition Complete!</h2>
+              
+              <div style={{ display: 'inline-block', background: '#f0fdf4', padding: '30px 60px', borderRadius: '30px', border: '4px dashed #4ade80', marginBottom: '40px' }}>
+                  <span style={{ fontSize: '5rem', color: '#16a34a', fontWeight: '900' }}>{score}</span>
+                  <span style={{ fontSize: '3rem', color: '#94a3b8', margin: '0 20px' }}>/</span>
+                  <span style={{ fontSize: '4rem', color: '#0f172a', fontWeight: '900' }}>{assessmentData.count}</span>
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                  <button onClick={async () => { await compilePaper(assessmentData.id, assessmentData.count); setShowPrintView(true); }} className="fun-btn" style={{ background: '#f59e0b', borderColor: '#d97706', boxShadow: '0 6px 0 #d97706' }}>🖨️ Print Trophy Sheet</button>
+                  <button onClick={() => setAssessmentData(null)} className="fun-btn">🔄 New Adventure</button>
+              </div>
+          </div>
+      ) : (
+          <div style={{ maxWidth: '900px', margin: '30px auto', background: 'white', borderRadius: '32px', padding: '40px', border: '4px solid #3b82f6', boxShadow: '0 15px 0 #2563eb' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '4px dashed #bfdbfe', paddingBottom: '20px' }}>
+                  <div style={{ background: '#dbeafe', padding: '10px 24px', borderRadius: '50px', border: '3px solid #93c5fd', fontWeight: '900', color: '#1d4ed8', fontSize: '1.2rem' }}>
+                      Puzzle {currentIndex} of {assessmentData.count}
+                  </div>
+                  <div style={{ display: 'flex', gap: '15px' }}>
+                      <button onClick={async () => { await compilePaper(assessmentData.id, assessmentData.count); setShowPrintView(true); }} className="nav-top-btn" style={{ fontSize: '1rem' }}>🖨️ Peek at Map</button>
+                      <div style={{ background: '#d1fae5', padding: '10px 24px', borderRadius: '50px', border: '3px solid #6ee7b7', fontWeight: '900', color: '#047857', fontSize: '1.2rem' }}>
+                          Stars: {score}
+                      </div>
+                  </div>
+              </div>
+
+              <div style={{ padding: '40px 20px', textAlign: 'center', marginBottom: '30px' }}>
+                  <h3 style={{ fontSize: '2.5rem', color: '#0f172a', lineHeight: '1.5', fontWeight: '900' }}>
+                      {getQDetails(qCache[currentIndex]).qText}
+                  </h3>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+                  {Object.entries(getQDetails(qCache[currentIndex]).qOptions).map(([key, value]) => (
+                      <button key={key} onClick={() => submitAnswer(key)} className="radio-card">
+                          <div style={{ background: '#3b82f6', color: 'white', width: '50px', height: '50px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', fontWeight: '900', border: '3px solid #1d4ed8' }}>{key}</div>
+                          <div style={{ color: '#334155', fontSize: '1.5rem', fontWeight: '900' }}>{value}</div>
+                      </button>
+                  ))}
+              </div>
+          </div>
+      )}
     </div>
   );
 }
