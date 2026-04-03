@@ -33,6 +33,7 @@ const CreateAssessment = () => {
     if (formData.subject) {
       fetchTopicsAndChapters();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.subject, formData.gradeLevel]);
 
   const fetchTopicsAndChapters = async () => {

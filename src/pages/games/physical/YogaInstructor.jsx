@@ -243,6 +243,7 @@ const YogaInstructor = ({ audioEnabled = true }) => {
     } else if (currentPose && holdTime === 0 && !isPaused) {
       completePose();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [holdTime, currentPose, isPaused]);
 
   const startGame = () => {

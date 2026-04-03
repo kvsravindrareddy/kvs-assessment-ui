@@ -31,6 +31,7 @@ const MemoryGame = () => {
 
   useEffect(() => {
     initializeGame(theme);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [theme]);
 
   useEffect(() => {
@@ -64,6 +65,7 @@ const MemoryGame = () => {
       }
       setMoves(moves + 1);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flippedCards]);
 
   const handleCardClick = (index) => {

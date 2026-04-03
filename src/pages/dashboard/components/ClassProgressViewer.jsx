@@ -16,6 +16,7 @@ const ClassProgressViewer = () => {
 
   useEffect(() => {
     fetchTeacherClasses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchTeacherClasses = async () => {
@@ -40,6 +41,7 @@ const ClassProgressViewer = () => {
     if (selectedClass) {
       fetchClassStudents();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClass, dateRange]);
 
   const fetchClassStudents = async () => {

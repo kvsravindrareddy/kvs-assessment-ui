@@ -5,16 +5,17 @@ import './GradeSubmissionsManager.css';
 
 const GradeSubmissionsManager = () => {
   const { user } = useAuth();
-  const [submissions, setSubmissions] = useState([]);
+  const [, setSubmissions] = useState([]);
   const [filteredSubmissions, setFilteredSubmissions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('PENDING_REVIEW');
   const [selectedSubmission, setSelectedSubmission] = useState(null);
-  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [, setDetailsLoading] = useState(false);
   const [submissionDetails, setSubmissionDetails] = useState(null);
 
   useEffect(() => {
     fetchSubmissions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter]);
 
   const fetchSubmissions = async () => {

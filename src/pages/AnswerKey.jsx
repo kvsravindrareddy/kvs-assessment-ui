@@ -13,6 +13,7 @@ const AnswerKey = () => {
 
   useEffect(() => {
     fetchAnswerKey();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assessmentId]);
 
   const fetchAnswerKey = async () => {

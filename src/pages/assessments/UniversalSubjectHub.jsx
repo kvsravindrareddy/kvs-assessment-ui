@@ -24,8 +24,7 @@ export default function UniversalSubjectHub({
 
     const [selectedGrade, setSelectedGrade] = useState(null);
     const [selectedSubject, setSelectedSubject] = useState(null);
-    const [complexity, setComplexity] = useState('MEDIUM');
-    
+    const [complexity] = useState('MEDIUM');
     const [loading, setLoading] = useState(false);
     const [isCompiling, setIsCompiling] = useState(false);
     const [compileProgress, setCompileProgress] = useState("");

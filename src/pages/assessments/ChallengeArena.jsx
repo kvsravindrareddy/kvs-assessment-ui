@@ -96,6 +96,7 @@ export default function ChallengeArena() {
         if (challengeIdParam) {
             loadChallengeById(challengeIdParam);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [challengeIdParam]);
 
     // Fetch available challenges
@@ -110,6 +111,7 @@ export default function ChallengeArena() {
         if (activeView === 'friends') {
             fetchFriendsData();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeView, friendsTab]);
 
     // Fetch tournaments data
@@ -117,6 +119,7 @@ export default function ChallengeArena() {
         if (activeView === 'tournaments') {
             fetchTournamentsData();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeView, tournamentsTab]);
 
     // 🌟 FIX: Safe Polling
@@ -149,6 +152,7 @@ export default function ChallengeArena() {
         }
 
         return () => clearInterval(pollInterval);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeView, activeChallenge?.status, activeChallenge?.challengeId]);
 
     const fetchFriendsData = async () => {

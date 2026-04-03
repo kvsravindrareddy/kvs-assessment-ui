@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import './css/footer.css';
 
 function Footer({onNavigate}) {

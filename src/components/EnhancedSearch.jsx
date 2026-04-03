@@ -48,7 +48,8 @@ export default function EnhancedSearch({
         const searchResults = performIntelligentSearch(query, activeFilter);
         setResults(searchResults);
         setSelectedIndex(0);
-    }, [query, activeFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, activeFilter]);
 
     /**
      * Intelligent search with fuzzy matching and relevance scoring

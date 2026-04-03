@@ -15,7 +15,7 @@ const Contactus = () => {
 
     const [submitMessage, setSubmitMessage] = useState('');
     const [messageCharsLeft, setMessageCharsLeft] = useState(2000);
-    const [formValid, setFormValid] = useState(true);
+    const [, setFormValid] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
 
     const handleChange = (event) => {

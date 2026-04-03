@@ -30,6 +30,7 @@ const SessionManagement = () => {
 
   useEffect(() => {
     applyFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessions, filters]);
 
   const loadSessions = async () => {

@@ -31,6 +31,7 @@ export default function LeaderboardView() {
         fetchLeaderboard();
         fetchUserRankings();
         fetchBadges();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeTab, gradeLevel]);
 
     const fetchLeaderboard = async () => {

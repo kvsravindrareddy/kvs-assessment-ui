@@ -6,7 +6,7 @@ import './ParentDashboard.css';
 
 const ParentDashboard = () => {
   const { user } = useAuth();
-  const { getLimits, subscriptionTier, SUBSCRIPTION_TIERS } = useSubscription();
+  const { getLimits } = useSubscription();
   const [children, setChildren] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,6 +36,7 @@ const ParentDashboard = () => {
       console.log('DEBUG useEffect: Waiting for user to load...');
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadChildren = async () => {
@@ -153,7 +154,7 @@ const ParentDashboard = () => {
 
     try {
       setLinking(true);
-      const response = await axios.post('http://localhost:9000/auth/parent-child/link-by-credentials', {
+      await axios.post('http://localhost:9000/auth/parent-child/link-by-credentials', {
         parentId: user.id,
         studentUsername: studentUsername,
         studentPassword: studentPassword
@@ -178,7 +179,7 @@ const ParentDashboard = () => {
 
     try {
       setLinking(true);
-      const response = await axios.post('http://localhost:9000/auth/parent-child/link-by-code', {
+      await axios.post('http://localhost:9000/auth/parent-child/link-by-code', {
         parentId: user.id,
         studentEmail: studentEmail,
         verificationCode: verificationCode

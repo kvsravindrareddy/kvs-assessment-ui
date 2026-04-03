@@ -4,15 +4,6 @@ import './PremiumGames.css';
 
 const MathRace = ({ audioEnabled = true }) => {
   const { user } = useAuth();
-
-  // Check if user is admin/super user
-  const isAdminUser = user && (
-    user.role === 'SUPER_ADMIN' ||
-    user.role === 'DISTRICT_ADMIN' ||
-    user.role === 'SCHOOL_ADMIN' ||
-    user.role === 'TEACHER' ||
-    user.role === 'CONTENT_CREATOR'
-  );
   const [level, setLevel] = useState(1);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(90);
@@ -95,6 +86,7 @@ const MathRace = ({ audioEnabled = true }) => {
     if (gameStarted) {
       setCurrentQuestion(generateQuestion());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameStarted, level]);
 
   useEffect(() => {
@@ -106,6 +98,7 @@ const MathRace = ({ audioEnabled = true }) => {
     } else if (timeLeft === 0) {
       endGame();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameStarted, timeLeft]);
 
   const startGame = () => {

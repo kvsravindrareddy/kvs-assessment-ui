@@ -184,4 +184,5 @@ class StudentGradingService {
   }
 }
 
-export default new StudentGradingService();
+const studentGradingServiceInstance = new StudentGradingService();
+export default studentGradingServiceInstance;

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getConfig } from '../../Config';
 import {
-  PlusIcon,
   MagnifyingGlassIcon,
   BookOpenIcon,
   CloudArrowUpIcon,
@@ -37,6 +36,7 @@ const StoryManagement = () => {
 
   useEffect(() => {
     loadInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadInitialData = async () => {

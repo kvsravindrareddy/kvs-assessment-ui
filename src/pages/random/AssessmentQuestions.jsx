@@ -13,7 +13,7 @@ const AssessmentQuestions = () => {
     const [selectedEmail, setSelectedEmail] = useState(null);
     const [selectedComplexity, setSelectedComplexity] = useState('easy');
     const [numberOfQuestions, setNumberOfQuestions] = useState(10);
-    const [pdfFileName, setPdfFileName] = useState('');
+    const [, setPdfFileName] = useState('');
 
     useEffect(() => {
         if (questions.length > 0) {

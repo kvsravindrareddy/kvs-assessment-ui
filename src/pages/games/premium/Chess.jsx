@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../context/AuthContext';
 import './PremiumGames.css';
 import './Chess.css';
 
 const Chess = ({ audioEnabled = true }) => {
-  const { user } = useAuth();
   const [board, setBoard] = useState([]);
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [validMoves, setValidMoves] = useState([]);
@@ -172,6 +170,9 @@ const Chess = ({ audioEnabled = true }) => {
             moves.push([newRow, newCol]);
           }
         });
+        break;
+
+      default:
         break;
     }
 

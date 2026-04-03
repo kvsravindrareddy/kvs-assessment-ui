@@ -19,6 +19,7 @@ export default function IncidentManagement() {
   useEffect(() => {
     loadIncidents();
     loadStatistics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   const loadIncidents = async () => {

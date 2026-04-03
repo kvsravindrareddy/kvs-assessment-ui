@@ -81,7 +81,6 @@ export const PDFGenerator = {
     let yPosition = 40;
     const leftMargin = 15;
     const columnWidth = 90;
-    let currentPage = 1;
 
     for (let num = from; num <= to; num++) {
       const tablesOnPage = (num - from) % 2;
@@ -92,7 +91,6 @@ export const PDFGenerator = {
         doc.addPage();
         addHeader(doc, `Multiplication Tables (${from} to ${to})`, includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
         yPosition = 40;
-        currentPage++;
       }
 
       // Reset Y for second column
@@ -167,6 +165,8 @@ export const PDFGenerator = {
           result = Math.floor(Math.random() * Math.min(maxNumber / num2, 12)) + 1;
           num1 = num2 * result;
           operation = '÷';
+          break;
+        default:
           break;
       }
 
@@ -299,6 +299,8 @@ export const PDFGenerator = {
           num2 = Math.floor(Math.random() * 12) + 1;
           result = Math.floor(Math.random() * 12) + 1;
           num1 = num2 * result;
+          break;
+        default:
           break;
       }
 
@@ -1068,8 +1070,6 @@ export const PDFGenerator = {
         doc.addPage();
         addHeader(doc, '🕐 Time & Clock Reading', includeAnswers ? 'ANSWER KEY' : 'Student Worksheet');
         yPosition = 48;
-        const newRow = 0;
-        const newYPos = yPosition + (newRow * rowHeight);
       }
 
       const actualY = yPos > 240 ? yPosition : yPos;
@@ -1131,7 +1131,6 @@ export const PDFGenerator = {
 
     const radius = sizes[value] || 5;
     const isGold = value === 1.00 || value === 0.01; // Dollar and penny are golden
-    const isSilver = value === 0.25 || value === 0.10 || value === 0.05;
 
     // 3D Shadow
     doc.setFillColor(100, 100, 100);

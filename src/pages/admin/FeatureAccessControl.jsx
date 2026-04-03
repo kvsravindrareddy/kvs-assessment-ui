@@ -17,7 +17,6 @@ export default function FeatureAccessControl() {
     const [features, setFeatures] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedFeature, setSelectedFeature] = useState(null);
-    const [editMode, setEditMode] = useState(false);
     const [filter, setFilter] = useState('ALL'); // ALL, ENABLED, DISABLED, LAUNCH_MODE
     const [searchTerm, setSearchTerm] = useState('');
 

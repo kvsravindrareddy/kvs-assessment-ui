@@ -229,7 +229,7 @@ export default function SpecialtyAssessmentHub({ title, subtitle, topics, primar
                 
                 <div className="print-wrapper" style={{ background: 'white', color: 'black', padding: '40px', maxWidth: '850px', margin: '0 auto', border: '3px solid #1e293b', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
                     <div style={{ textAlign: 'center', borderBottom: '2px solid black', paddingBottom: '20px', marginBottom: '30px' }}>
-                        <img src="/kivo-logo.png" alt="KiVO Learning" style={{ height: '60px', objectFit: 'contain', marginBottom: '10px' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                        <img src="/kivo-logo.png" alt="KiVO Learning" width="60" height="60" style={{ height: '60px', objectFit: 'contain', marginBottom: '10px' }} onError={(e) => { e.target.style.display = 'none'; }} />
                         <h2 style={{ margin: '0 0 5px 0', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '24px' }}>KiVO Learning International</h2>
                         <h3 style={{ margin: '0 0 15px 0', color: '#555' }}>{title} {completed ? 'PERFORMANCE REPORT' : 'MOCK PAPER'}</h3>
                         
