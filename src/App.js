@@ -79,7 +79,7 @@ function AppContent() {
   }, [location.pathname]);
 
   const [, setLocationState] = useState({ latitude: null, longitude: null });
-  const [gradeData] = useState({});
+  const gradeData = {};
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [selectedGame, setSelectedGame] = useState(null);

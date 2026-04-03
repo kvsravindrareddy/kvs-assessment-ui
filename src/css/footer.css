@@ -137,6 +137,11 @@
   align-items: center;
   gap: 0.5rem;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
 }
 
 .link-icon {
@@ -269,14 +274,21 @@
   font-weight: 500;
 }
 
-.footer-legal a {
+.footer-legal a,
+.footer-legal-btn {
   color: rgba(255, 255, 255, 0.95);
   text-decoration: none;
   transition: all 0.3s ease;
   font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
 }
 
-.footer-legal a:hover {
+.footer-legal a:hover,
+.footer-legal-btn:hover {
   color: #fbbf24;
   text-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
 }
